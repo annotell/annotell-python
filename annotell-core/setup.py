@@ -21,7 +21,6 @@ if not version:
     raise RuntimeError('Cannot find version information')
 
 # https://packaging.python.org/guides/packaging-namespace-packages/
-namespaces = ["annotell"]
 packages = find_namespace_packages(include=['annotell.*'])
 
 # Should be one of:
@@ -33,7 +32,7 @@ release_status = "Development Status :: 3 - Alpha"
 setup(
     name=package_name,
     packages=packages,
-    namespace_packages=namespaces,
+    namespace_packages=["annotell"],
     version=version,
     description='Annotell Core Lib',
     long_description=LONG_DESCRIPTION,
