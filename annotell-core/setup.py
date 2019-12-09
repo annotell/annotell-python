@@ -20,7 +20,7 @@ if not version:
 package_name = 'annotell-core'
 setuptools.setup(
     name = package_name,
-    packages = ["annotell"],
+    packages = ["annotell", "annotell/core"],
     version = version,
     description = 'Annotell Core lib',
     long_description = LONG_DESCRIPTION,
