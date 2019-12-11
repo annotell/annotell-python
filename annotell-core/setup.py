@@ -3,10 +3,10 @@ import re
 
 URL = 'https://github.com/annotell/annotell-python'
 
+package_name = 'annotell-core'
+
 with open('README.md') as f:
     LONG_DESCRIPTION = f.read()
-
-package_name = 'annotell-core'
 
 # resolve version by opening file. We cannot do import during install
 # since the package does not yet exist
@@ -44,6 +44,7 @@ setup(
     install_requires=[
         'requests>=2.5'
     ],
+    python_requires='~=3.3',
     include_package_data=True,
     package_data={
         '': ['*.md', 'LICENSE'],
