@@ -4,12 +4,6 @@ from google.cloud import storage
 
 log = logging.getLogger(__name__)
 
-#
-# Sample python code for working with Google Cloud Storage
-# Annotell Annotation Management System
-# https://cloud.google.com/storage/docs/uploading-objects
-#
-
 # Instantiates a client
 _storage_client: storage.Client = None
 

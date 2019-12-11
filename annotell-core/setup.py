@@ -2,11 +2,9 @@ from setuptools import setup, find_namespace_packages
 import re
 
 URL = 'https://github.com/annotell/annotell-python'
-LONG_DESCRIPTION = """annotell-core
-============
-Python 3 library providing tools Annotell
-To install with pip run ``pip install annotell-core``
-"""
+
+with open('README.md') as f:
+    LONG_DESCRIPTION = f.read()
 
 package_name = 'annotell-core'
 
@@ -36,9 +34,9 @@ setup(
     version=version,
     description='Annotell Core Lib',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     author='Annotell',
-    author_email=['michel.edkrantz@annotell.com',
-                  'daniel@annotell.com'],
+    author_email="Michel Edkrantz <michel.edkrantz@annotell.com>, Daniel Langkilde <daniel@annotell.com>",
     license='MIT',
     url=URL,
     download_url='%s/tarball/%s' % (URL, version),
@@ -48,11 +46,12 @@ setup(
     ],
     include_package_data=True,
     package_data={
-        '': ['*.rst', 'LICENSE'],
+        '': ['*.md', 'LICENSE'],
     },
     classifiers=[
         release_status,
-        'License :: OSI Approved :: MIT License'
-        'Programming Language :: Python',
+        'License :: OSI Approved :: MIT License',
+        'Intended Audience :: Developers',
+        'Programming Language :: Python :: 3',
     ],
 )

@@ -5,11 +5,8 @@ URL = 'https://github.com/annotell/annotell-python'
 
 package_name = 'annotell-cloud-storage'
 
-LONG_DESCRIPTION = f"""{package_name}
-============
-Python 3 library providing Annotell tools
-To install with pip run ``pip install {package_name}``
-"""
+with open('README.md') as f:
+    LONG_DESCRIPTION = f.read()
 
 # resolve version by opening file. We cannot do import during install
 # since the package does not yet exist
@@ -37,8 +34,9 @@ setup(
     version=version,
     description='Annotell Cloud Storage Lib',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     author='Annotell',
-    author_email=['michel.edkrantz@annotell.com'],
+    author_email='Michel Edkrantz <michel.edkrantz@annotell.com>',
     license='MIT',
     url=URL,
     download_url='%s/tarball/%s' % (URL, version),
@@ -48,11 +46,12 @@ setup(
     ],
     include_package_data=True,
     package_data={
-        '': ['*.rst', 'LICENSE'],
+        '': ['*.md', 'LICENSE'],
     },
     classifiers=[
         release_status,
-        'License :: OSI Approved :: MIT License'
-        'Programming Language :: Python',
+        'License :: OSI Approved :: MIT License',
+        'Intended Audience :: Developers',
+        'Programming Language :: Python :: 3',
     ],
 )
