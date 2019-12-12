@@ -44,7 +44,7 @@ setup(
     install_requires=[
         'google-cloud-storage>=1.23.0,<2'
     ],
-    python_requires='~=3.3',
+    python_requires='~=3.6',
     include_package_data=True,
     package_data={
         '': ['*.md', 'LICENSE'],
