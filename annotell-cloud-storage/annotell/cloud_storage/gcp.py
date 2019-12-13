@@ -30,6 +30,10 @@ def list_blobs(bucket_name: str):
 def upload_blob(bucket_name: str, source_file_name: str, destination_blob_name: str):
     """Uploads a local file to the bucket."""
     bucket = storage_client().bucket(bucket_name)
+
+    if destination_blob_name.startswith("/"):
+        raise ValueError("Cannot write to /")
+
     blob = bucket.blob(destination_blob_name)
 
     blob.upload_from_filename(source_file_name)
