@@ -1,5 +1,5 @@
 from pyspark import SparkContext, SQLContext
-from annotell.core.loader import ParquetLoader
+from annotell.core.loader import parquet_loader
 from annotell.core.datamodel import KpiDataTable
 
 
@@ -8,7 +8,7 @@ def create_spark_context(sessionName, remote='local'):
 
 
 def load_test_data(sparkContext) -> KpiDataTable:
-    return ParquetLoader.load_file(sparkContext=sparkContext, path='sample_data/sample.parquet')
+    return parquet_loader.load_file(sparkContext=sparkContext, path='sample_data/sample.parquet')
 
 
 def list_signals(dataFrame):
