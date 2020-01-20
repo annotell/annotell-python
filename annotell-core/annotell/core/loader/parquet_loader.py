@@ -1,4 +1,5 @@
-from pyspark import SparkContext, SQLContext
+from pyspark import SQLContext
+
 
 def load_file(sparkContext, path):
     sqlContext = SQLContext(sparkContext)

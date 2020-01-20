@@ -42,9 +42,10 @@ setup(
     download_url='%s/tarball/%s' % (URL, version),
     keywords=['API', 'Annotell'],
     install_requires=[
-        'requests>=2.5'
+        'requests>=2.5',
+        'pyspark'
     ],
-    python_requires='~=3.3',
+    python_requires='~=3.6',
     include_package_data=True,
     package_data={
         '': ['*.md', 'LICENSE'],

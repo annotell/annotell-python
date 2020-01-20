@@ -1,7 +1,5 @@
-from dataclasses import dataclass
 from typing import List, Union
 
-@dataclass
 class KpiDataTable:
     def __init__(self, name):
         self.name = name
