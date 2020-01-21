@@ -42,7 +42,6 @@ setup(
     download_url='%s/tarball/%s' % (URL, version),
     keywords=['API', 'Annotell'],
     install_requires=[
-        'requests>=2.5',
         'pyspark'
     ],
     python_requires='~=3.6',
