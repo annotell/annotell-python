@@ -1,14 +1,10 @@
-from pyspark import SparkContext
-from annotell.core.loader import parquet_loader
+from pyspark import SparkContext, SQLContext
 
 
-def create_spark_context(sessionName, remote='local'):
-    return SparkContext(remote, sessionName)
+def load_file(spark_context, path):
+    sql_context = SQLContext(spark_context)
+    return sql_context.read.format("parquet").load(path)
 
 
-def load_test_data(sparkContext):
-    return parquet_loader.load_file(sparkContext=sparkContext, path='sample_data/sample.parquet')
-
-
-def list_signals(dataFrame):
-    dataFrame.printSchema()
+def create_spark_context(session_name, remote='local'):
+    return SparkContext(remote, session_name)
