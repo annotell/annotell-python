@@ -1,6 +1,8 @@
 import requests
 import os
 import json
+from typing import Union
+from . import __version__
 
 default_host = "https://api.annotell.com"
 
@@ -32,13 +34,13 @@ class QueryClient:
         self.metadata_url = "%s/v1/search/metadata/query" % self.host
         self.token = token or os.getenv("ANNOTELL_API_TOKEN")
 
-    def stream_metadata(self, query_filter: str, limit=10, includes=None, excludes=None):
+    def stream_metadata(self, query_filter: str, limit: Union[int, None]=10, includes=None, excludes=None):
         """
         Returns an iterator with result items
         :param query_filter:
-        :param limit:
-        :param excludes:
-        :param includes:
+        :param limit: set to None for no limit
+        :param excludes: list
+        :param includes: list
         :return:
         """
         if excludes is None:
@@ -59,6 +61,7 @@ class QueryClient:
             "Authorization": "Bearer %s" % self.token,
             "Accept-Encoding": "gzip",
             "Accept": "application/json",
+            "User-Agent": "annotell-ams/query:%s" % __version__
         }
 
         params = {"stream": "true"}
@@ -75,4 +78,4 @@ class QueryClient:
             return QueryResponse(resp)
         except requests.exceptions.HTTPError as e:
             msg = resp.content.decode()
-            raise RuntimeError("Got %s error %s" % (resp.status_code, msg)) from e
+            raise QueryException("Got %s error %s" % (resp.status_code, msg)) from e
