@@ -9,12 +9,12 @@ def _human_readable(posix_time):
 
 
 class Kpi:
-    def __init__(self, kpiType, kpiId, name):
-        if not util.valid_kpi_type(kpiType):
+    def __init__(self, kpi_type, kpi_id, name):
+        if not util.valid_kpi_type(kpi_type):
             raise ValueError('Invalid KPI type')
-        self.kpiType = kpiType
+        self.kpiType = kpi_type
         self.name = name
-        self.kpiId = kpiId
+        self.kpiId = kpi_id
         self.created = int(time.time())
         self.results = []
 
@@ -41,7 +41,7 @@ class Kpi:
                         raise ValueError("Invalid result keys: {}, expected: {}".format(item_keys, expected_keys))
                 self.results.append(result)
 
-    def printKpiResults(self):
+    def print_kpi_results(self):
         if len(self.results) == 0:
             print("No KPI results added yet for kpiId={}".format(self.kpiId))
         print("KPI Results for kpiId={}\n".format(self.kpiId))
