@@ -8,7 +8,7 @@ def _human_readable(posix_time):
     return datetime.utcfromtimestamp(posix_time).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
-class Kpi:
+class KPI:
     def __init__(self, kpi_type, kpi_id, name):
         if not util.valid_kpi_type(kpi_type):
             raise ValueError('Invalid KPI type')
@@ -40,6 +40,9 @@ class Kpi:
                     if not util.valid_result_keys(item_keys, expected_keys):
                         raise ValueError("Invalid result keys: {}, expected: {}".format(item_keys, expected_keys))
                 self.results.append(result)
+
+    def get_results(self):
+        return self.results
 
     def print_kpi_results(self):
         if len(self.results) == 0:
