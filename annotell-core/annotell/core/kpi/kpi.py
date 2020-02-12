@@ -12,9 +12,9 @@ class KPI:
     def __init__(self, kpi_type, kpi_id, name):
         if not util.valid_kpi_type(kpi_type):
             raise ValueError('Invalid KPI type')
-        self.kpiType = kpi_type
+        self.kpi_type = kpi_type
         self.name = name
-        self.kpiId = kpi_id
+        self.kpi_id = kpi_id
         self.created = int(time.time())
         self.results = []
 
@@ -23,13 +23,13 @@ class KPI:
             raise ValueError('Please provide dict of result')
         keys = result.keys()
         result['created'] = created
-        if self.kpiType == 'fraction':
+        if self.kpi_type == 'fraction':
             expected_keys = ['numerator', 'denominator', 'threshold', 'created']
             if not util.valid_result_keys(keys, expected_keys):
                 raise ValueError("Invalid result keys: {}, expected: {}".format(keys, expected_keys))
             else:
                 self.results.append(result)
-        if self.kpiType == 'histogram':
+        if self.kpi_type == 'histogram':
             expected_keys = ['splits', 'items', 'created']
             if not util.valid_result_keys(keys, expected_keys):
                 raise ValueError("Invalid result keys: {}, expected: {}".format(keys, expected_keys))
@@ -46,14 +46,14 @@ class KPI:
 
     def print_kpi_results(self):
         if len(self.results) == 0:
-            print("No KPI results added yet for kpiId={}".format(self.kpiId))
-        print("KPI Results for kpiId={}\n".format(self.kpiId))
+            print("No KPI results added yet for kpiId={}".format(self.kpi_id))
+        print("KPI Results for kpiId={}\n".format(self.kpi_id))
         for kpiResult in self.results:
-            if self.kpiType == 'fraction':
+            if self.kpi_type == 'fraction':
                 print("kpiId:\t\t {}\n"
                       "Result:\t\t {}\n"
                       "Threshold:\t {}\n"
-                      "Created:\t {}\n".format(self.kpiId,
+                      "Created:\t {}\n".format(self.kpi_id,
                                                kpiResult['result'],
                                                kpiResult['threshold'],
                                                _human_readable(kpiResult['created'])))
