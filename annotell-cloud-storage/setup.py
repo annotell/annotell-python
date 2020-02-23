@@ -21,12 +21,6 @@ if not version:
 # https://packaging.python.org/guides/packaging-namespace-packages/
 packages = find_namespace_packages(include=['annotell.*'])
 
-# Should be one of:
-# 'Development Status :: 3 - Alpha'
-# 'Development Status :: 4 - Beta'
-# 'Development Status :: 5 - Production/Stable'
-release_status = "Development Status :: 3 - Alpha"
-
 setup(
     name=package_name,
     packages=packages,
@@ -42,7 +36,8 @@ setup(
     download_url='%s/tarball/%s' % (URL, version),
     keywords=['API', 'Annotell'],
     install_requires=[
-        'google-cloud-storage>=1.23.0,<2'
+        'google-cloud-storage>=1.23.0,<2',
+        'requests>2.20<3'
     ],
     python_requires='~=3.6',
     include_package_data=True,
@@ -50,7 +45,7 @@ setup(
         '': ['*.md', 'LICENSE'],
     },
     classifiers=[
-        release_status,
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
