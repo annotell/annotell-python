@@ -10,7 +10,7 @@ from annotell.core.kpi.kpi import KPI
 
 
 class ExecutionManager:
-    def __init__(self, root_directory, kpi_manager_host='http://localhost:5000'):
+    def __init__(self, root_directory, host='http://localhost:5000'):
         self.session_id = 'test_session_id'
         self.host = kpi_manager_host
         self.root_dir = root_directory
@@ -47,4 +47,4 @@ class ExecutionManager:
             if not isinstance(kpi, KPI):
                 raise ValueError("Trying to submit something which is not a result: {}".format(result))
 
-            requests.post("http://localhost:5000/v1/result", data=kpi.toJSON())
+            requests.post(url=self.host+"v1/result", data=kpi.toJSON())
