@@ -1,34 +1,37 @@
-import requests
-import time
+import json
 import os
-
-from model import Event
-from annotell.core.kpi.kpi import KPI
+import time
+import requests
 
 from pyspark import SparkContext
 from pyspark.sql import SQLContext
 
+from annotell.core.kpi.kpi import KPI
+
+
 class ExecutionManager:
-    def __init__(self, kpi_manager_host):
+    def __init__(self, root_directory, kpi_manager_host='http://localhost:5000'):
         self.session_id = 'test_session_id'
         self.host = kpi_manager_host
+        self.root_dir = root_directory
+        self.submit_event('initialized', '')
 
     def load_data(self, project_name: str):
-        # compute absolute paths to the data
-        pardir = os.path.dirname(os.path.abspath(__file__))
-        sampleDataDir = os.path.join(pardir, 'sample_data')
-        parquetObjectsPath = os.path.join(sampleDataDir, '10km_fixed_offset.parquet')
-        sc = SparkContext(appName="object_detection", master="local")
-        sqlContext = SQLContext(sc)
-        data_frame = sqlContext.read.parquet(parquetObjectsPath)
-        self.submit_event(session_id=123, event_type='data_load',
-                          event_context='na', event_time=int(time.time()))
-        return data_frame
+        sample_data_dir = os.path.join(self.root_dir, 'sample_data')
+        parquet_path = os.path.join(sample_data_dir, project_name + '_latest.parquet')
+        sc = SparkContext(appName=project_name, master="local")
+        sql_context = SQLContext(sc)
+        data_frame = sql_context.read.parquet(parquet_path)
+        self.submit_event(type='data_loaded', context='na')
+        return data_frame, sc, sql_context
 
-    def submit_event(self, session_id: int, event_type: str, event_context: str, event_time: int):
-        event = Event(session_id, event_type, event_context, event_time)
-        r = requests.post(url=self.host + "/event", data=event)
-        return r
+    def submit_event(self, type: str, context: str, event_time=int(time.time())):
+        event = {}
+        event['session_id'] = self.session_id
+        event['type'] = type
+        event['context'] = context
+        event['time'] = event_time
+        return requests.post(url=self.host + "/v1/events", data=json.dumps(event))
 
     def submit_kpi_results(self, kpis):
         """
@@ -44,11 +47,4 @@ class ExecutionManager:
             if not isinstance(kpi, KPI):
                 raise ValueError("Trying to submit something which is not a result: {}".format(result))
 
-            for result in kpi.get_results():
-                print(
-                    "stub for submitting results, this will be done via HTTPS calls to result storage API once deployed")
-                print("result: {}".format(result))
-                r = requests.get("http://localhost:5000/submit_result")
-                print(r.status_code)
-                print(r.headers)
-                print(r.content)
+            requests.post("http://localhost:5000/v1/result", data=kpi.toJSON())
