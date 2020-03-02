@@ -8,12 +8,17 @@ from pyspark.sql import SQLContext
 
 from annotell.core.kpi.kpi import KPI
 
+API_VERSION = '/v1'
 
 class ExecutionManager:
-    def __init__(self, root_directory, host='http://localhost:5000'):
+    def __init__(self, root_directory, username, password, host='http://localhost:5000'):
         self.session_id = 'test_session_id'
         self.host = host
         self.root_dir = root_directory
+        self.username = username
+        self.password = password
+        self.session = requests.Session()
+        self.session.auth = (username, password)
         self.submit_event('initialized', '')
 
     def load_data(self, project_name: str):
@@ -33,7 +38,7 @@ class ExecutionManager:
         event['time'] = event_time
         print(json.dumps(event))
         try:
-            return requests.post(url=self.host + "/v1/events", data=json.dumps(event))
+            return self.session.post(url=self.host + API_VERSION + "/events", data=json.dumps(event))
         except requests.exceptions.ConnectionError:
             print('ConnectionError, event not submitted')
             return None
@@ -50,8 +55,9 @@ class ExecutionManager:
 
         for kpi in kpis:
             if not isinstance(kpi, KPI):
+                print('not a kpi')
                 raise ValueError("Trying to submit something which is not a result: {}".format(result))
             try:
-                requests.post(url=self.host+"v1/result", data=kpi.toJSON())
+                self.session.post(url=self.host + API_VERSION + "/result", data=kpi.toJSON())
             except requests.exceptions.ConnectionError:
                 print('ConnectionError, result not submitted')
