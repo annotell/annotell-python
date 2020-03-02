@@ -12,7 +12,7 @@ from annotell.core.kpi.kpi import KPI
 class ExecutionManager:
     def __init__(self, root_directory, host='http://localhost:5000'):
         self.session_id = 'test_session_id'
-        self.host = kpi_manager_host
+        self.host = host
         self.root_dir = root_directory
         self.submit_event('initialized', '')
 
