@@ -35,7 +35,7 @@ class ExecutionManager:
         event['session_id'] = self.session_id
         event['type'] = type
         event['context'] = context
-        event['time'] = event_time
+        event['event_time'] = event_time
         print(json.dumps(event))
         try:
             return self.session.post(url=self.host + API_VERSION + "/events", data=json.dumps(event))
