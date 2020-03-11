@@ -9,7 +9,7 @@ def _human_readable(posix_time):
 
 
 class KPI:
-    def __init__(self, kpi_type, kpi_id, name):
+    def __init__(self, kpi_type, kpi_id, test_case_id, name, metadata):
         if not util.valid_kpi_type(kpi_type):
             raise ValueError('Invalid KPI type')
         self.kpi_type = kpi_type
@@ -17,6 +17,7 @@ class KPI:
         self.kpi_id = kpi_id
         self.created = int(time.time())
         self.results = []
+        self.metadata = metadata
 
     def add_result(self, result, created=int(time.time())) -> None:
         if not isinstance(result, dict):
