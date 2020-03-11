@@ -42,7 +42,7 @@ setup(
     download_url='%s/tarball/%s' % (URL, version),
     keywords=['API', 'Annotell'],
     install_requires=[
-        'pyspark'
+        'pyspark', 'flask'
     ],
     python_requires='~=3.6',
     include_package_data=True,
