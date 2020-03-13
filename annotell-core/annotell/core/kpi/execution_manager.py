@@ -44,7 +44,7 @@ class ExecutionManager:
     def script_completed(self):
         self.submit_event("script_completed", "")
 
-    def submit_event(self, type: str, context: str, event_time=int(time.time())):
+    def submit_event(self, type: str, context: str, event_time=int(round(time.time() * 1000))):
         event = {}
         event['session_id'] = self.session_id
         event['type'] = type
@@ -72,7 +72,9 @@ class ExecutionManager:
                 print('not a kpi')
                 raise ValueError("Trying to submit something which is not a result: {}".format(result))
             try:
-                response_json = self.session.post(url=self.host + API_VERSION + "/result", data=kpi.toJSON())
+                kpi_json = json.loads(json.loads(json.dumps(kpi.toJSON())))
+                kpi_json['session_id'] = self.session_id
+                response_json = self.session.post(url=self.host + API_VERSION + "/result", data=json.dumps(kpi_json))
                 response = json.loads(response_json.content)
                 result_id = response['result_id']
                 result_ids.append(result_id)

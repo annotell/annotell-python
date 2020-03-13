@@ -15,11 +15,11 @@ class KPI:
         self.kpi_type = kpi_type
         self.name = name
         self.kpi_id = kpi_id
-        self.created = int(time.time())
+        self.created = int(round(time.time() * 1000))
         self.results = []
         self.metadata = metadata
 
-    def add_result(self, result, created=int(time.time())) -> None:
+    def add_result(self, result, created=int(round(time.time() * 1000))) -> None:
         if not isinstance(result, dict):
             raise ValueError('Please provide dict of result')
         keys = result.keys()
@@ -62,4 +62,4 @@ class KPI:
                 raise NotImplementedError('Printing results for this KPI type is not implemented yet')
 
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True)
