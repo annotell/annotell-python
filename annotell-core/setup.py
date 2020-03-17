@@ -32,7 +32,7 @@ setup(
     packages=packages,
     namespace_packages=["annotell"],
     version=version,
-    description='Annotell Core Lib',
+    description='Annotell Core Library',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     author='Annotell',
