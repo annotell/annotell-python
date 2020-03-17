@@ -75,11 +75,17 @@ class ExecutionManager:
                 kpi_json = json.loads(json.loads(json.dumps(kpi.toJSON())))
                 kpi_json['session_id'] = self.session_id
                 response_json = self.session.post(url=self.host + API_VERSION + "/result", data=json.dumps(kpi_json))
-                response = json.loads(response_json.content)
-                result_id = response['result_id']
-                result_ids.append(result_id)
-                self.submit_event('result_submitted', '')
+                if response_json.status_code == requests.codes.ok:
+                    response = json.loads(response_json.content)
+                    result_id = response['result_id']
+                    result_ids.append(result_id)
+                    self.submit_event('result_submitted', '')
+                else:
+                    self.submit_event('result_submit_failed', 'API response {}'.format(response_json.status_code))
+                    print('API Response: {} - Result not submitted'.format(response_json.status_code))
+
             except requests.exceptions.ConnectionError:
+                self.submit_event('result_missing', 'no result submitted')
                 print('ConnectionError, result not submitted')
 
         return result_ids
