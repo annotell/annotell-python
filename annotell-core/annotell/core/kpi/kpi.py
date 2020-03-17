@@ -13,8 +13,15 @@ class KPI:
         if not util.valid_kpi_type(kpi_type):
             raise ValueError('Invalid KPI type')
         self.kpi_type = kpi_type
+        if not isinstance(name, str):
+            raise ValueError('Invalid KPI name, needs ot be string')
         self.name = name
+        if not isinstance(kpi_id, int):
+            raise ValueError('Invalid KPI ID, needs to be an integer')
         self.kpi_id = kpi_id
+        if not isinstance(test_case_id, int):
+            raise ValueError('Invalid Test Case ID, needs to be an integer')
+        self.test_case_id = test_case_id
         self.created = int(round(time.time() * 1000))
         self.results = []
         self.metadata = metadata

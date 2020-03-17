@@ -24,6 +24,13 @@ def valid_kpi_type(kpi_type):
     else:
         return True
 
+def valid_kpi_id(kpi_id):
+    if kpi_type not in KPI_TYPES:
+        return False
+    else:
+        return True
+
+
 
 def create_bucketizer(splits, input_column):
     return Bucketizer(splits=splits,

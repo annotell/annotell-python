@@ -69,7 +69,6 @@ class ExecutionManager:
         result_ids = []
         for kpi in kpis:
             if not isinstance(kpi, KPI):
-                print('not a kpi')
                 raise ValueError("Trying to submit something which is not a result: {}".format(result))
             try:
                 kpi_json = json.loads(json.loads(json.dumps(kpi.toJSON())))
