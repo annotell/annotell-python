@@ -1,11 +1,12 @@
 import os
 import logging
+from typing import Optional
 from google.cloud import storage
 
 log = logging.getLogger(__name__)
 
 # Instantiates a client
-_storage_client: storage.Client = None
+_storage_client: Optional[storage.Client] = None
 
 
 def storage_client() -> storage.Client:
