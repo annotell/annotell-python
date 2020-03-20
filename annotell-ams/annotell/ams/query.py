@@ -1,10 +1,12 @@
-import requests
-import os
 import json
-from typing import Union
+from typing import Optional, List
+
+import requests
+from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST, AuthSession
+
 from . import __version__
 
-default_host = "https://api.annotell.com"
+DEFAULT_HOST = "https://api.annotell.com"
 
 
 def _iter_items(resp):
@@ -29,12 +31,35 @@ class QueryException(RuntimeError):
 
 
 class QueryClient:
-    def __init__(self, host=default_host, token=None):
+    def __init__(self, *,
+                 client_id: Optional[str] = None,
+                 client_secret: Optional[str] = None,
+                 api_token: Optional[str] = None,
+                 host=DEFAULT_HOST,
+                 auth_host=DEFAULT_AUTH_HOST):
+        """
+        :param client_id: client id for authentication
+        :param client_secret: client secret for authentication
+        :param api_token: legacy api token for authentication
+        :param host: Annotell api host
+        :param auth_host: authentication server host
+        """
         self.host = host
         self.metadata_url = "%s/v1/search/metadata/query" % self.host
-        self.token = token or os.getenv("ANNOTELL_API_TOKEN")
 
-    def stream_metadata(self, query_filter: str, limit: Union[int, None]=10, includes=None, excludes=None):
+        self.oauth_session = AuthSession(client_id=client_id,
+                                         client_secret=client_secret,
+                                         api_token=api_token,
+                                         host=auth_host)
+    @property
+    def session(self):
+        return self.oauth_session.session
+
+    def stream_metadata(self,
+                        query_filter: str,
+                        limit: Optional[int] = 10,
+                        includes: Optional[List[str]] = None,
+                        excludes: Optional[List[str]] = None):
         """
         Returns an iterator with result items
         :param query_filter:
@@ -58,7 +83,6 @@ class QueryClient:
         }
 
         headers = {
-            "Authorization": "Bearer %s" % self.token,
             "Accept-Encoding": "gzip",
             "Accept": "application/json",
             "User-Agent": "annotell-ams/query:%s" % __version__
@@ -66,7 +90,7 @@ class QueryClient:
 
         params = {"stream": "true"}
 
-        resp = requests.post(
+        resp = self.session.post(
             url=self.metadata_url,
             params=params,
             json=body,
