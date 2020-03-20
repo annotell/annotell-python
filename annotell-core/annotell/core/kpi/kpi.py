@@ -9,16 +9,24 @@ def _human_readable(posix_time):
 
 
 class KPI:
-    def __init__(self, kpi_type, kpi_id, name):
+    def __init__(self, kpi_type, kpi_id, test_case_id, name, metadata):
         if not util.valid_kpi_type(kpi_type):
             raise ValueError('Invalid KPI type')
         self.kpi_type = kpi_type
+        if not isinstance(name, str):
+            raise ValueError('Invalid KPI name, needs ot be string')
         self.name = name
+        if not isinstance(kpi_id, int):
+            raise ValueError('Invalid KPI ID, needs to be an integer')
         self.kpi_id = kpi_id
-        self.created = int(time.time())
+        if not isinstance(test_case_id, int):
+            raise ValueError('Invalid Test Case ID, needs to be an integer')
+        self.test_case_id = test_case_id
+        self.created = int(round(time.time() * 1000))
         self.results = []
+        self.metadata = metadata
 
-    def add_result(self, result, created=int(time.time())) -> None:
+    def add_result(self, result, created=int(round(time.time() * 1000))) -> None:
         if not isinstance(result, dict):
             raise ValueError('Please provide dict of result')
         keys = result.keys()
@@ -61,4 +69,4 @@ class KPI:
                 raise NotImplementedError('Printing results for this KPI type is not implemented yet')
 
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True)

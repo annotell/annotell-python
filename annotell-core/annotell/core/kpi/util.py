@@ -1,4 +1,5 @@
-from pyspark import SparkContext, SQLContext
+from pyspark import SparkContext
+from pyspark.sql import SQLContext
 from pyspark.ml.feature import Bucketizer
 
 import pyspark.sql.functions as psf
@@ -8,30 +9,37 @@ import numpy as np
 KPI_TYPES = ['fraction', 'histogram']
 
 
-def load_file(spark_context, path):
-    sql_context = SQLContext(spark_context)
-    return sql_context.read.format("parquet").load(path)
+def load_parquet_file(spark_context, path):
+    sqlContext = SQLContext(spark_context)
+    return sqlContext.read.parquet(path)
 
 
-def create_spark_context(session_name, remote='local'):
-    return SparkContext(remote, session_name)
+def create_spark_context(app_name, master='local'):
+    return SparkContext(appName=app_name, master=master)
 
 
-def valid_kpi_type(kpiType):
-    if kpiType not in KPI_TYPES:
+def valid_kpi_type(kpi_type):
+    if kpi_type not in KPI_TYPES:
+        return False
+    else:
+        return True
+
+def valid_kpi_id(kpi_id):
+    if kpi_type not in KPI_TYPES:
         return False
     else:
         return True
 
 
-def create_bucketizer(splits, inputCol):
+
+def create_bucketizer(splits, input_column):
     return Bucketizer(splits=splits,
-                      inputCol=inputCol,
+                      inputCol=input_column,
                       outputCol="bin")
 
 
-def count_values_by_bucket(bucketizer, dataFrame):
-    return bucketizer.setHandleInvalid("keep").transform(dataFrame)
+def count_values_by_bucket(bucketizer, data_frame):
+    return bucketizer.setHandleInvalid("keep").transform(data_frame)
 
 
 def create_bins(bin_size, max_distance):
