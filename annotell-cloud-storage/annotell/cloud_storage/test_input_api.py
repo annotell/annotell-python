@@ -7,7 +7,11 @@ from input_api_client import InputApiClient
 
 
 if __name__ == "__main__":
-    c = InputApiClient(base_url="http://annotell.org:8010", api_token="DEF")
+    c = InputApiClient(
+        host="http://annotell.org:8010",
+        api_token="DEF",
+        auth_host="http://annotell.org:8001"
+    )
 
     folder = Path("/Users/markocotra/Downloads/test_input_api")
     """
@@ -19,7 +23,8 @@ if __name__ == "__main__":
 
     files = dict(
         images=["india_1259396926226198_1575361708215415_FC.jpg"],
-        pointclouds=["india_1259396926226198.pcd"]
+        # pointclouds=["india_1259396926226198.pcd"]
+        pointclouds=["india_1238861697022498.csv"]
     )
 
     path_to_calibration = os.path.join(folder, 'annotell_sensor_config.json')

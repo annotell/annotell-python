@@ -1,15 +1,13 @@
 import requests
+import os
 import logging
 from typing import List, Mapping, Optional
 from pathlib import Path
 import mimetypes
-<<<<<<< HEAD
 from PIL import Image
 # from . import __version__
-=======
-from . import __version__
+# from . import __version__
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
->>>>>>> d5068cdca616cfadacafd6127d56fe9a96ea6907
 
 DEFAULT_HOST = "https://input.annotell.com"
 
@@ -60,15 +58,9 @@ class InputApiClient:
 
     def get_upload_urls(self, files: Mapping[str, List[str]]):
         """Get upload urls to cloud storage"""
-<<<<<<< HEAD
-        url = f"{self.base_url}/v1/inputs/upload-urls"
+        url = f"{self.host}/v1/inputs/upload-urls"
         #js = dict(files=files)
         resp = self.session.get(url, json=files, headers=self.headers)
-=======
-        url = f"{self.host}/v1/inputs/upload-urls"
-        js = dict(files=files)
-        resp = self.session.get(url, json=js, headers=self.headers)
->>>>>>> d5068cdca616cfadacafd6127d56fe9a96ea6907
         return self._raise_on_error(resp).json()
 
     def upload_files(self, folder: Path, url_map: Mapping[str, str]):
@@ -90,13 +82,12 @@ class InputApiClient:
                     log.error(f"Got {resp.status_code} error calling cloud bucket upload, "
                               f"got response\n{resp.content}")
 
-<<<<<<< HEAD
     def create_inputs(self, image_files: Mapping[str, Mapping[str, str]],
                       pointcloud_files: List[str], job_id: str, input_list_id: int,
                       metadata: dict):
         """Create inputs from uploaded files"""
         log.info(f"Creating inputs for files with job_id={job_id}")
-        url = f"{self.base_url}/v1/inputs"
+        url = f"{self.host}/v1/inputs"
         files_js = dict(
             imagesWithSettings=image_files,
             pointclouds=pointcloud_files
@@ -107,13 +98,6 @@ class InputApiClient:
             inputListId=input_list_id,
             metadata=metadata
         )
-=======
-    def create_inputs(self, files: List[str], job_id: str):
-        """Create inputs from uploaded files"""
-        log.info(f"Creating inputs for files with job_id={job_id}")
-        url = f"{self.host}/v1/inputs"
-        js = dict(files=files, jobId=job_id)
->>>>>>> d5068cdca616cfadacafd6127d56fe9a96ea6907
         resp = self.session.post(url, json=js, headers=self.headers)
         return self._raise_on_error(resp).json()
 
@@ -140,34 +124,33 @@ class InputApiClient:
         items = {**resp['images'], **resp['pointclouds']}
         #files = list(items.keys())
         self.upload_files(folder, items)
-<<<<<<< HEAD
         resp = self.create_inputs(
             images_with_settings, pointcloud_files, job_id, input_list_id, metadata
         )
         return resp
 
     def mend_input_data(self):
-        url = f"{self.base_url}/v1/inputs/mend-input-metadata"
+        url = f"{self.host}/v1/inputs/mend-input-metadata"
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def invalidate_input(self):
-        url = f"{self.base_url}/v1/inputs/invalidate"
+        url = f"{self.host}/v1/inputs/invalidate"
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def list_projects(self):
-        url = f"{self.base_url}/v1/inputs/projects"
+        url = f"{self.host}/v1/inputs/projects"
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def list_input_lists(self, project_id: int):
-        url = f"{self.base_url}/v1/inputs/input-lists?projectId={project_id}"
+        url = f"{self.host}/v1/inputs/input-lists?projectId={project_id}"
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def get_calibration_data(self, id: Optional[int] = None, external_id: Optional[str] = None):
-        url = f"{self.base_url}/v1/inputs/calibration-data"
+        url = f"{self.host}/v1/inputs/calibration-data"
         if id:
             url += f"?id={id}"
         elif external_id:
@@ -177,7 +160,7 @@ class InputApiClient:
         return self._raise_on_error(resp).json()
 
     def create_calibration_data(self, calibration: dict, external_id: str):
-        url = f"{self.base_url}/v1/inputs/calibration-data"
+        url = f"{self.host}/v1/inputs/calibration-data"
         js = dict(
             externalId=external_id,
             calibration=calibration
@@ -186,36 +169,32 @@ class InputApiClient:
         return self._raise_on_error(resp).json()
 
     def get_requests_for_request_ids(self, request_ids: List[int]):
-        url = f"{self.base_url}/v1/inputs/requests"
+        url = f"{self.host}/v1/inputs/requests"
         js = request_ids
         resp = self.session.get(url, json=js, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def get_requests_for_input_lists(self, input_list_id: int):
-        url = f"{self.base_url}/v1/inputs/requests?inputListId={input_list_id}"
+        url = f"{self.host}/v1/inputs/requests?inputListId={input_list_id}"
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def get_input_lists_for_inputs(self, internal_ids: List[str]):
-        url = f"{self.base_url}/v1/inputs/input-lists"
+        url = f"{self.host}/v1/inputs/input-lists"
         js = internal_ids
         resp = self.session.get(url, json=js, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def get_input_status(self, internal_ids: List[str]):
-        url = f"{self.base_url}/v1/inputs/export-status"
+        url = f"{self.host}/v1/inputs/export-status"
         js = internal_ids
         resp = self.session.get(url, json=js, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def download_annotations(self, internal_ids: List[str], request_id=None):
-        url = f"{self.base_url}/v1/inputs/export"
+        url = f"{self.host}/v1/inputs/export"
         if request_id:
             url += f"?requestId={request_id}"
         js = internal_ids
         resp = self.session.get(url, json=js, headers=self.headers)
         return self._raise_on_error(resp).json()
-=======
-        self.create_inputs(files, job_id)
-        return job_id
->>>>>>> d5068cdca616cfadacafd6127d56fe9a96ea6907
