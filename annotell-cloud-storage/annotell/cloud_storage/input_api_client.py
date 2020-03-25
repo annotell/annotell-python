@@ -5,6 +5,7 @@ import logging
 from typing import List, Mapping, Optional
 from pathlib import Path
 import mimetypes
+from PIL import Image
 # from . import __version__
 
 BASE_URL = "https://input.annotell.com"
@@ -33,11 +34,11 @@ class InputApiClient:
             raise
         return resp
 
-    def get_upload_urls(self, files: List[str]):
+    def get_upload_urls(self, files: Mapping[str, List[str]]):
         """Get upload urls to cloud storage"""
         url = f"{self.base_url}/v1/inputs/upload-urls"
-        js = dict(files=files)
-        resp = self.session.get(url, json=js, headers=self.headers)
+        #js = dict(files=files)
+        resp = self.session.get(url, json=files, headers=self.headers)
         return self._raise_on_error(resp).json()
 
     def upload_files(self, folder: Path, url_map: Mapping[str, str]):
@@ -47,7 +48,7 @@ class InputApiClient:
             log.info(f"Uploading file={fi}")
             with fi.open('rb') as f:
                 content_type = mimetypes.guess_type(file)[0]
-                # Hack deluxe
+                # Needed for pcd
                 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
                 if not content_type:
                     content_type = 'application/octet-stream'
@@ -59,12 +60,18 @@ class InputApiClient:
                     log.error(f"Got {resp.status_code} error calling cloud bucket upload, "
                               f"got response\n{resp.content}")
 
-    def create_inputs(self, files: List[str], job_id: str, input_list_id: int, metadata: dict):
+    def create_inputs(self, image_files: Mapping[str, Mapping[str, str]],
+                      pointcloud_files: List[str], job_id: str, input_list_id: int,
+                      metadata: dict):
         """Create inputs from uploaded files"""
         log.info(f"Creating inputs for files with job_id={job_id}")
         url = f"{self.base_url}/v1/inputs"
+        files_js = dict(
+            imagesWithSettings=image_files,
+            pointclouds=pointcloud_files
+        )
         js = dict(
-            files=files,
+            files=files_js,
             internalId=job_id,
             inputListId=input_list_id,
             metadata=metadata
@@ -72,14 +79,32 @@ class InputApiClient:
         resp = self.session.post(url, json=js, headers=self.headers)
         return self._raise_on_error(resp).json()
 
-    def create_inputs_for_files(self, folder: Path, files: List[str], input_list_id: int, metadata: dict):
+    def create_inputs_for_files(self, folder: Path, files: Mapping[str, List[str]],
+                                input_list_id: int, metadata: dict):
         """Upload files in folder to an input"""
         resp = self.get_upload_urls(files)
-        items = resp['items']
+
+        images_with_settings = dict()
+        for image in files['images']:
+            with Image.open(os.path.join(folder, image)) as im:
+                width, height = im.size
+            images_with_settings[image] = dict(
+                width=width,
+                height=height
+            )
+
+        images_on_disk = list(images_with_settings.keys())
+        images_in_response = list(resp['images'].keys())
+        assert set(images_on_disk) == set(images_in_response)
+        pointcloud_files = list(resp['pointclouds'].keys())
         job_id = resp['jobId']
-        files = list(items.keys())
+
+        items = {**resp['images'], **resp['pointclouds']}
+        #files = list(items.keys())
         self.upload_files(folder, items)
-        resp = self.create_inputs(files, job_id, input_list_id, metadata)
+        resp = self.create_inputs(
+            images_with_settings, pointcloud_files, job_id, input_list_id, metadata
+        )
         return resp
 
     def mend_input_data(self):

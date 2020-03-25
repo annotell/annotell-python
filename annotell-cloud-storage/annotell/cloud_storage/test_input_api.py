@@ -10,10 +10,17 @@ if __name__ == "__main__":
     c = InputApiClient(base_url="http://annotell.org:8010", api_token="DEF")
 
     folder = Path("/Users/markocotra/Downloads/test_input_api")
+    """
     files = [
         "india_1259396926226198_1575361708215415_FC.jpg",
         "india_1259396926226198.pcd"
     ]
+    """
+
+    files = dict(
+        images=["india_1259396926226198_1575361708215415_FC.jpg"],
+        pointclouds=["india_1259396926226198.pcd"]
+    )
 
     path_to_calibration = os.path.join(folder, 'annotell_sensor_config.json')
 
@@ -23,16 +30,15 @@ if __name__ == "__main__":
     input_list_id = 8
 
     scene_metadata = {
-        "externalId": "master_skywalker_what_are_we_going_to_do",
+        "externalId": "master_skywalker_what_are_we_going_to_do_JKL",
         "sourceSpecification": {
-            "filesToSource": {
-                "india_1259396926226198_1575361708215415_FC.jpg": "FC",
-                "india_1259396926226198.pcd": "lidar"
+            "imagesToSource": {
+                "india_1259396926226198_1575361708215415_FC.jpg": "FC"
             },
             "sourceToPrettyName": {
                 "FC": "Front Camera"
             },
-            "sourceOrder": ["FC", "lidar"]
+            "sourceOrder": ["FC"]
         },
         "calibrationSpec": {
             "externalId": "big_boi_test:1337",
@@ -40,9 +46,9 @@ if __name__ == "__main__":
         }
         # "calibrationId": 419
     }
-    """
     resp = c.create_inputs_for_files(folder, files, input_list_id, scene_metadata)
     print(resp)
+    """
 
     print()
     resp = c.list_projects()
@@ -77,7 +83,6 @@ if __name__ == "__main__":
     print()
     resp = c.invalidate_input()
     print(resp)
-    """
 
     print()
     resp = c.get_requests_for_request_ids(request_ids=[23])
@@ -101,3 +106,4 @@ if __name__ == "__main__":
     internal_ids = ["ed8cf0da-5f5a-4b6f-bfcf-684358b0ad50", "be25e986-5be3-4bc7-8d69-321b63899942", "cdefdf49-ca27-464a-b29d-976f72e63556"]
     resp = c.download_annotations(internal_ids=internal_ids, request_id=23)
     print(resp)
+    """
