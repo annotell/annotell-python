@@ -26,7 +26,7 @@ class ExecutionManager:
     def __init__(self, root_directory, username, password, host='http://localhost:5005'):
         parser.add_argument('--session-id', type=str, help='Session id')
         parser.add_argument("--filter", type=argparse.FileType('r'), help="JSON file with test config")
-        parser.add_argument("--script-hash", type=argparse.FileType('r'), help="Hash of file in current state")
+        parser.add_argument("--script-hash", type=str, help="Hash of file in current state")
 
         args = parser.parse_args()
 
@@ -42,7 +42,7 @@ class ExecutionManager:
 
         script_hash = args.script_hash
         if script_hash:
-            self.script_hash = json.loads(script_hash.read())
+            self.script_hash = str(script_hash)
         else:
             self.script_hash = 'localmode'
 
