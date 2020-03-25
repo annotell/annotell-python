@@ -72,7 +72,9 @@ class ExecutionManager:
         kpi['kpi_type'] = kpi_type
         kpi['kpi_tags'] = kpi_tags
         kpi['kpi_groups'] = kpi_groups
-        response = self.session.post(url=self.host + API_VERSION + "/kpi", data=json.dumps(kpi))
+        kpi_json = json.dumps(kpi)
+        log.info(kpi_json)
+        response = self.session.post(url=self.host + API_VERSION + "/kpi", data=kpi_json)
         return response
 
 
