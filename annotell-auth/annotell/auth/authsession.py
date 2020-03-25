@@ -1,25 +1,36 @@
 import os
 import logging
-from logging import NullHandler
 from datetime import datetime
+from typing import Optional
+
 from authlib.integrations.requests_client import OAuth2Session
-default_host = "https://user.annotell.com"
+
+DEFAULT_HOST = "https://user.annotell.com"
 
 log = logging.getLogger(__name__)
-log.addHandler(NullHandler())
 
 # https://docs.authlib.org/en/latest/client/oauth2.html
 class AuthSession:
-    def __init__(self, host=default_host,
-                 client_id=None,
-                 client_secret=None,
-                 annotell_api_token=None):
+    """
+    Not thread safe
+    """
+    def __init__(self, *,
+                 client_id: Optional[str] = None,
+                 client_secret: Optional[str] = None,
+                 api_token: Optional[str] = None,
+                 host: str = DEFAULT_HOST):
+        """
+        :param client_id: client id for authentication
+        :param client_secret: client secret for authentication
+        :param api_token: legacy api token for authentication
+        :param host: base url for authentication server
+        """
         self.host = host
         self.token_url = "%s/v1/auth/oauth/token" % self.host
 
         # support ANNOTELL_API_TOKEN as client_secret temporarily
         if client_id is None and client_secret is None:
-            static_api_token = annotell_api_token or os.getenv("ANNOTELL_API_TOKEN")
+            static_api_token = api_token or os.getenv("ANNOTELL_API_TOKEN")
             if static_api_token is not None:
                 client_id = ""
                 client_secret = static_api_token
@@ -55,6 +66,8 @@ class AuthSession:
 
     @property
     def session(self):
-        return self.oauth_session
+        if not self._token:
+            self.init()
+        return self.oauth_session.session
 
 
