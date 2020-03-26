@@ -25,6 +25,7 @@ class ExecutionManager:
         parser.add_argument('--session-id', type=str, help='Session id')
         parser.add_argument("--filter", type=argparse.FileType('r'), help="JSON file with test config")
         parser.add_argument("--script-hash", type=str, help="Hash of file in current state")
+        parser.add_argument("--source", type=str, help="Tells the backend who generate results")
 
         args = parser.parse_args()
 
@@ -44,6 +45,12 @@ class ExecutionManager:
         else:
             self.script_hash = 'localmode'
 
+        source = args.source
+        if source:
+            self.source = str(source)
+        else:
+            self.source = 'localhost'
+
         self.host = host
         self.root_dir = root_directory
         self.username = username
@@ -55,11 +62,11 @@ class ExecutionManager:
     def load_data(self, project_name: str):
         sample_data_dir = os.path.join(self.root_dir, 'sample_data')
         parquet_path = os.path.join(sample_data_dir, project_name + '_latest.parquet')
-        sc = SparkContext(appName=project_name, master="local")
-        sql_context = SQLContext(sc)
-        data_frame = sql_context.read.parquet(parquet_path)
+        spark_context = SparkContext(appName=project_name, master="local[4]")
+        spark_sql_context = SQLContext(spark_context)
+        data_frame = spark_sql_context.read.parquet(parquet_path)
         self.submit_event(type='data_loaded', context='')
-        return data_frame
+        return data_frame, spark_context, spark_sql_context
 
     def script_completed(self):
         self.submit_event("script_completed", "you deserve some coffee now!")
@@ -102,6 +109,7 @@ class ExecutionManager:
         for result in results:
             result.set_session_id(session_id=self.session_id)
             result.set_script_hash(script_hash=self.script_hash)
+            result.set_source(source=self.source)
             to_json = result.toJSON()
             response_json = self.session.post(url=self.host + API_VERSION + "/result", data=to_json)
             response_code = response_json.status_code
