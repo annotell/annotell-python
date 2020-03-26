@@ -1,13 +1,14 @@
 import requests
 import os
 import logging
-from typing import List, Mapping, Optional
+from typing import List, Mapping, Optional, Union, Dict
 from pathlib import Path
 import mimetypes
 from PIL import Image
 # from . import __version__
 # from . import __version__
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
+import input_api_model as IAP
 
 DEFAULT_HOST = "https://input.annotell.com"
 
@@ -52,18 +53,19 @@ class InputApiClient:
         try:
             resp.raise_for_status()
         except requests.HTTPError as e:
-            log.error(f"Got {resp.status_code} error calling url={resp.url}, got response:\n{resp.content}")
+            log.error(
+                f"Got {resp.status_code} error calling url={resp.url}, got response:\n{resp.content}")
             raise
         return resp
 
-    def get_upload_urls(self, files: Mapping[str, List[str]]):
+    def _get_upload_urls(self, files: Mapping[str, List[str]]):
         """Get upload urls to cloud storage"""
         url = f"{self.host}/v1/inputs/upload-urls"
         #js = dict(files=files)
         resp = self.session.get(url, json=files, headers=self.headers)
         return self._raise_on_error(resp).json()
 
-    def upload_files(self, folder: Path, url_map: Mapping[str, str]):
+    def _upload_files(self, folder: Path, url_map: Mapping[str, str]):
         """Upload all files to cloud storage"""
         for (file, upload_url) in url_map.items():
             fi = folder.joinpath(file)
@@ -82,9 +84,9 @@ class InputApiClient:
                     log.error(f"Got {resp.status_code} error calling cloud bucket upload, "
                               f"got response\n{resp.content}")
 
-    def create_inputs(self, image_files: Mapping[str, Mapping[str, str]],
-                      pointcloud_files: List[str], job_id: str, input_list_id: int,
-                      metadata: dict):
+    def _create_inputs_point_cloud_with_images(self, image_files: Mapping[str, Mapping[str, str]],
+                                               pointcloud_files: List[str], job_id: str, input_list_id: int,
+                                               metadata: dict):
         """Create inputs from uploaded files"""
         log.info(f"Creating inputs for files with job_id={job_id}")
         url = f"{self.host}/v1/inputs"
@@ -99,12 +101,14 @@ class InputApiClient:
             metadata=metadata
         )
         resp = self.session.post(url, json=js, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        return IAP.CreateInputResponse.from_json(json_resp)
 
-    def create_inputs_for_files(self, folder: Path, files: Mapping[str, List[str]],
-                                input_list_id: int, metadata: dict):
+    def create_inputs_point_cloud_with_images(self, folder: Path, files: Mapping[str, List[str]],
+                                              input_list_id: int,
+                                              metadata: dict) -> IAP.CreateInputResponse:
         """Upload files in folder to an input"""
-        resp = self.get_upload_urls(files)
+        resp = self._get_upload_urls(files)
 
         images_with_settings = dict()
         for image in files['images']:
@@ -122,12 +126,11 @@ class InputApiClient:
         job_id = resp['jobId']
 
         items = {**resp['images'], **resp['pointclouds']}
-        #files = list(items.keys())
-        self.upload_files(folder, items)
-        resp = self.create_inputs(
+        self._upload_files(folder, items)
+        create_input_response = self._create_inputs_point_cloud_with_images(
             images_with_settings, pointcloud_files, job_id, input_list_id, metadata
         )
-        return resp
+        return create_input_response
 
     def mend_input_data(self):
         url = f"{self.host}/v1/inputs/mend-input-metadata"
@@ -139,62 +142,112 @@ class InputApiClient:
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
-    def list_projects(self):
+    def list_projects(self) -> List[IAP.Project]:
         url = f"{self.host}/v1/inputs/projects"
         resp = self.session.get(url, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        return [IAP.Project.from_json(js) for js in json_resp]
 
-    def list_input_lists(self, project_id: int):
+    def list_input_lists(self, project_id: int) -> List[IAP.InputList]:
         url = f"{self.host}/v1/inputs/input-lists?projectId={project_id}"
         resp = self.session.get(url, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        return [IAP.InputList.from_json(js) for js in json_resp]
 
-    def get_calibration_data(self, id: Optional[int] = None, external_id: Optional[str] = None):
-        url = f"{self.host}/v1/inputs/calibration-data"
+    def get_calibration_data(self, id: Optional[int] = None, external_id: Optional[str] = None
+                             ) -> Union[List[IAP.CalibrationNoContent], List[IAP.CalibrationWithContent]]:
+        base_url = f"{self.host}/v1/inputs/calibration-data"
         if id:
-            url += f"?id={id}"
+            url = base_url + f"?id={id}"
         elif external_id:
-            url += f"?externalId={external_id}"
+            url = base_url + f"?externalId={external_id}"
+        else:
+            url = base_url
 
         resp = self.session.get(url, headers=self.headers)
-        return self._raise_on_error(resp).json()
 
-    def create_calibration_data(self, calibration: dict, external_id: str):
+        json_resp = self._raise_on_error(resp).json()
+        if base_url == url:
+            return [IAP.CalibrationNoContent.from_json(js) for js in json_resp]
+        else:
+            return [IAP.CalibrationWithContent.from_json(js) for js in json_resp]
+
+    def create_calibration_data(self, calibration: dict, external_id: str
+                                ) -> IAP.CalibrationNoContent:
         url = f"{self.host}/v1/inputs/calibration-data"
         js = dict(
             externalId=external_id,
             calibration=calibration
         )
         resp = self.session.post(url, json=js, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        return IAP.CalibrationNoContent.from_json(json_resp)
 
-    def get_requests_for_request_ids(self, request_ids: List[int]):
+    def get_requests_for_request_ids(self, request_ids: List[int]) -> Dict[int, IAP.Request]:
         url = f"{self.host}/v1/inputs/requests"
         js = request_ids
         resp = self.session.get(url, json=js, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        dict_resp = dict()
+        for k, v in json_resp.items():
+            dict_resp[int(k)] = IAP.Request.from_json(v)
+        return dict_resp
 
-    def get_requests_for_input_lists(self, input_list_id: int):
+    def get_requests_for_input_lists(self, input_list_id: int) -> List[IAP.Request]:
         url = f"{self.host}/v1/inputs/requests?inputListId={input_list_id}"
         resp = self.session.get(url, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        return [IAP.Request.from_json(js) for js in json_resp]
 
-    def get_input_lists_for_inputs(self, internal_ids: List[str]):
+    def get_input_lists_for_inputs(self, internal_ids: List[str]) -> Dict[str, IAP.InputList]:
         url = f"{self.host}/v1/inputs/input-lists"
         js = internal_ids
         resp = self.session.get(url, json=js, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        dict_resp = dict()
+        for k, v in json_resp.items():
+            dict_resp[k] = IAP.InputList.from_json(v)
+        return dict_resp
 
-    def get_input_status(self, internal_ids: List[str]):
+    def get_input_status(self, internal_ids: List[str]) -> Dict[str, Dict[int, bool]]:
+        """
+        Returns a nested dictionary, the outmost key is the internal_id, which points to a
+        dictionary whose keys are the request_ids for the requests where the input is included
+        (via the inputList). The key is a boolean denoting if the input is ready for export (true)
+        or not (false).
+        """
         url = f"{self.host}/v1/inputs/export-status"
         js = internal_ids
         resp = self.session.get(url, json=js, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        for k, v in json_resp.items():
+            inner_dict_resp = dict()
+            for kk, vv in v.items():
+                inner_dict_resp[int(kk)] = vv
+            json_resp[k] = inner_dict_resp
 
-    def download_annotations(self, internal_ids: List[str], request_id=None):
-        url = f"{self.host}/v1/inputs/export"
+        return json_resp
+
+    def download_annotations(self, internal_ids: List[str], request_id=None
+                             ) -> Dict[str, Union[Dict[int, IAP.ExportAnnotation], IAP.ExportAnnotation]]:
+        base_url = f"{self.host}/v1/inputs/export"
         if request_id:
-            url += f"?requestId={request_id}"
+            url = base_url + f"?requestId={request_id}"
+        else:
+            url = base_url
         js = internal_ids
         resp = self.session.get(url, json=js, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+
+        if base_url == url:
+            for k, v in json_resp.items():
+                inner_dict_resp = dict()
+                for kk, vv in v.items():
+                    inner_dict_resp[int(kk)] = IAP.ExportAnnotation.from_json(vv)
+                json_resp[k] = inner_dict_resp
+            return json_resp
+
+        else:
+            for k, v in json_resp.items():
+                json_resp[k] = IAP.ExportAnnotation.from_json(v)
+            return json_resp
