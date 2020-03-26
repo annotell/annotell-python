@@ -2,8 +2,8 @@ import json
 from datetime import datetime
 
 class Result:
-    def __init__(self, data, result_type, kpi_id=None, session_id=None, created=None, script_hash=None):
-        self.data = data
+    def __init__(self, content, result_type, kpi_id=None, session_id=None, created=None, script_hash=None):
+        self.content = content
         self.session_id = session_id
         self.created = created
         self.kpi_id = kpi_id
