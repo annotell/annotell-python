@@ -12,13 +12,11 @@ import sys
 from pyspark import SparkContext
 from pyspark.sql import SQLContext
 from annotell.core.kpi.Kpi import KPI
-from annotell.platform.logger import setup_logging
 
 parser = argparse.ArgumentParser(description='execution manager app arguments')
 
 API_VERSION = '/v1'
 
-setup_logging(stream=sys.stdout)
 log = logging.getLogger(__name__)
 
 
