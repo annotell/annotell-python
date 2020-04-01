@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+# Expose the app as a command line tool
+
+from annotell.input_api.annoutil import main
+main()

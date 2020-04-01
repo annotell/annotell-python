@@ -5,9 +5,9 @@ from typing import List, Mapping, Optional, Union, Dict
 from pathlib import Path
 import mimetypes
 from PIL import Image
-# from . import __version__
+from . import __version__
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
-import input_api_model as IAM
+from . import input_api_model as IAM
 import time
 
 DEFAULT_HOST = "https://input.annotell.com"
@@ -42,7 +42,7 @@ class InputApiClient:
         self.headers = {
             "Accept-Encoding": "gzip",
             "Accept": "application/json",
-            "User-Agent": f"annotell-cloud-storage:0.2.0"  # FIXME {__version__}
+            "User-Agent": f"annotell-cloud-storage:{__version__}"
         }
 
     @property

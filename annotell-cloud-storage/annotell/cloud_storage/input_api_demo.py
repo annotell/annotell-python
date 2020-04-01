@@ -4,6 +4,7 @@ from pathlib import Path
 import yaml
 
 from input_api_client import InputApiClient
+import input_api_model as IAM
 
 
 def convert_calibration(path_to_target_yaml_file: str) -> dict:
@@ -24,7 +25,7 @@ def convert_calibration(path_to_target_yaml_file: str) -> dict:
             "image_width":  cam["resolution"][0],
             "image_height": cam["resolution"][1],
             "camera_properties": {
-                "camera_type": "pinhole"
+                "camera_type": "pinhole"  # could also be "fisheye"
             },
 
         }
@@ -61,48 +62,39 @@ def convert_calibration(path_to_target_yaml_file: str) -> dict:
 
 if __name__ == "__main__":
     api_token = "abfd14d7483fa72e81a9dbb1"
-    c = InputApiClient(
+    client = InputApiClient(
         api_token=api_token
     )
 
     folder = Path("/Users/markocotra/input_api_demo")
-    image = "india_1260002498938491_1575967280926345_FC.jpg"
-    pointcloud = "india_1260002498938491.csv"
 
-    files = dict(
+    image = "india_1260003370120391_1575968152103699_FC.jpg"
+    pointcloud = "india_1260003370120391.csv"
+
+    files = IAM.FilesPointCloudWithImages(
         images=[image],
-        pointclouds=[pointcloud]  # currently only supports 1 lidar file
+        pointclouds=[pointcloud]  # Only support 1 pointcloud
     )
 
-    """
-    calibration_file = "sensor_setup_191210_191215.yaml"
-    path_to_calibration_yaml_file = os.path.join(folder, calibration_file)
-    calibration = convert_calibration(path_to_calibration_yaml_file)
-    """
-
     input_list_id = 256
-
-    scene_metadata = {
-        "externalId": f"{pointcloud.split('.')[0]}",
-        "sourceSpecification": {
-            "imagesToSource": {
+    metadata = IAM.Metadata(
+        external_id=f"{pointcloud.split('.')[0]}",
+        source_specification=IAM.SourceSpecification(
+            images_to_source={
                 image: "FC"
             },
-            "sourceToPrettyName": {
+            source_to_pretty_name={
                 "FC": "Front Camera"
             },
-            "sourceOrder": ["FC"]
-        },
-        "calibrationId": 31827623
-    }
+            source_order=["FC"]
+        ),
+        calibration_id=31827623
+    )
 
-    """
-    "calibrationSpec": {
-        "externalId": f"{calibration_file.split('.')[0]}",
-        "calibration": calibration
-    }
-    """
-    print()
-    print("create_inputs_point_cloud_with_images")
-    resp = c.create_inputs_point_cloud_with_images(folder, files, input_list_id, scene_metadata)
-    print(resp)
+    response = client.create_inputs_point_cloud_with_images(
+        folder,
+        files,
+        input_list_id,
+        metadata
+    )
+    print(response)

@@ -1,22 +1,10 @@
-from input_api_client import InputApiClient
 from typing import Optional, List
 from tabulate import tabulate
+from .input_api_client import InputApiClient
 
 import click
 
-
-api_token = "abfd14d7483fa72e81a9dbb1"
-c = InputApiClient(
-    api_token=api_token
-)
-
-"""
-c = InputApiClient(
-    host="http://annotell.org:8010",
-    api_token="DEF",
-    auth_host="http://annotell.org:8001"
-)
-"""
+c = InputApiClient()
 
 
 def _tabulate(body, headers, title=None):
@@ -212,5 +200,5 @@ cli.add_command(requests)
 cli.add_command(input_lists)
 
 
-if __name__ == '__main__':
+def main():
     cli(prog_name="annoutil")
