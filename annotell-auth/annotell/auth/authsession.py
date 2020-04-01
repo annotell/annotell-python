@@ -65,6 +65,14 @@ class AuthSession:
         self._log_new_token()
 
     @property
+    def token(self):
+        return self._token
+
+    @property
+    def access_token(self):
+        return self._token.get('access_token') if self._token is not None else None
+
+    @property
     def session(self):
         if not self._token:
             self.init()

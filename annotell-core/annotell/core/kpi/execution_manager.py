@@ -11,6 +11,7 @@ import sys
 
 from pyspark import SparkContext
 from pyspark.sql import SQLContext
+from pyspark.sql import utils as sql_utils
 from annotell.core.kpi.Kpi import KPI
 
 parser = argparse.ArgumentParser(description='execution manager app arguments')
@@ -59,13 +60,20 @@ class ExecutionManager:
         self.session.auth = (username, password)
         self.submit_event('initialized', context='connected to {HOST}'.format(HOST=host))
 
-    def load_data(self, project_name: str):
-        sample_data_dir = os.path.join(self.root_dir, 'sample_data')
-        parquet_path = os.path.join(sample_data_dir, project_name + '_latest.parquet')
-        spark_context = SparkContext(appName=project_name, master="local[4]")
+    def load_data(self, project_name: str, release_id: str):
+        source = str(self.source)
+        data_path = source + '/' + project_name + '/' + release_id + "/*"
+        full_data_path = os.path.join(self.root_dir, data_path)
+        spark_context = SparkContext(appName=project_name, master="local[*]")
         spark_sql_context = SQLContext(spark_context)
-        data_frame = spark_sql_context.read.parquet(parquet_path)
-        self.submit_event(type='data_loaded', context='')
+        try:
+            data_frame = spark_sql_context.read.parquet(full_data_path)
+        except sql_utils.AnalysisException:
+            self.submit_event(type='data_loading_failed',
+                              context=f"project_name={project_name} has no release_id={release_id}")
+            raise Exception(f"project_name={project_name} has no release_id={release_id}")
+        self.submit_event(type='data_loaded',
+                          context=f"loaded project_name={project_name} release_id={release_id}")
         return data_frame, spark_context, spark_sql_context
 
     def script_completed(self):
@@ -82,7 +90,6 @@ class ExecutionManager:
         response = self.session.post(url=self.host + API_VERSION + "/kpi", data=kpi_json)
         return response
 
-
     def submit_event(self, type: str, context: str, created=None):
         event = {}
         event['session_id'] = self.session_id
@@ -94,7 +101,7 @@ class ExecutionManager:
         try:
             return self.session.post(url=self.host + API_VERSION + "/events", data=json.dumps(event))
         except requests.exceptions.ConnectionError:
-            log.warn(requests.exceptions)
+            log.error(f"Cannot submit event, the server={self.host} probably did not respond")
             return None
 
     def submit_kpi_results(self, results):
@@ -111,10 +118,16 @@ class ExecutionManager:
             result.set_script_hash(script_hash=self.script_hash)
             result.set_source(source=self.source)
             to_json = result.toJSON()
-            response_json = self.session.post(url=self.host + API_VERSION + "/result", data=to_json)
+            try:
+                response_json = self.session.post(url=self.host + API_VERSION + "/result", data=to_json)
+            except requests.exceptions.ConnectionError:
+                log.error(f"Cannot submit result, the server={self.host} probably did not respond")
+                self.submit_event('result_submit_failed', f'the server={self.host} probably did not respond')
+                return None
+
             response_code = response_json.status_code
             if response_code in [200, 201]:
                 response = json.loads(response_json.content)
-                self.submit_event('result_submitted', 'API response {}'.format(response_code))
+                self.submit_event('result_submitted', 'api response {}'.format(response_code))
             else:
-                self.submit_event('result_submit_failed', 'API response {}'.format(response_code))
+                self.submit_event('result_submit_failed', 'api response {}'.format(response_code))
