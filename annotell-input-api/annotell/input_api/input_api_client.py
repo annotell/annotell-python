@@ -1,3 +1,4 @@
+"""Client for communicating with the Annotell platform."""
 import requests
 import os
 import logging
@@ -8,7 +9,6 @@ from PIL import Image
 from . import __version__
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 from . import input_api_model as IAM
-import time
 
 DEFAULT_HOST = "https://input.annotell.com"
 
@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 class InputApiClient:
-    """Creates Annotell inputs from local files"""
+    """Creates Annotell inputs from local files."""
 
     def __init__(self, *,
                  client_id: Optional[str] = None,

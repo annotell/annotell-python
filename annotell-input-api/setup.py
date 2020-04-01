@@ -38,7 +38,10 @@ setup(
     install_requires=[
         'annotell-auth>=1.1.0',
         'annotell-cloud-storage>=0.3.0',
-        # 3rd requirements
+        'click>=7.1.1',
+        'Pillow>=7.0.0',
+        'requests>=2.23.0',
+        'tabulate>=0.8.7'
     ],
     python_requires='~=3.6',
     include_package_data=True,
@@ -46,7 +49,7 @@ setup(
         '': ['*.md', 'LICENSE'],
     },
     classifiers=[
-        'Development Status :: 5 - Production/Stable',  # Set to Alpha
+        'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
