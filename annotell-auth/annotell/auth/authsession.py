@@ -1,7 +1,7 @@
-import os
 import logging
 from datetime import datetime
 from typing import Optional
+from .credentials_parser import get_credentials_from_env
 
 from authlib.integrations.requests_client import OAuth2Session
 
@@ -28,15 +28,8 @@ class AuthSession:
         self.host = host
         self.token_url = "%s/v1/auth/oauth/token" % self.host
 
-        client_id = client_id or os.getenv("ANNOTELL_CLIENT_ID")
-        client_secret = client_secret or os.getenv("ANNOTELL_CLIENT_SECRET")
-
-        # support ANNOTELL_API_TOKEN as client_secret temporarily
-        if client_id is None and client_secret is None:
-            static_api_token = api_token or os.getenv("ANNOTELL_API_TOKEN")
-            if static_api_token is not None:
-                client_id = ""
-                client_secret = static_api_token
+        if not client_id and not client_secret:
+            client_id, client_secret = get_credentials_from_env(api_token)
 
         self.oauth_session = OAuth2Session(
             client_id=client_id,
