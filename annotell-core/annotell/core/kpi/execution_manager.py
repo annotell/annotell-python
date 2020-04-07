@@ -13,6 +13,7 @@ from pyspark import SparkContext
 from pyspark.sql import SQLContext
 from pyspark.sql import utils as sql_utils
 from annotell.core.kpi.Kpi import KPI
+from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 
 parser = argparse.ArgumentParser(description='execution manager app arguments')
 
@@ -20,9 +21,8 @@ API_VERSION = '/v1'
 
 log = logging.getLogger(__name__)
 
-
 class ExecutionManager:
-    def __init__(self, root_directory, username, password, host='http://localhost:5005'):
+    def __init__(self, root_directory, host='http://localhost:5005', auth_host=DEFAULT_AUTH_HOST):
         parser.add_argument('--session-id', type=str, help='Session id')
         parser.add_argument("--filter", type=argparse.FileType('r'), help="JSON file with test config")
         parser.add_argument("--script-hash", type=str, help="Hash of file in current state")
@@ -54,10 +54,10 @@ class ExecutionManager:
 
         self.host = host
         self.root_dir = root_directory
-        self.username = username
-        self.password = password
-        self.session = requests.Session()
-        self.session.auth = (username, password)
+
+        self.oauth_session = AuthSession(host=auth_host)
+
+        self.session = self.oauth_session.session
         self.submit_event('initialized', context='connected to {HOST}'.format(HOST=host))
 
     def load_data(self, project_name: str, release_id: str):
