@@ -42,7 +42,11 @@ setup(
     download_url='%s/tarball/%s' % (URL, version),
     keywords=['API', 'Annotell'],
     install_requires=[
-        'pyspark', 'flask', 'pymongo', 'mongoengine'
+        'pyspark',
+        'flask',
+        'pymongo',
+        'mongoengine',
+        'annotell-auth>=1.2.0'
     ],
     python_requires='~=3.6',
     include_package_data=True,
