@@ -12,3 +12,14 @@ command line util `annoutil` (this is a part of the pip package).
 ```console
 $ annoutil projects
 ```
+
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.1.5] - 2020-04-07
+
+### Changed
+- Method `get_input_jobs_status` now accepts lists of internal_ids and external_ids as arguments.
+

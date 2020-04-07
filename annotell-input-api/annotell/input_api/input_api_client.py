@@ -284,17 +284,14 @@ class InputApiClient:
         json_resp = self._raise_on_error(resp).json()
         return json_resp
 
-    def get_input_jobs_status(self, internal_id: str = None,
-                              external_id: str = None) -> List[IAM.InputJob]:
+    def get_input_jobs_status(self, internal_ids: List[str] = [],
+                              external_ids: List[str] = []) -> List[IAM.InputJob]:
         base_url = f"{self.host}/v1/inputs/job-status"
-        if internal_id:
-            base_url += f"?internalId={internal_id}"
-        elif external_id:
-            base_url += f"?externalId={external_id}"
-        else:
-            raise Exception(f"You must provide internal_id or external_id")
-
-        resp = self.session.get(base_url, headers=self.headers)
+        js = dict(
+            internalIds=internal_ids,
+            externalIds=external_ids
+        )
+        resp = self.session.post(base_url, json=js, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
 
         return [IAM.InputJob.from_json(js) for js in json_resp]
