@@ -37,8 +37,7 @@ setup(
     keywords=['API', 'Annotell'],
     install_requires=[
         'google-cloud-storage>=1.23.0,<2',
-        'requests>2.20<3',
-        'annotell-auth>=1.1.0'
+        'requests>2.20<3'
     ],
     python_requires='~=3.6',
     include_package_data=True,
