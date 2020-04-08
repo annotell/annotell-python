@@ -36,7 +36,7 @@ setup(
     download_url='%s/tarball/%s' % (URL, version),
     keywords=['API', 'Annotell'],
     install_requires=[
-        'annotell-auth>=1.1.0',
+        'annotell-auth>=1.3.0',
         'annotell-cloud-storage>=0.3.0',
         'click>=7.1.1',
         'Pillow>=7.0.0',
