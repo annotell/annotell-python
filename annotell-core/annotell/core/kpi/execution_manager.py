@@ -33,6 +33,7 @@ log.setLevel(logging.WARN)
 class ExecutionManager:
     def __init__(self, project_id, dataset_id, kpi_host='https://kpi.annotell.com', auth_host=DEFAULT_AUTH_HOST):
         parser.add_argument('--session-id', type=str, help='Session id')
+        parser.add_argument('--organization-id', type=str, help='Organization ID')
         parser.add_argument("--filter-file", type=str, help="JSON filter from file")
         parser.add_argument("--filter-json", type=str, help="JSON string version of filter")
         parser.add_argument("--script-hash", type=str, help="Hash of file in current state")
@@ -42,6 +43,7 @@ class ExecutionManager:
         args = parser.parse_args()
 
         ## Each execution run has necessary core information
+        self.organization_id = args.organization_id or 'localhost'
         self.project_id = project_id
         self.dataset_id = dataset_id
         self.session_id = args.session_id or str(uuid.uuid4())
@@ -50,7 +52,6 @@ class ExecutionManager:
         self.kpi_host = kpi_host
         self.client_id = args.client_id or ""
         self.client_secret = args.client_secret or None
-
         self.filter_file = args.filter_file or None
         self.filter_json = args.filter_json or None
         self.filter_dict = None
@@ -72,9 +73,10 @@ class ExecutionManager:
             self.filter_id = self.filter_dict['filter_id']
             self.submit_event('filter_added', f'will use filter_id={self.filter_id}')
 
-        self.data_path = str(self.execution_mode) + '/' + \
-                         str(self.project_id) + '/' + \
-                         str(self.dataset_id) + "/*"
+        self.data_path = 'organization_id=' + str(self.organization_id) + '/' + \
+                         'project_id=' + str(self.project_id) + '/' + \
+                         'dataset_id=' + str(self.dataset_id) + "/*"
+
         abs_path = os.path.abspath((inspect.stack()[1])[1])
         self.root_dir = os.path.dirname(abs_path)
         self.absolute_data_path = os.path.join(self.root_dir, self.data_path)
