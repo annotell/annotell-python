@@ -5,7 +5,7 @@ Python 3 library providing access to AMS.
 To install with pip run `pip install annotell-ams`
 
 ## Metadata Example
-Set env ANNOTELL_API_TOKEN
+Set env ANNOTELL_CREDENTIALS, see [annotell-auth](https://github.com/annotell/annotell-python/tree/master/annotell-auth). 
 
 Stream all items matching a query
 ```python
