@@ -6,7 +6,9 @@ To install with pip run `pip install annotell-input-api`
 
 
 ## Example
-Set env ANNOTELL_CREDENTIALS to the credentials file provided to you by Annotell.
+Set env ANNOTELL_CREDENTIALS to the credentials file provided to you by Annotell,
+see [annotell-auth](https://github.com/annotell/annotell-python/tree/master/annotell-auth).
+
 Once set, the easiest way to test if everything is working is to use the
 command line util `annoutil` (this is a part of the pip package). 
 ```console
