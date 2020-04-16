@@ -37,7 +37,18 @@ def parse_credentials(path: str):
     )
 
 
-def get_credentials_from_env(api_token: Optional[str] = None):
+def get_credentials(auth):
+    if isinstance(auth, str):
+        if auth.endswith(".json"):
+            return parse_credentials(auth)
+        raise ValueError("Bad auth credentials file, but be json")
+    elif isinstance(auth, AnnotellCredentials):
+        return auth
+    else:
+        raise ValueError("Bad auth credentials, must be path to credentials file, or AnnotellCredentials object")
+
+
+def get_credentials_from_env():
     creds = os.getenv("ANNOTELL_CREDENTIALS")
     if creds:
         client_credentials = parse_credentials(creds)
@@ -46,12 +57,26 @@ def get_credentials_from_env(api_token: Optional[str] = None):
     client_id = os.getenv("ANNOTELL_CLIENT_ID")
     client_secret = os.getenv("ANNOTELL_CLIENT_SECRET")
 
-    # support ANNOTELL_API_TOKEN as client_secret temporarily
-    if client_id is None and client_secret is None:
-        static_api_token = api_token or os.getenv("ANNOTELL_API_TOKEN")
-        if static_api_token is not None:
-            client_id = ""
-            client_secret = static_api_token
+    return client_id, client_secret
+
+def resolve_credentials(auth=None,
+                        client_id: Optional[str] = None,
+                        client_secret: Optional[str] = None):
+    has_credentials_tuple = client_id is not None and client_secret is not None
+    if auth is not None:
+        if has_credentials_tuple:
+            raise ValueError("Choose either auth or client_id+client_secret")
+        if isinstance(auth, tuple):
+            if len(auth) != 2:
+                raise ValueError("Credentials tuple must be tuple of (client_id, client_secret)")
+            client_id, client_secret = auth
+        else:
+            creds = get_credentials(auth)
+            client_id = creds.client_id
+            client_secret = creds.client_secret
+    elif not has_credentials_tuple:
+        client_id, client_secret = get_credentials_from_env()
+
     return client_id, client_secret
 
 if __name__ == '__main__':
