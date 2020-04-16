@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from typing import Optional
-from .credentials_parser import get_credentials_from_env
+from .credentials_parser import resolve_credentials
 
 from authlib.integrations.requests_client import OAuth2Session
 
@@ -15,21 +15,22 @@ class AuthSession:
     Not thread safe
     """
     def __init__(self, *,
+                 auth=None,
                  client_id: Optional[str] = None,
                  client_secret: Optional[str] = None,
-                 api_token: Optional[str] = None,
                  host: str = DEFAULT_HOST):
         """
+        There is a variety of ways to setup the authentication. See
+        https://github.com/annotell/annotell-python/tree/master/annotell-auth
+        :param auth: authentication credentials
         :param client_id: client id for authentication
         :param client_secret: client secret for authentication
-        :param api_token: legacy api token for authentication
         :param host: base url for authentication server
         """
         self.host = host
         self.token_url = "%s/v1/auth/oauth/token" % self.host
 
-        if not client_id and not client_secret:
-            client_id, client_secret = get_credentials_from_env(api_token)
+        client_id, client_secret = resolve_credentials(auth, client_id, client_secret)
 
         self.oauth_session = OAuth2Session(
             client_id=client_id,

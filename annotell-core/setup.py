@@ -46,7 +46,7 @@ setup(
         'flask',
         'pymongo',
         'mongoengine',
-        'annotell-auth>=1.3.0'
+        'annotell-auth>=1.4.0,<2'
     ],
     python_requires='~=3.6',
     include_package_data=True,

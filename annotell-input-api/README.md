@@ -20,8 +20,9 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.5] - 2020-04-07
+## [0.2.0] - 2020-04-16
+- Change constructor to disable legacy api token support and only accept an `auth` parameter
 
-### Changed
+## [0.1.5] - 2020-04-07
 - Method `get_input_jobs_status` now accepts lists of internal_ids and external_ids as arguments.
 
