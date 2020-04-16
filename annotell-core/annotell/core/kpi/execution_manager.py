@@ -112,9 +112,9 @@ class ExecutionManager:
                                       context=f"column={col_filter['column']} limited to values={col_filter['values']}")
                 except sql_utils.AnalysisException:
                     log.error(f"column {col_filter['column']} not found in DataFrame")
-            return data_frame, spark_context
+            return data_frame, spark_context, spark_sql_context
         else:
-            return data_frame, spark_context
+            return data_frame, spark_context, spark_sql_context
 
     def script_completed(self):
         self.submit_event("script_completed", "you deserve some coffee now! ☕️")
