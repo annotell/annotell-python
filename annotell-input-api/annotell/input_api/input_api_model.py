@@ -259,3 +259,48 @@ class InputJob(Response):
             f"success={self.success}, " + \
             f"added={self.added}, " + \
             f"error_message={self.error_message})>"
+
+
+class Data(Response):
+    def __init__(self, id, external_id: str, source: Optional[str], created: datetime):
+        self.id = id
+        self.external_id = external_id
+        self.source = source
+        self.created = created
+
+    @staticmethod
+    def from_json(js: dict):
+        return Data(
+            int(js["id"]),
+            js.get("externalId"),
+            js.get("source"),
+            ts_to_dt(js["created"]["timestamp"])
+        )
+
+    def __repr__(self):
+        return f"<Data(" + \
+            f"id={self.id}, " + \
+            f"external_id={self.external_id}, " + \
+            f"source={self.source}, " + \
+            f"created={self.created})>"
+
+
+class Input(Response):
+    def __init__(self, internal_id: Optional[str], external_id: Optional[str], input_type: str):
+        self.internal_id = internal_id
+        self.external_id = external_id
+        self.input_type = input_type
+
+    @staticmethod
+    def from_json(js: dict):
+        return Input(
+            js.get("internalId"),
+            js.get("externalId"),
+            js["inputType"]
+        )
+
+    def __repr__(self):
+        return f"<Input(" + \
+            f"internal_id={self.internal_id}, " + \
+            f"external_id={self.external_id}, " + \
+            f"inpyt_type={self.input_type})>"

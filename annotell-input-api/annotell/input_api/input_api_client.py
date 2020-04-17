@@ -35,7 +35,7 @@ class InputApiClient:
         self.host = host
 
         self.oauth_session = AuthSession(host=auth_host,
-                                         api_token=api_token,
+                                         auth=api_token,
                                          client_id=client_id,
                                          client_secret=client_secret)
 
@@ -301,3 +301,31 @@ class InputApiClient:
         resp = self.session.get(base_url, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return [IAM.Request.from_json(js) for js in json_resp]
+
+    def get_datas_for_inputs_by_internal_ids(self, internal_ids: List[str]) -> Mapping[IAM.Input, List[IAM.Data]]:
+        base_url = f"{self.host}/v1/inputs/datas-internal-id"
+        js = internal_ids
+        resp = self.session.post(base_url, js=js, headers=self.headers)
+        json_resp = self._raise_on_error(resp).json()
+
+        new_dict = {}
+        for (k, v) in json_resp:
+            new_key = IAM.Input.from_json(k)
+            new_values = [IAM.Data.from_json(vv) for vv in v]
+            new_dict[new_key] = new_values
+
+        return new_dict
+
+    def get_datas_for_inputs_by_external_ids(self, external_ids: List[str]) -> Mapping[IAM.Input, List[IAM.Data]]:
+        base_url = f"{self.host}/v1/inputs/datas-external-id"
+        js = external_ids
+        resp = self.session.post(base_url, js=js, headers=self.headers)
+        json_resp = self._raise_on_error(resp).json()
+
+        new_dict = {}
+        for (k, v) in json_resp:
+            new_key = IAM.Input.from_json(k)
+            new_values = [IAM.Data.from_json(vv) for vv in v]
+            new_dict[new_key] = new_values
+
+        return new_dict

@@ -77,7 +77,8 @@ def projects(project_id, get_requests, get_input_lists):
 @click.option("--get-export-status", is_flag=True)
 @click.option("--get-upload-status", is_flag=True)
 @click.option("--get-input-lists", is_flag=True)
-def inputs(internal_ids, view, get_export_status, get_upload_status, get_input_lists):
+@click.option("--get-datas", is_flag=True)
+def inputs(internal_ids, view, get_export_status, get_upload_status, get_input_lists, get_datas):
     print()
     if internal_ids and view:
         view_dict = c.get_view_links(list(internal_ids))
@@ -111,17 +112,32 @@ def inputs(internal_ids, view, get_export_status, get_upload_status, get_input_l
         tab = _tabulate(body, headers, "INPUT LISTS FOR INPUTS")
         print(tab)
 
+    elif internal_ids and get_datas:
+        dict_of_datas = c.get_datas_for_inputs_by_internal_ids(internal_ids)
+        headers = ["input", "datas"]
+        body = [(k, v) for (k, v) in dict_of_datas.items()]
+        tab = _get_table(body, headers, "DATAS IN INPUTS")
+        print(tab)
+
 
 @click.command(name="inputs-externalid")
 @click.argument("external_ids", nargs=-1, required=True)
 @click.option("--get-upload-status", is_flag=True)
-def inputs_externalid(external_ids, get_upload_status):
+@click.option("--get-datas", is_flag=True)
+def inputs_externalid(external_ids, get_upload_status, get_datas):
     print()
-    if get_upload_status:
+    if external_ids and get_upload_status:
         headers = ["id", "internal_id", "external_id", "filename", "success", "added", "error_message"]
         list_of_jobs = c.get_input_jobs_status(external_ids=list(external_ids))
         tab = _get_table(list_of_jobs, headers, title="UPLOAD STATUS FOR INPUTS")
         print(tab)
+    elif external_ids and get_datas:
+        dict_of_datas = c.get_datas_for_inputs_by_external_ids(external_ids)
+        headers = ["input", "datas"]
+        body = [(k, v) for (k, v) in dict_of_datas.items()]
+        tab = _get_table(body, headers, "DATAS IN INPUTS")
+        print(tab)
+
     else:
         to_internal_dict = c.get_internal_ids_for_external_ids(list(external_ids))
         body = []
