@@ -32,25 +32,20 @@ class QueryException(RuntimeError):
 
 class QueryClient:
     def __init__(self, *,
-                 client_id: Optional[str] = None,
-                 client_secret: Optional[str] = None,
-                 api_token: Optional[str] = None,
+                 auth=None,
                  host=DEFAULT_HOST,
                  auth_host=DEFAULT_AUTH_HOST):
         """
-        :param client_id: client id for authentication
-        :param client_secret: client secret for authentication
-        :param api_token: legacy api token for authentication
+        :param auth: Annotell authentication credentials,
+        see https://github.com/annotell/annotell-python/tree/master/annotell-auth
         :param host: Annotell api host
         :param auth_host: authentication server host
         """
         self.host = host
         self.metadata_url = "%s/v1/search/metadata/query" % self.host
 
-        self.oauth_session = AuthSession(client_id=client_id,
-                                         client_secret=client_secret,
-                                         api_token=api_token,
-                                         host=auth_host)
+        self.oauth_session = AuthSession(auth=auth, host=auth_host)
+
     @property
     def session(self):
         return self.oauth_session.session

@@ -19,25 +19,25 @@ class InputApiClient:
     """Creates Annotell inputs from local files."""
 
     def __init__(self, *,
-                 client_id: Optional[str] = None,
-                 client_secret: Optional[str] = None,
-                 api_token: Optional[str] = None,
+                 auth: None,
                  host: str = DEFAULT_HOST,
                  auth_host: str = DEFAULT_AUTH_HOST):
         """
-        :param client_id: client id for authentication
-        :param client_secret: client secret for authentication
-        :param api_token: legacy api token for authentication.
+        :param auth: auth credentials, see https://github.com/annotell/annotell-python/tree/master/annotell-auth
         :param host: override for input api url
         :param auth_host: override for authentication url
         """
 
         self.host = host
 
+<<<<<<< HEAD
         self.oauth_session = AuthSession(host=auth_host,
                                          auth=api_token,
                                          client_id=client_id,
                                          client_secret=client_secret)
+=======
+        self.oauth_session = AuthSession(host=auth_host, auth=auth)
+>>>>>>> a467569f482f6ae1d35013a74617ac6d771b26dc
 
         self.headers = {
             "Accept-Encoding": "gzip",
