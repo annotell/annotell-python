@@ -1,11 +1,7 @@
-from typing import List, Mapping, Dict, Any, Type, Optional
-import json
+"""API MODEL."""
+from typing import List, Mapping, Dict, Optional, Union
+from enum import Enum
 from datetime import datetime
-import math
-
-"""
-    API MODEL RESPONSES
-"""
 
 
 def ts_to_dt(unixtimemillis: int) -> datetime:
@@ -13,15 +9,13 @@ def ts_to_dt(unixtimemillis: int) -> datetime:
     return datetime.utcfromtimestamp(unixtimeseconds)
 
 
-class Response:
-    @staticmethod
-    def from_json(js: dict):
-        raise NotImplementedError
-
-
 class RequestCall:
     def to_dict(self) -> dict:
         raise NotImplementedError
+
+#
+# Request Calls
+#
 
 
 class FilesPointCloudWithImages(RequestCall):
@@ -36,15 +30,100 @@ class FilesPointCloudWithImages(RequestCall):
         )
 
 
+class CameraType(str, Enum):
+    PINHOLE = "pinhole"
+    FISHEYE = "fisheye"
+    KANNALA = "kannala"
+
+
+class CameraProperty(RequestCall):
+    def __init__(self, camera_type: CameraType):
+        self.camera_type = camera_type
+
+    def to_dict(self):
+        return {
+            "camera_type": self.camera_type
+        }
+
+
+class CameraCalibration(RequestCall):
+    def __init__(self, position: List[float], rotation_quaternion: List[float],
+                 camera_matrix: List[float], camera_properties: CameraProperty,
+                 distortion_coefficients: List[float], image_height: int, image_width: int,
+                 undistortion_coefficients: Optional[List[float]]):
+
+        self.position = position
+        self.rotation_quaternion = rotation_quaternion
+
+        self.camera_matrix = camera_matrix
+        self.camera_properties = camera_properties
+        self.distortion_coefficients = distortion_coefficients
+        self.image_height = image_height
+        self.image_width = image_width
+        self.undistortion_coefficients = undistortion_coefficients
+
+        assert(len(position) == 3)
+        assert(len(rotation_quaternion) == 4)
+        assert(len(camera_matrix) == 9)
+
+        if camera_properties.camera_type == CameraType.KANNALA:
+            assert(undistortion_coefficients is not None)
+            assert(len(distortion_coefficients) == 4 and len(undistortion_coefficients) == 4)
+        else:
+            assert(len(distortion_coefficients) == 5)
+
+    def to_dict(self):
+        base = {
+            "position": self.position,
+            "rotation_quaternion": self.rotation_quaternion,
+            "camera_matrix": self.camera_matrix,
+            "camera_properties": self.camera_properties.to_dict(),
+            "distortion_coefficients": self.distortion_coefficients,
+            "image_height": self.image_height,
+            "image_width": self.image_width
+        }
+
+        if self.undistortion_coefficients is not None:
+            base["undistortion_coefficients"] = self.undistortion_coefficients
+
+        return base
+
+
+class LidarCalibration(RequestCall):
+    def __init__(self, position: List[float], rotation_quaternion: List[float]):
+        self.position = position
+        self.rotation_quaternion = rotation_quaternion
+
+        assert(len(position) == 3)
+        assert(len(rotation_quaternion) == 4)
+
+    def to_dict(self):
+        return {
+            "position": self.position,
+            "rotation_quaternion": self.rotation_quaternion
+        }
+
+
+class Calibration(RequestCall):
+    def __init__(self, calibration_dict: Dict[str, Union[CameraCalibration, LidarCalibration]]):
+        self.calibration_dict = calibration_dict
+
+    def to_dict(self):
+        return dict(
+            [(k, v.to_dict()) for (k, v) in self.calibration_dict.items()]
+        )
+
+
 class CalibrationSpec(RequestCall):
-    def __init__(self, external_id: str, calibration: Dict[str, Any]):
+    def __init__(self, external_id: str,
+                 calibration: Calibration):
         self.external_id = external_id
         self.calibration = calibration
 
     def to_dict(self):
         return {
             'externalId': self.external_id,
-            'calibration': self.calibration
+            'calibration': self.calibration.to_dict()
         }
 
 
@@ -91,6 +170,16 @@ class Metadata(RequestCall):
         as_dict['externalId'] = self.external_id
         as_dict['sourceSpecification'] = self.source_specification.to_dict()
         return as_dict
+
+#
+# Responses
+#
+
+
+class Response:
+    @staticmethod
+    def from_json(js: dict):
+        raise NotImplementedError
 
 
 class CalibrationNoContent(Response):

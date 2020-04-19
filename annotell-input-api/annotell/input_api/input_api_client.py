@@ -197,12 +197,12 @@ class InputApiClient:
         else:
             return [IAM.CalibrationWithContent.from_json(js) for js in json_resp]
 
-    def create_calibration_data(self, calibration: dict, external_id: str
+    def create_calibration_data(self, calibration: IAM.Calibration, external_id: str
                                 ) -> IAM.CalibrationNoContent:
         url = f"{self.host}/v1/inputs/calibration-data"
         js = dict(
             externalId=external_id,
-            calibration=calibration
+            calibration=calibration.to_dict()
         )
         resp = self.session.post(url, json=js, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
@@ -305,7 +305,7 @@ class InputApiClient:
     def get_datas_for_inputs_by_internal_ids(self, internal_ids: List[str]) -> Mapping[IAM.Input, List[IAM.Data]]:
         base_url = f"{self.host}/v1/inputs/datas-internal-id"
         js = internal_ids
-        resp = self.session.post(base_url, js=js, headers=self.headers)
+        resp = self.session.get(base_url, json=js, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
 
         new_dict = {}
@@ -319,7 +319,7 @@ class InputApiClient:
     def get_datas_for_inputs_by_external_ids(self, external_ids: List[str]) -> Mapping[IAM.Input, List[IAM.Data]]:
         base_url = f"{self.host}/v1/inputs/datas-external-id"
         js = external_ids
-        resp = self.session.post(base_url, js=js, headers=self.headers)
+        resp = self.session.get(base_url, json=js, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
 
         new_dict = {}
