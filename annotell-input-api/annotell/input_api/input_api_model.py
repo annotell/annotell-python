@@ -2,11 +2,11 @@
 from typing import List, Mapping, Dict, Optional, Union
 from enum import Enum
 from datetime import datetime
+import dateutil.parser
 
 
-def ts_to_dt(unixtimemillis: int) -> datetime:
-    unixtimeseconds = unixtimemillis // 1000
-    return datetime.utcfromtimestamp(unixtimeseconds)
+def ts_to_dt(date_string: str) -> datetime:
+    return dateutil.parser.parse(date_string)
 
 
 class RequestCall:
@@ -191,7 +191,7 @@ class CalibrationNoContent(Response):
     @staticmethod
     def from_json(js: dict):
         return CalibrationNoContent(
-            int(js["id"]), js["externalId"], ts_to_dt(js["created"]["timestamp"])
+            int(js["id"]), js["externalId"], ts_to_dt(js["created"])
         )
 
     def __repr__(self):
@@ -212,7 +212,7 @@ class CalibrationWithContent(Response):
     @staticmethod
     def from_json(js: dict):
         return CalibrationWithContent(int(js["id"]), js["externalId"],
-                                      ts_to_dt(js["created"]["timestamp"]), js["calibration"])
+                                      ts_to_dt(js["created"]), js["calibration"])
 
     def __repr__(self):
         return f"<CalibrationWithContent(" + \
@@ -232,7 +232,7 @@ class InputList(Response):
     @staticmethod
     def from_json(js: dict):
         return InputList(int(js["id"]), int(js["projectId"]), js["name"],
-                         ts_to_dt(js["created"]["timestamp"]))
+                         ts_to_dt(js["created"]))
 
     def __repr__(self):
         return f"<InputList(" + \
@@ -254,7 +254,7 @@ class Project(Response):
 
     @staticmethod
     def from_json(js: dict):
-        return Project(int(js["id"]), ts_to_dt(js["created"]["timestamp"]), js["title"],
+        return Project(int(js["id"]), ts_to_dt(js["created"]), js["title"],
                        js["description"], js.get("deadline"), js["status"])
 
     def __repr__(self):
@@ -279,7 +279,7 @@ class Request(Response):
 
     @staticmethod
     def from_json(js: dict):
-        return Request(int(js["id"]), ts_to_dt(js["created"]["timestamp"]), int(js["projectId"]),
+        return Request(int(js["id"]), ts_to_dt(js["created"]), int(js["projectId"]),
                        js["title"], js["description"], int(js["inputListId"]))
 
     def __repr__(self):
@@ -337,7 +337,7 @@ class InputJob(Response):
     @staticmethod
     def from_json(js: dict):
         return InputJob(int(js["id"]), js["jobId"], js["externalId"], js["filename"],
-                        bool(js["success"]), ts_to_dt(js["added"]["timestamp"]), js.get("errorMessage"))
+                        bool(js["success"]), ts_to_dt(js["added"]), js.get("errorMessage"))
 
     def __repr__(self):
         return f"<InputJob(" + \
