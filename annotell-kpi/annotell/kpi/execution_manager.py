@@ -15,7 +15,7 @@ from pyspark.sql import SQLContext
 from pyspark.sql import utils as sql_utils
 from pyspark.sql.functions import col
 
-from annotell.core.kpi.Result import Result
+from annotell.kpi.Result import Result
 
 parser = argparse.ArgumentParser(description='handles execution manager arguments')
 
