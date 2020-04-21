@@ -30,14 +30,7 @@ class InputApiClient:
 
         self.host = host
 
-<<<<<<< HEAD
-        self.oauth_session = AuthSession(host=auth_host,
-                                         auth=api_token,
-                                         client_id=client_id,
-                                         client_secret=client_secret)
-=======
         self.oauth_session = AuthSession(host=auth_host, auth=auth)
->>>>>>> a467569f482f6ae1d35013a74617ac6d771b26dc
 
         self.headers = {
             "Accept-Encoding": "gzip",

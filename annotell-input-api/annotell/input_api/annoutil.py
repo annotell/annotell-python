@@ -4,7 +4,8 @@ from .input_api_client import InputApiClient
 
 import click
 
-client = InputApiClient()
+
+client = InputApiClient(auth=None)
 
 
 def _tabulate(body, headers, title=None):
