@@ -36,7 +36,7 @@ class EventManager:
             "context": context,
             "created": str(datetime.datetime.now())
         }
-        log.debug(f"event_type={event_type} context={context}")
+        log.info(f"event_type={event_type} context={context}")
 
         headers = {'Content-Type': 'application/json'}
         try:

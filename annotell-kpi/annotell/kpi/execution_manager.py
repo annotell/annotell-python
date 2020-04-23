@@ -66,7 +66,7 @@ class ExecutionManager:
 
         # Determine if credentials are to be used from arguments or environment variables
         if self.client_secret:
-            log.debug(f"authenticating using client_id={self.client_id} client_secret={self.client_secret}")
+            log.info(f"authenticating using client_id and client_secret from script arguments")
             self.oauth_session = AuthSession(host=auth_host,
                                              client_id=self.client_id,
                                              client_secret=self.client_secret)
