@@ -37,10 +37,13 @@ class EventManager:
             "created": str(datetime.datetime.now())
         }
         log.debug(f"event_type={event_type} context={context}")
+
+        headers = {'Content-Type': 'application/json'}
         try:
             return self.auth_session.post(
                 url=self.host + self.kpi_manager_version + "/event",
-                json=json.dumps(event)
+                data=json.dumps(event),
+                headers=headers
             )
         except requests.exceptions.ConnectionError:
             log.error(f"Cannot submit event, the server={self.host} probably did not respond")

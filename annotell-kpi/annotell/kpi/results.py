@@ -46,9 +46,12 @@ class ResultManager:
         result.set_filter_id(filter_id=self.filter_id)
         result.set_execution_mode(execution_mode=self.execution_mode)
 
+        headers = {'Content-Type': 'application/json'}
+
         try:
             response_json = self.session.post(url=self.host + self.kpi_manager_version + "/result",
-                                              json=result.toJSON())
+                                              data=result.toJSON(),
+                                              headers=headers)
         except requests.exceptions.ConnectionError:
             log.error(f"Cannot submit result, the server={self.host} probably did not respond")
             self.event_manager.submit(event_type=self.event_manager.EVENT_RESULT_SUBMIT_FAILED,
