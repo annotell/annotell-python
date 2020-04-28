@@ -41,7 +41,7 @@ class EventManager:
         headers = {'Content-Type': 'application/json'}
         try:
             return self.auth_session.post(
-                url=self.host + self.kpi_manager_version + "/event",
+                url=self.host + self.kpi_manager_version + "/event/create",
                 data=json.dumps(event),
                 headers=headers
             )

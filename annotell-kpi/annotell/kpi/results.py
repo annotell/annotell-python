@@ -50,7 +50,7 @@ class ResultManager:
 
 
         try:
-            response_json = self.session.post(url=self.host + self.kpi_manager_version + "/result",
+            response_json = self.session.post(url=self.host + self.kpi_manager_version + "/result/create",
                                               data=result.toJSON(),
                                               headers=headers)
             log.info(f"submitted result")
