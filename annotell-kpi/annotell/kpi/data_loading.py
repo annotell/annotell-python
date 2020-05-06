@@ -7,15 +7,16 @@ from pyspark.sql.functions import col
 log = get_logger()
 
 
-def internal_loader(data_path: str,
-                    filter_dict: dict,
-                    spark_sql_context: SQLContext,
-                    event_manager: EventManager):
-    log.debug(f"data_path={data_path}")
-
-    data_frame = load_parquet_files(spark_sql_context, data_path, event_manager)
-    event_manager.submit(event_type=event_manager.EVENT_DATA_LOADED, context=f"data_path={data_path}")
-
+def internal_data_loader(absolute_data_path: str,
+                         data_path: str,
+                         compute_placement: str,
+                         filter_dict: dict,
+                         spark_sql_context: SQLContext,
+                         event_manager: EventManager):
+    log.debug(f"absolute_data_path={absolute_data_path}")
+    log.info(f"data_path={data_path}")
+    data_frame = load_parquet_files(spark_sql_context, compute_placement, absolute_data_path, data_path, event_manager)
+    event_manager.submit(event_type=event_manager.EVENT_DATA_LOADED, context=f"data_path={absolute_data_path}")
     filtered_data_frame = filter_data_frame(filter_dict, data_frame, event_manager)
     return filtered_data_frame
 
@@ -38,10 +39,14 @@ def filter_data_frame(filter_dict, data_frame, event_manager):
         return data_frame
 
 
-def load_parquet_files(spark_sql_context: SQLContext, data_path: str, event_manager: EventManager):
+def load_parquet_files(spark_sql_context: SQLContext, compute_placement: str, absolute_data_path: str, data_path: str,
+                       event_manager: EventManager):
+    log.info(f"loading data from {compute_placement}")
+    if compute_placement == 'GOOGLE_CLOUD_DATAPROC':
+        absolute_data_path = 'gs://annotell-kpi-manager/' + data_path
     try:
-        return spark_sql_context.read.parquet(data_path)
+        return spark_sql_context.read.parquet(absolute_data_path)
     except sql_utils.AnalysisException:
         event_manager.submit(event_type=event_manager.EVENT_DATA_LOADING_FAILED,
-                             context=f"data_path={data_path} did not exist")
-        raise Exception(f"data_path={data_path} did not exist")
+                             context=f"data_path={absolute_data_path} did not exist")
+        raise Exception(f"data_path={absolute_data_path} did not exist")

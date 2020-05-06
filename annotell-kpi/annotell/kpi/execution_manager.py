@@ -47,6 +47,7 @@ class ExecutionManager:
         parser.add_argument("--client-id", type=str, help="Client ID used for authentication")
         parser.add_argument("--client-secret", type=str, help="Client secret used for authentication")
         parser.add_argument("--execution-mode", type=str, help="How is this script being run?")
+        parser.add_argument("--compute-placement", type=str, help="Where will this workload be run?")
         args = parser.parse_args()
 
         # Here we put together information about the execution session. Since it should be possible to run scripts
@@ -63,6 +64,7 @@ class ExecutionManager:
         self.client_secret = args.client_secret or None
         self.filter_file = args.filter_file or None
         self.filter_json = args.filter_json or None
+        self.compute_placement = args.compute_placement or None
 
         # Determine if credentials are to be used from arguments or environment variables
         if self.client_secret:
@@ -134,8 +136,10 @@ class ExecutionManager:
         by the Execution Manager. The Execution Manager will be aware of the context in which it is running,
         and load data the appropriate way.
         """
-        return data_loading.internal_loader(
-            data_path=self.absolute_data_path,
+        return data_loading.internal_data_loader(
+            absolute_data_path=self.absolute_data_path,
+            data_path=self.data_path,
+            compute_placement=self.compute_placement,
             filter_dict=self.filter_dict,
             spark_sql_context=self.spark_sql_context,
             event_manager=self.event_manager), \
