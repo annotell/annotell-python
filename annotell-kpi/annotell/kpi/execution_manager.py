@@ -9,7 +9,7 @@ from annotell.kpi import conf
 from annotell.kpi.events import EventManager
 from annotell.kpi.logging import setup_logging
 from annotell.kpi.results import ResultManager
-from annotell.kpi.compute import setup_spark
+from annotell.kpi.compute import setup_spark, get_dataproc_job_id
 from annotell.kpi.models import Result
 
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
@@ -49,6 +49,17 @@ class ExecutionManager:
         parser.add_argument("--execution-mode", type=str, help="How is this script being run?")
         parser.add_argument("--compute-placement", type=str, help="Where will this workload be run?")
         args = parser.parse_args()
+
+        # To enable debugging in Spark clusters, we define the app_name based on the configuration
+        self.app_name = 'execution_mode=' + self.execution_mode + \
+                        ':project_id=' + str(self.project_id) + \
+                        ':dataset_id=' + str(self.dataset_id)
+
+        # Sets up Spark to run against a local master
+        sc, sqlc = setup_spark(app_name=self.app_name)
+
+        if self.compute_placement == 'GOOGLE_CLOUD_DATAPROC':
+            self.session_id = get_dataproc_job_id(sc.getConf())
 
         # Here we put together information about the execution session. Since it should be possible to run scripts
         # both locally and in production, we use placeholders for variables that are only relevant
@@ -109,14 +120,6 @@ class ExecutionManager:
         self.root_dir = os.path.dirname(abs_path)
         self.absolute_data_path = os.path.join(self.root_dir, self.data_path)
 
-        # To enable debugging in Spark clusters, we define the app_name based on the configuration
-        self.app_name = 'execution_mode=' + self.execution_mode + \
-                        ':project_id=' + str(self.project_id) + \
-                        ':dataset_id=' + str(self.dataset_id) + \
-                        ':session_id=' + str(self.session_id)
-
-        # Sets up Spark to run against a local master
-        sc, sqlc = setup_spark(app_name=self.app_name)
         self.spark_context = sc
         self.spark_sql_context = sqlc
 
