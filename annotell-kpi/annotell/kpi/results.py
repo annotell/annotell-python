@@ -17,7 +17,7 @@ class ResultManager:
                  kpi_manager_version: str,
                  execution_mode: str,
                  script_hash: str,
-                 session_id: str,
+                 job_id: str,
                  project_id: str,
                  dataset_id: str,
                  filter_id: str,
@@ -27,7 +27,7 @@ class ResultManager:
         self.host = host
         self.kpi_manager_version = kpi_manager_version
         self.script_hash = script_hash
-        self.session_id = session_id
+        self.job_id = job_id
         self.project_id = project_id
         self.dataset_id = dataset_id
         self.filter_id = filter_id
@@ -39,7 +39,7 @@ class ResultManager:
 
         Will send the json representation of the KPI result to the KPI Manager for storage.
         """
-        result.set_session_id(session_id=self.session_id)
+        result.set_job_id(job_id=self.job_id)
         result.set_project_id(project_id=self.project_id)
         result.set_dataset_id(dataset_id=self.dataset_id)
         result.set_script_hash(script_hash=self.script_hash)
@@ -47,7 +47,6 @@ class ResultManager:
         result.set_execution_mode(execution_mode=self.execution_mode)
 
         headers = {'Content-Type': 'application/json'}
-
 
         try:
             response_json = self.session.post(url=self.host + self.kpi_manager_version + "/result/create",

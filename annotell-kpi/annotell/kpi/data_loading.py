@@ -16,7 +16,7 @@ def internal_data_loader(absolute_data_path: str,
     log.debug(f"absolute_data_path={absolute_data_path}")
     log.info(f"data_path={data_path}")
     data_frame = load_parquet_files(spark_sql_context, compute_placement, absolute_data_path, data_path, event_manager)
-    event_manager.submit(event_type=event_manager.EVENT_DATA_LOADED, context=f"data_path={absolute_data_path}")
+    event_manager.submit(event_type=event_manager.EVENT_DATA_LOADED, context=f"data_path={data_path}")
     filtered_data_frame = filter_data_frame(filter_dict, data_frame, event_manager)
     return filtered_data_frame
 

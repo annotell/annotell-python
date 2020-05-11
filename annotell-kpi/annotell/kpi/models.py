@@ -8,14 +8,14 @@ class Result:
                  content,
                  project_id=None,
                  dataset_id=None,
-                 session_id=None,
+                 job_id=None,
                  created=None,
                  script_hash=None,
                  filter_id=None,
                  result_type="undefined",
                  execution_mode=None):
         self.content = content
-        self.session_id = session_id
+        self.job_id = job_id
         self.created = created
         self.kpi_id = kpi_id
         self.project_id = project_id
@@ -41,8 +41,8 @@ class Result:
     def set_execution_mode(self, execution_mode):
         self.execution_mode = execution_mode
 
-    def set_session_id(self, session_id):
-        self.session_id = session_id
+    def set_job_id(self, job_id):
+        self.job_id = job_id
 
     def set_script_hash(self, script_hash):
         self.script_hash = script_hash

@@ -9,10 +9,10 @@ log = get_logger()
 
 
 class EventManager:
-    def __init__(self, auth_session: AuthSession, session_id, host, kpi_manager_version):
+    def __init__(self, auth_session: AuthSession, job_id: str, host, kpi_manager_version):
         self.auth_session = auth_session
         self.host = host
-        self.session_id = session_id
+        self.job_id = job_id
         self.kpi_manager_version = kpi_manager_version
 
     EVENT_SCRIPT_INITIALIZED = 'script_initialized'
@@ -31,12 +31,12 @@ class EventManager:
             context:        String that provides information about event context.
         """
         event = {
-            "session_id": self.session_id,
+            "job_id": self.job_id,
             "event_type": event_type,
             "context": context,
             "created": str(datetime.datetime.now())
         }
-        log.info(f"event_type={event_type} context={context}")
+        log.info(f"[{event_type}] {context}")
 
         headers = {'Content-Type': 'application/json'}
         try:

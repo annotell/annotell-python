@@ -39,7 +39,7 @@ class ExecutionManager:
         """
 
     def __init__(self, project_id, dataset_id, kpi_host=conf.KPI_MANAGER_HOST, auth_host=DEFAULT_AUTH_HOST):
-        parser.add_argument('--session-id', type=str, help='Session id')
+        parser.add_argument('--job-id', type=str, help='Job ID')
         parser.add_argument('--organization-id', type=str, help='Organization ID')
         parser.add_argument("--filter-file", type=str, help="JSON filter from file")
         parser.add_argument("--filter-json", type=str, help="JSON string version of filter")
@@ -48,15 +48,17 @@ class ExecutionManager:
         parser.add_argument("--client-secret", type=str, help="Client secret used for authentication")
         parser.add_argument("--execution-mode", type=str, help="How is this script being run?")
         parser.add_argument("--compute-placement", type=str, help="Where will this workload be run?")
+        parser.add_argument("--project-id", type=str, help="Enables overriding project_id via arguments")
+        parser.add_argument("--dataset-id", type=str, help="Enables overriding dataset_id via arguments")
         args = parser.parse_args()
 
         # Here we put together information about the execution session. Since it should be possible to run scripts
         # both locally and in production, we use placeholders for variables that are only relevant
         # in production (such as organization_id).
         self.organization_id = args.organization_id or 'localhost'
-        self.project_id = project_id
-        self.dataset_id = dataset_id
-        self.session_id = args.session_id or str(uuid.uuid4())
+        self.project_id = args.project_id or project_id  # first check overriding arguments
+        self.dataset_id = args.dataset_id or dataset_id  # first check overriding arguments
+        self.job_id = args.job_id or str(uuid.uuid4())  # Note that later overrides are possible
         self.script_hash = args.script_hash or 'local_execution_mode'
         self.execution_mode = args.execution_mode or 'local_execution_mode'
         self.kpi_host = kpi_host
@@ -67,14 +69,15 @@ class ExecutionManager:
         self.compute_placement = args.compute_placement or None
 
         # To enable debugging in Spark clusters, we define the app_name based on the configuration
-        self.app_name = ':project_id=' + str(self.project_id) + \
+        self.app_name = 'project_id=' + str(self.project_id) + \
                         ':dataset_id=' + str(self.dataset_id)
 
         # Sets up Spark to run against a local master
         sc, sqlc = setup_spark(app_name=self.app_name)
 
+        # If running in Google Cloud, replace job_id with ID from Yarn tags
         if self.compute_placement == 'GOOGLE_CLOUD_DATAPROC':
-            self.session_id = get_dataproc_job_id(sc.getConf())
+            self.job_id = get_dataproc_job_id(sc.getConf())
 
         # Determine if credentials are to be used from arguments or environment variables
         if self.client_secret:
@@ -92,7 +95,7 @@ class ExecutionManager:
 
         # The Event Manager is used to send events used for script diagnostics
         self.event_manager = EventManager(auth_session=self.session,
-                                          session_id=self.session_id,
+                                          job_id=self.job_id,
                                           host=self.kpi_host,
                                           kpi_manager_version=conf.KPI_MANAGER_VERSION)
 
@@ -102,7 +105,7 @@ class ExecutionManager:
                                             kpi_manager_version=conf.KPI_MANAGER_VERSION,
                                             execution_mode=self.execution_mode,
                                             script_hash=self.script_hash,
-                                            session_id=self.session_id,
+                                            job_id=self.job_id,
                                             project_id=self.project_id,
                                             dataset_id=self.dataset_id,
                                             filter_id=self.filter_id,
