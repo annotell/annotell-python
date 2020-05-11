@@ -41,7 +41,7 @@ def filter_data_frame(filter_dict, data_frame, event_manager):
 
 def load_parquet_files(spark_sql_context: SQLContext, compute_placement: str, absolute_data_path: str, data_path: str,
                        event_manager: EventManager):
-    log.info(f"loading data from {compute_placement}")
+    log.debug(f"compute_placement={compute_placement}")
     if compute_placement == 'GOOGLE_CLOUD_DATAPROC':
         absolute_data_path = 'gs://annotell-kpi-manager/' + data_path
     try:

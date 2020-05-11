@@ -78,6 +78,7 @@ class ExecutionManager:
         # If running in Google Cloud, replace job_id with ID from Yarn tags
         if self.compute_placement == 'GOOGLE_CLOUD_DATAPROC':
             self.job_id = get_dataproc_job_id(sc.getConf())
+        log.info(f"job_id={self.job_id}")
 
         # Determine if credentials are to be used from arguments or environment variables
         if self.client_secret:
