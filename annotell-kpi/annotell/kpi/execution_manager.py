@@ -50,16 +50,6 @@ class ExecutionManager:
         parser.add_argument("--compute-placement", type=str, help="Where will this workload be run?")
         args = parser.parse_args()
 
-        # To enable debugging in Spark clusters, we define the app_name based on the configuration
-        self.app_name = ':project_id=' + str(self.project_id) + \
-                        ':dataset_id=' + str(self.dataset_id)
-        
-        # Sets up Spark to run against a local master
-        sc, sqlc = setup_spark(app_name=self.app_name)
-
-        if self.compute_placement == 'GOOGLE_CLOUD_DATAPROC':
-            self.session_id = get_dataproc_job_id(sc.getConf())
-
         # Here we put together information about the execution session. Since it should be possible to run scripts
         # both locally and in production, we use placeholders for variables that are only relevant
         # in production (such as organization_id).
@@ -75,6 +65,16 @@ class ExecutionManager:
         self.filter_file = args.filter_file or None
         self.filter_json = args.filter_json or None
         self.compute_placement = args.compute_placement or None
+
+        # To enable debugging in Spark clusters, we define the app_name based on the configuration
+        self.app_name = ':project_id=' + str(self.project_id) + \
+                        ':dataset_id=' + str(self.dataset_id)
+
+        # Sets up Spark to run against a local master
+        sc, sqlc = setup_spark(app_name=self.app_name)
+
+        if self.compute_placement == 'GOOGLE_CLOUD_DATAPROC':
+            self.session_id = get_dataproc_job_id(sc.getConf())
 
         # Determine if credentials are to be used from arguments or environment variables
         if self.client_secret:
