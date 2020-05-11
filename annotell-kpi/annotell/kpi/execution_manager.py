@@ -51,10 +51,9 @@ class ExecutionManager:
         args = parser.parse_args()
 
         # To enable debugging in Spark clusters, we define the app_name based on the configuration
-        self.app_name = 'execution_mode=' + self.execution_mode + \
-                        ':project_id=' + str(self.project_id) + \
+        self.app_name = ':project_id=' + str(self.project_id) + \
                         ':dataset_id=' + str(self.dataset_id)
-
+        
         # Sets up Spark to run against a local master
         sc, sqlc = setup_spark(app_name=self.app_name)
 
