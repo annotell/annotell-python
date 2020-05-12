@@ -66,7 +66,7 @@ class ExecutionManager:
         self.client_secret = args.client_secret or None
         self.filter_file = args.filter_file or None
         self.filter_json = args.filter_json or None
-        self.compute_placement = args.compute_placement or None
+        self.compute_placement = args.compute_placement or 'localhost'
 
         # To enable debugging in Spark clusters, we define the app_name based on the configuration
         self.app_name = 'project_id=' + str(self.project_id) + \
