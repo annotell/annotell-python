@@ -1,13 +1,15 @@
 """Client for communicating with the Annotell platform."""
-import requests
-import os
 import logging
-from typing import List, Mapping, Optional, Union, Dict
-from pathlib import Path
 import mimetypes
+import os
+from pathlib import Path
+from typing import List, Mapping, Optional, Union, Dict
+
+import requests
 from PIL import Image
-from . import __version__
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
+
+from . import __version__
 from . import input_api_model as IAM
 
 DEFAULT_HOST = "https://input.annotell.com"
@@ -35,7 +37,7 @@ class InputApiClient:
         self.headers = {
             "Accept-Encoding": "gzip",
             "Accept": "application/json",
-            "User-Agent": f"annotell-cloud-storage:{__version__}"
+            "User-Agent": f"annotell-cloud-storage/{__version__}"
         }
 
     @property
@@ -54,7 +56,6 @@ class InputApiClient:
     def _get_upload_urls(self, files: Mapping[str, List[str]]):
         """Get upload urls to cloud storage"""
         url = f"{self.host}/v1/inputs/upload-urls"
-        #js = dict(files=files)
         resp = self.session.get(url, json=files, headers=self.headers)
         return self._raise_on_error(resp).json()
 
@@ -129,8 +130,8 @@ class InputApiClient:
                 height=height
             )
 
-        images_on_disk = list(images_with_settings.keys())
-        images_in_response = list(resp['images'].keys())
+        images_on_disk = images_with_settings.keys()
+        images_in_response = resp['images'].keys()
         assert set(images_on_disk) == set(images_in_response)
         pointcloud_files = list(resp['pointclouds'].keys())
         job_id = resp['jobId']
@@ -141,6 +142,50 @@ class InputApiClient:
             images_with_settings, pointcloud_files, job_id, input_list_id, metadata
         )
         return create_input_response
+
+    def create_slam_input_job(self, files: IAM.SlamFiles, metadata: IAM.SlamMetaData, input_list_id: int):
+        """
+        Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
+        started.
+
+        @:param files: class containing URI pointers to pointclouds, to be SLAM:ed, and videos.
+        @:param metadata: class containing.
+        @:param input_list_id: ID of the input list the new input, when created, should be added to.
+        @:returns dict: Json containing id of the created input job.
+        """
+        url = f"{self.host}/v1/inputs/slam"
+        slam_json = dict(files=files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
+        resp = self.session.post(url, json=slam_json, headers=self.headers)
+        return self._raise_on_error(resp).json()
+
+    def update_completed_slam_input_job(self, pointcloud_uri: str, metadata: IAM.SlamUpdateMetaData, job_id: str):
+        """
+        Updates an input job with data about the created SLAM, then sends a message to inputEngine which
+        will create an input.
+
+        @:param pointcloud_uri: URI pointing to a SLAM:ed pointcloud in either s3 or gs cloud storage.
+        @:param metadata: class containing the trajectory of the SLAM:ed pointcloud.
+        @:param job_id: UUID for the input job.
+        @:returns dict: Json containing information whether the input job was successfully updated or not.
+        """
+        url = f"{self.host}/v1/inputs/progress"
+        update_json = dict(files=dict(pointcloud=pointcloud_uri), metadata=metadata.to_dict(), jobId=job_id)
+        resp = self.session.post(url, json=update_json, headers=self.headers)
+        return self._raise_on_error(resp).json()
+
+    def update_failed_slam_input_job(self, job_id: str, message: str):
+        """
+        Updates an input job with an error message, then sends a message to inputEngine which will
+        notify the responsible party about the failed input job.
+
+        @:param job_id: UUID for the input job.
+        @:param message: String with the error message.
+        @:returns dict: Json containing information whether the input job was successfully updated or not.
+        """
+        url = f"{self.host}/v1/inputs/progress"
+        update_json = dict(jobId=job_id, message=message)
+        resp = self.session.post(url, json=update_json, headers=self.headers)
+        return self._raise_on_error(resp).json()
 
     def get_internal_ids_for_external_ids(self, external_ids: List[str]) -> Dict[str, List[str]]:
         url = f"{self.host}/v1/inputs/"

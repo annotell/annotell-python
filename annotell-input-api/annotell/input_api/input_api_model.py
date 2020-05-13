@@ -1,7 +1,9 @@
 """API MODEL."""
-from typing import List, Mapping, Dict, Optional, Union
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import List, Mapping, Dict, Optional, Union
+import re
+
 import dateutil.parser
 
 
@@ -62,15 +64,15 @@ class CameraCalibration(RequestCall):
         self.image_width = image_width
         self.undistortion_coefficients = undistortion_coefficients
 
-        assert(len(position) == 3)
-        assert(len(rotation_quaternion) == 4)
-        assert(len(camera_matrix) == 9)
+        assert (len(position) == 3)
+        assert (len(rotation_quaternion) == 4)
+        assert (len(camera_matrix) == 9)
 
         if camera_properties.camera_type == CameraType.KANNALA:
-            assert(undistortion_coefficients is not None)
-            assert(len(distortion_coefficients) == 4 and len(undistortion_coefficients) == 4)
+            assert (undistortion_coefficients is not None)
+            assert (len(distortion_coefficients) == 4 and len(undistortion_coefficients) == 4)
         else:
-            assert(len(distortion_coefficients) == 5)
+            assert (len(distortion_coefficients) == 5)
 
     def to_dict(self):
         base = {
@@ -94,8 +96,8 @@ class LidarCalibration(RequestCall):
         self.position = position
         self.rotation_quaternion = rotation_quaternion
 
-        assert(len(position) == 3)
-        assert(len(rotation_quaternion) == 4)
+        assert (len(position) == 3)
+        assert (len(rotation_quaternion) == 4)
 
     def to_dict(self):
         return {
@@ -171,6 +173,110 @@ class Metadata(RequestCall):
         as_dict['sourceSpecification'] = self.source_specification.to_dict()
         return as_dict
 
+
+class SlamMetaData(Metadata):
+    def __init__(self, external_id: str,
+                 vehicle_data: List[str],
+                 dynamic_objects: str,
+                 trajectory: Optional[str],
+                 timestamps: List[int],
+                 source_specification: Dict[str, Dict[str, str]],
+                 calibration_id: Optional[int],
+                 calibration_spec: Optional[CalibrationSpec]):
+
+        self.external_id = external_id
+        self.vehicle_data = vehicle_data
+        self.dynamic_objects = dynamic_objects
+        self.trajectory = trajectory
+        self.timestamps = timestamps
+        self.source_specification = source_specification
+        self.calibration_id = calibration_id
+        self.calibration_spec = calibration_spec
+
+    def to_dict(self):
+        as_dict = {
+            "externalId": self.external_id,
+            "vehicleData": self.vehicle_data,
+            "dynamicObjects": self.dynamic_objects,
+            "timestamps": self.timestamps,
+            "sourceSpecification": self.source_specification
+        }
+        if self.trajectory:
+            as_dict["trajectory"] = self.trajectory
+        if self.calibration_id:
+            as_dict["calibrationId"] = self.calibration_id
+        if self.calibration_spec:
+            as_dict["calibrationSpec"] = self.calibration_spec.to_dict()
+
+        return as_dict
+
+
+class SlamUpdateMetaData(RequestCall):
+    def __init__(self, trajectory: List[List[float]]):
+        self.trajectory = trajectory
+
+    def to_dict(self):
+        return {
+            "trajectory": self.trajectory
+        }
+
+
+class ImageSettings(RequestCall):
+    def __init__(self, width: int, height: int):
+        self.width = width
+        self.height = height
+
+    def to_dict(self):
+        return {
+            "width": self.width,
+            "height": self.height
+        }
+
+
+class SlamFiles(RequestCall):
+    def __init__(self, pointclouds: List[str],
+                 videos: Optional[Dict[str, ImageSettings]]):
+        self.pointclouds = pointclouds
+        self.videos = videos
+
+    def to_dict(self):
+        as_dict = {"pointclouds": self.pointclouds}
+        if self.videos:
+            as_dict['videos'] = dict([(k, v.to_dict()) for (k, v) in self.videos.items()])
+
+        return as_dict
+
+
+class SlamJobState(RequestCall):
+    def __init__(self, slam_pointcloud: Optional[str],
+                 slam_trajectory: Optional[List[List[float]]],
+                 input_list_id: int,
+                 user_id: int,
+                 files: SlamFiles,
+                 metadata: SlamMetaData):
+
+        self.slam_pointcloud = slam_pointcloud
+        self.slam_trajectory = slam_trajectory
+        self.input_list_id = input_list_id
+        self.user_id = user_id
+        self.files = files.to_dict()
+        self.metadata = metadata.to_dict()
+
+    def to_dict(self):
+        as_dict = {
+            "inputListId": self.input_list_id,
+            "userId": self.user_id,
+            "files": self.files,
+            "metadata": self.metadata
+        }
+        if self.slam_pointcloud:
+            as_dict["slamPointcloud"] = self.slam_pointcloud
+        if self.slam_trajectory:
+            as_dict["slamTrajectory"] = self.slam_trajectory
+
+        return as_dict
+
+
 #
 # Responses
 #
@@ -196,9 +302,9 @@ class CalibrationNoContent(Response):
 
     def __repr__(self):
         return f"<CalibrationWithContent(" + \
-            f"id={self.id}, " + \
-            f"external_id={self.external_id}, " + \
-            f"created={self.created})>"
+               f"id={self.id}, " + \
+               f"external_id={self.external_id}, " + \
+               f"created={self.created})>"
 
 
 class CalibrationWithContent(Response):
@@ -216,10 +322,10 @@ class CalibrationWithContent(Response):
 
     def __repr__(self):
         return f"<CalibrationWithContent(" + \
-            f"id={self.id}, " + \
-            f"external_id={self.external_id}, " + \
-            f"created={self.created}, " + \
-            f"calibration={{...}})>"
+               f"id={self.id}, " + \
+               f"external_id={self.external_id}, " + \
+               f"created={self.created}, " + \
+               f"calibration={{...}})>"
 
 
 class InputList(Response):
@@ -236,10 +342,10 @@ class InputList(Response):
 
     def __repr__(self):
         return f"<InputList(" + \
-            f"id={self.id}, " + \
-            f"project_id={self.project_id}, " + \
-            f"name={self.name}, " + \
-            f"created={self.created})>"
+               f"id={self.id}, " + \
+               f"project_id={self.project_id}, " + \
+               f"name={self.name}, " + \
+               f"created={self.created})>"
 
 
 class Project(Response):
@@ -259,12 +365,12 @@ class Project(Response):
 
     def __repr__(self):
         return f"<Project(" + \
-            f"id={self.id}, " + \
-            f"created={self.created}, " + \
-            f"title={self.title}, " + \
-            f"description={self.description}, " + \
-            f"deadline={self.deadline}, " + \
-            f"status={self.status})>"
+               f"id={self.id}, " + \
+               f"created={self.created}, " + \
+               f"title={self.title}, " + \
+               f"description={self.description}, " + \
+               f"deadline={self.deadline}, " + \
+               f"status={self.status})>"
 
 
 class Request(Response):
@@ -284,12 +390,12 @@ class Request(Response):
 
     def __repr__(self):
         return f"<Request(" + \
-            f"id={self.id}, " + \
-            f"created={self.created}, " + \
-            f"project_id={self.project_id}, " + \
-            f"title={self.title}, " + \
-            f"description={self.description}, " + \
-            f"input_list_id={self.input_list_id})>"
+               f"id={self.id}, " + \
+               f"created={self.created}, " + \
+               f"project_id={self.project_id}, " + \
+               f"title={self.title}, " + \
+               f"description={self.description}, " + \
+               f"input_list_id={self.input_list_id})>"
 
 
 class CreateInputResponse(Response):
@@ -304,8 +410,8 @@ class CreateInputResponse(Response):
 
     def __repr__(self):
         return f"<CreateInputResponse(" + \
-            f"internal_id={self.internal_id}, external_id={self.external_id}, " + \
-            f"converting_files={self.converting_files})>"
+               f"internal_id={self.internal_id}, external_id={self.external_id}, " + \
+               f"converting_files={self.converting_files})>"
 
 
 class ExportAnnotation(Response):
@@ -319,35 +425,45 @@ class ExportAnnotation(Response):
 
     def __repr__(self):
         return f"<ExportAnnotation(" + \
-            f"annotation_id={self.annotation_id}, " + \
-            f"export_content={{...}})>"
+               f"annotation_id={self.annotation_id}, " + \
+               f"export_content={{...}})>"
+
+
+class InputJobStatus(str, Enum):
+    CREATED = "created"
+    PENDINGFORINPUT = "pending-for-input"
+    READYFORCREATION = "ready-for-creation"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class InputJob(Response):
     def __init__(self, id: int, internal_id: str, external_id: str, filename: str,
-                 success: bool, added: datetime, error_message: Optional[str]):
+                 status: InputJobStatus, state: dict, added: datetime, error_message: Optional[str]):
         self.id = id
         self.internal_id = internal_id
         self.external_id = external_id
         self.filename = filename
-        self.success = success
+        self.status = status
+        self.state = state
         self.added = added
         self.error_message = error_message
 
     @staticmethod
     def from_json(js: dict):
-        return InputJob(int(js["id"]), js["jobId"], js["externalId"], js["filename"],
-                        bool(js["success"]), ts_to_dt(js["added"]), js.get("errorMessage"))
+        return InputJob(int(js["id"]), js["jobId"], js["externalId"], js["filename"], InputJobStatus(js["status"]),
+                        js["state"], ts_to_dt(js["added"]), js.get("errorMessage"))
 
     def __repr__(self):
         return f"<InputJob(" + \
-            f"id={self.id}, " + \
-            f"internal_id={self.internal_id}, " + \
-            f"external_id={self.external_id}, " + \
-            f"filename={self.filename}, " + \
-            f"success={self.success}, " + \
-            f"added={self.added}, " + \
-            f"error_message={self.error_message})>"
+               f"id={self.id}, " + \
+               f"internal_id={self.internal_id}, " + \
+               f"external_id={self.external_id}, " + \
+               f"filename={self.filename}, " + \
+               f"status={self.status}, " + \
+               f"state={self.state}, " + \
+               f"added={self.added}, " + \
+               f"error_message={self.error_message})>"
 
 
 class Data(Response):
@@ -368,10 +484,10 @@ class Data(Response):
 
     def __repr__(self):
         return f"<Data(" + \
-            f"id={self.id}, " + \
-            f"external_id={self.external_id}, " + \
-            f"source={self.source}, " + \
-            f"created={self.created})>"
+               f"id={self.id}, " + \
+               f"external_id={self.external_id}, " + \
+               f"source={self.source}, " + \
+               f"created={self.created})>"
 
 
 class Input(Response):
@@ -390,6 +506,6 @@ class Input(Response):
 
     def __repr__(self):
         return f"<Input(" + \
-            f"internal_id={self.internal_id}, " + \
-            f"external_id={self.external_id}, " + \
-            f"inpyt_type={self.input_type})>"
+               f"internal_id={self.internal_id}, " + \
+               f"external_id={self.external_id}, " + \
+               f"inpyt_type={self.input_type})>"
