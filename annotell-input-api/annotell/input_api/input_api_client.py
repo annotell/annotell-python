@@ -158,7 +158,9 @@ class InputApiClient:
         resp = self.session.post(url, json=slam_json, headers=self.headers)
         return self._raise_on_error(resp).json()
 
-    def update_completed_slam_input_job(self, pointcloud_uri: str, metadata: IAM.SlamUpdateMetaData, job_id: str):
+    def update_completed_slam_input_job(self, pointcloud_uri: str,
+                                        trajectories: List[IAM.Trajectory],
+                                        job_id: str):
         """
         Updates an input job with data about the created SLAM, then sends a message to inputEngine which
         will create an input.
@@ -169,7 +171,9 @@ class InputApiClient:
         @:returns dict: Json containing information whether the input job was successfully updated or not.
         """
         url = f"{self.host}/v1/inputs/progress"
-        update_json = dict(files=dict(pointcloud=pointcloud_uri), metadata=metadata.to_dict(), jobId=job_id)
+        update_json = dict(files=dict(pointclouds=pointcloud_uri),
+                           metadata=dict(trajectory=[trajectory.to_dict() for trajectory in trajectories]),
+                           jobId=job_id)
         resp = self.session.post(url, json=update_json, headers=self.headers)
         return self._raise_on_error(resp).json()
 

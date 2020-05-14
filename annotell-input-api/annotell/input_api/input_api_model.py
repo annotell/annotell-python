@@ -174,7 +174,7 @@ class Metadata(RequestCall):
         return as_dict
 
 
-class SlamMetaData(Metadata):
+class SlamMetaData(RequestCall):
     def __init__(self, external_id: str,
                  vehicle_data: List[str],
                  dynamic_objects: str,
@@ -211,16 +211,6 @@ class SlamMetaData(Metadata):
         return as_dict
 
 
-class SlamUpdateMetaData(RequestCall):
-    def __init__(self, trajectory: List[List[float]]):
-        self.trajectory = trajectory
-
-    def to_dict(self):
-        return {
-            "trajectory": self.trajectory
-        }
-
-
 class ImageSettings(RequestCall):
     def __init__(self, width: int, height: int):
         self.width = width
@@ -234,8 +224,7 @@ class ImageSettings(RequestCall):
 
 
 class SlamFiles(RequestCall):
-    def __init__(self, pointclouds: List[str],
-                 videos: Optional[Dict[str, ImageSettings]]):
+    def __init__(self, pointclouds: List[str], videos: Optional[Dict[str, ImageSettings]]):
         self.pointclouds = pointclouds
         self.videos = videos
 
@@ -247,36 +236,18 @@ class SlamFiles(RequestCall):
         return as_dict
 
 
-class SlamJobState(RequestCall):
-    def __init__(self, slam_pointcloud: Optional[str],
-                 slam_trajectory: Optional[List[List[float]]],
-                 input_list_id: int,
-                 user_id: int,
-                 files: SlamFiles,
-                 metadata: SlamMetaData):
-
-        self.slam_pointcloud = slam_pointcloud
-        self.slam_trajectory = slam_trajectory
-        self.input_list_id = input_list_id
-        self.user_id = user_id
-        self.files = files.to_dict()
-        self.metadata = metadata.to_dict()
+class Trajectory(RequestCall):
+    def __init__(self, timestamp: int, position: List[float], rotation_quaternion: List[float]):
+        self.timestamp = timestamp
+        self.position = position
+        self.rotation_quaternion = rotation_quaternion
 
     def to_dict(self):
-        as_dict = {
-            "inputListId": self.input_list_id,
-            "userId": self.user_id,
-            "files": self.files,
-            "metadata": self.metadata
+        return {
+            "timestamp": self.timestamp,
+            "position": self.position,
+            "rotation_quaternion": self.rotation_quaternion
         }
-        if self.slam_pointcloud:
-            as_dict["slamPointcloud"] = self.slam_pointcloud
-        if self.slam_trajectory:
-            as_dict["slamTrajectory"] = self.slam_trajectory
-
-        return as_dict
-
-
 #
 # Responses
 #
