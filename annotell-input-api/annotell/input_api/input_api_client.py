@@ -166,7 +166,7 @@ class InputApiClient:
         will create an input.
 
         @:param pointcloud_uri: URI pointing to a SLAM:ed pointcloud in either s3 or gs cloud storage.
-        @:param metadata: class containing the trajectory of the SLAM:ed pointcloud.
+        @:param trajectory: class containing the trajectory of the SLAM:ed pointcloud.
         @:param job_id: UUID for the input job.
         @:returns dict: Json containing information whether the input job was successfully updated or not.
         """
