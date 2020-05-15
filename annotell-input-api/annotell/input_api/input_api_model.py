@@ -236,7 +236,7 @@ class SlamFiles(RequestCall):
         return as_dict
 
 
-class Trajectory(RequestCall):
+class PoseTransform(RequestCall):
     def __init__(self, timestamp: int, position: List[float], rotation_quaternion: List[float]):
         self.timestamp = timestamp
         self.position = position
