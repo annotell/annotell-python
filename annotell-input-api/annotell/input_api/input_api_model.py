@@ -174,13 +174,36 @@ class Metadata(RequestCall):
         return as_dict
 
 
+class SourceSpecificationSlam(RequestCall):
+    def __init__(self, pointclouds_to_source: Dict[str, str],
+                 videos_to_source: Dict[str, str],
+                 source_to_pretty_name: Optional[Dict[str, str]],
+                 source_order: Optional[List[str]]):
+        self.pointclouds_to_source = pointclouds_to_source
+        self.videos_to_source = videos_to_source
+        self.source_to_pretty_name = source_to_pretty_name
+        self.source_order = source_order
+
+    def to_dict(self):
+        as_dict = {
+            "pointcloudsToSource": self.pointclouds_to_source,
+            "videosToSource": self.videos_to_source,
+        }
+        if self.source_to_pretty_name:
+            as_dict["sourceToPrettyName"] = self.source_to_pretty_name
+        if self.source_order:
+            as_dict["sourceOrder"] = self.source_order
+
+        return as_dict
+
+
 class SlamMetaData(RequestCall):
     def __init__(self, external_id: str,
                  vehicle_data: List[str],
                  dynamic_objects: str,
                  trajectory: Optional[str],
                  timestamps: List[int],
-                 source_specification: Dict[str, Dict[str, str]],
+                 source_specification: SourceSpecificationSlam,
                  calibration_id: Optional[int],
                  calibration_spec: Optional[CalibrationSpec]):
 
@@ -199,7 +222,7 @@ class SlamMetaData(RequestCall):
             "vehicleData": self.vehicle_data,
             "dynamicObjects": self.dynamic_objects,
             "timestamps": self.timestamps,
-            "sourceSpecification": self.source_specification
+            "sourceSpecification": self.source_specification.to_dict()
         }
         if self.trajectory:
             as_dict["trajectory"] = self.trajectory
@@ -237,7 +260,7 @@ class SlamFiles(RequestCall):
 
 
 class PoseTransform(RequestCall):
-    def __init__(self, timestamp: int, position: List[float], rotation_quaternion: List[float]):
+    def __init__(self, timestamp: float, position: List[float], rotation_quaternion: List[float]):
         self.timestamp = timestamp
         self.position = position
         self.rotation_quaternion = rotation_quaternion
@@ -248,6 +271,14 @@ class PoseTransform(RequestCall):
             "position": self.position,
             "rotation_quaternion": self.rotation_quaternion
         }
+
+
+class Trajectory(RequestCall):
+    def __init__(self, trajectory: List[PoseTransform]):
+        self.trajectory = trajectory
+
+    def to_dict(self):
+        return [pt.to_dict() for pt in self.trajectory]
 #
 # Responses
 #

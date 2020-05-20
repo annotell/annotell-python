@@ -159,7 +159,7 @@ class InputApiClient:
         return self._raise_on_error(resp).json()
 
     def update_completed_slam_input_job(self, pointcloud_uri: str,
-                                        trajectory: List[IAM.PoseTransform],
+                                        trajectory: IAM.Trajectory,
                                         job_id: str):
         """
         Updates an input job with data about the created SLAM, then sends a message to inputEngine which
@@ -172,7 +172,7 @@ class InputApiClient:
         """
         url = f"{self.host}/v1/inputs/progress"
         update_json = dict(files=dict(pointclouds=pointcloud_uri),
-                           metadata=dict(trajectory=[pose_transform.to_dict() for pose_transform in trajectory]),
+                           metadata=dict(trajectory=trajectory.to_dict()),
                            jobId=job_id)
         resp = self.session.post(url, json=update_json, headers=self.headers)
         return self._raise_on_error(resp).json()
