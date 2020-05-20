@@ -19,9 +19,10 @@ class DatasetManager:
     def update_metadata(self, project_id: int, dataset_id: int, key: str, value: dict):
         """Update metadata attached to a specific dataset
         """
+        print('getting existing metadata')
         dataset = self.get_dataset(project_id, dataset_id)
         dataset[key] = value
-
+        print('updating metadata')
         try:
             return self.auth_session.post(
                 url=self.host + self.kpi_manager_version + "/dataset/update",
@@ -35,7 +36,8 @@ class DatasetManager:
     def get_dataset(self, project_id, dataset_id):
         try:
             response = self.auth_session.get(
-                url=self.host + self.kpi_manager_version + f"/dataset?project_id={project_id}&dataset_id={dataset_id}",
+                url=self.host + self.kpi_manager_version \
+                    + f"/dataset/info?project_id={project_id}&dataset_id={dataset_id}",
                 headers=headers
             )
             return response.json()

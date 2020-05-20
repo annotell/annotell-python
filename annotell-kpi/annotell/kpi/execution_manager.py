@@ -44,6 +44,8 @@ class ExecutionManager:
     def __init__(self, project_id, dataset_id, kpi_host=conf.KPI_MANAGER_HOST, auth_host=DEFAULT_AUTH_HOST):
         parser.add_argument('--job-id', type=str, help='Job ID')
         parser.add_argument('--organization-id', type=str, help='Organization ID')
+        parser.add_argument("--project-id", type=str, help="Enables overriding project_id via arguments")
+        parser.add_argument("--dataset-id", type=str, help="Enables overriding dataset_id via arguments")
         parser.add_argument('--user-id', type=str, help='User ID')
         parser.add_argument("--filter-file", type=str, help="JSON filter from file")
         parser.add_argument("--filter-json", type=str, help="JSON string version of filter")
@@ -52,8 +54,7 @@ class ExecutionManager:
         parser.add_argument("--client-secret", type=str, help="Client secret used for authentication")
         parser.add_argument("--execution-mode", type=str, help="How is this script being run?")
         parser.add_argument("--compute-placement", type=str, help="Where will this workload be run?")
-        parser.add_argument("--project-id", type=str, help="Enables overriding project_id via arguments")
-        parser.add_argument("--dataset-id", type=str, help="Enables overriding dataset_id via arguments")
+
         args = parser.parse_args()
 
         # Here we put together information about the execution session. Since it should be possible to run scripts
