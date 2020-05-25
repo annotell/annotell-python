@@ -36,7 +36,8 @@ class EventManager:
             "context": context,
             "created": str(datetime.datetime.now())
         }
-        log.info(f"[{event_type}] {context}")
+        event_type_padded = "{:<20}".format(event_type)
+        log.info(f"[{event_type_padded}] {context}")
 
         headers = {'Content-Type': 'application/json'}
         try:
@@ -49,9 +50,9 @@ class EventManager:
             log.error(f"Cannot submit event, the server={self.host} probably did not respond")
             return None
 
-    def script_initialized(self, app_name: str):
+    def script_initialized(self, organization_id: int, project_id: int, dataset_id: int, user_id: int):
         self.submit(event_type=self.EVENT_SCRIPT_INITIALIZED,
-                    context=f"app_name={app_name} with host={self.host}")
+                    context=f"org_id={organization_id} user_id={user_id} project_id={project_id} dataset_id={dataset_id}")
 
     def script_completed(self):
         self.submit(event_type=self.EVENT_SCRIPT_COMPLETED,
