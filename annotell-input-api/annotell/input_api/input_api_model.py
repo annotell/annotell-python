@@ -171,6 +171,27 @@ class Metadata(RequestCall):
         as_dict['sourceSpecification'] = self.source_specification.to_dict()
         return as_dict
 
+
+class PoseTransform(RequestCall):
+    def __init__(self, timestamp: float, position: List[float], rotation_quaternion: List[float]):
+        self.timestamp = timestamp
+        self.position = position
+        self.rotation_quaternion = rotation_quaternion
+
+    def to_dict(self):
+        return {
+            "timestamp": self.timestamp,
+            "position": self.position,
+            "rotation_quaternion": self.rotation_quaternion
+        }
+
+
+class Trajectory(RequestCall):
+    def __init__(self, trajectory: List[PoseTransform]):
+        self.trajectory = trajectory
+
+    def to_dict(self):
+        return [pt.to_dict() for pt in self.trajectory]
 #
 # Responses
 #

@@ -54,7 +54,6 @@ class InputApiClient:
     def _get_upload_urls(self, files: Mapping[str, List[str]]):
         """Get upload urls to cloud storage"""
         url = f"{self.host}/v1/inputs/upload-urls"
-        #js = dict(files=files)
         resp = self.session.get(url, json=files, headers=self.headers)
         return self._raise_on_error(resp).json()
 
@@ -129,8 +128,8 @@ class InputApiClient:
                 height=height
             )
 
-        images_on_disk = list(images_with_settings.keys())
-        images_in_response = list(resp['images'].keys())
+        images_on_disk = images_with_settings.keys()
+        images_in_response = resp['images'].keys()
         assert set(images_on_disk) == set(images_in_response)
         pointcloud_files = list(resp['pointclouds'].keys())
         job_id = resp['jobId']
@@ -141,6 +140,39 @@ class InputApiClient:
             images_with_settings, pointcloud_files, job_id, input_list_id, metadata
         )
         return create_input_response
+
+    def update_completed_slam_input_job(self, pointcloud_uri: str,
+                                        trajectory: IAM.Trajectory,
+                                        job_id: str):
+        """
+        Updates an input job with data about the created SLAM, then sends a message to inputEngine which
+        will create an input.
+
+        @:param pointcloud_uri: URI pointing to a SLAM:ed pointcloud in either s3 or gs cloud storage.
+        @:param trajectory: class containing the trajectory of the SLAM:ed pointcloud.
+        @:param job_id: UUID for the input job.
+        @:returns dict: Json containing information whether the input job was successfully updated or not.
+        """
+        url = f"{self.host}/v1/inputs/progress"
+        update_json = dict(files=dict(pointclouds=pointcloud_uri),
+                           metadata=dict(trajectory=trajectory.to_dict()),
+                           jobId=job_id)
+        resp = self.session.post(url, json=update_json, headers=self.headers)
+        return self._raise_on_error(resp).json()
+
+    def update_failed_slam_input_job(self, job_id: str, message: str):
+        """
+        Updates an input job with an error message, then sends a message to inputEngine which will
+        notify the responsible party about the failed input job.
+
+        @:param job_id: UUID for the input job.
+        @:param message: String with the error message.
+        @:returns dict: Json containing information whether the input job was successfully updated or not.
+        """
+        url = f"{self.host}/v1/inputs/progress"
+        update_json = dict(jobId=job_id, message=message)
+        resp = self.session.post(url, json=update_json, headers=self.headers)
+        return self._raise_on_error(resp).json()
 
     def get_internal_ids_for_external_ids(self, external_ids: List[str]) -> Dict[str, List[str]]:
         url = f"{self.host}/v1/inputs/"
