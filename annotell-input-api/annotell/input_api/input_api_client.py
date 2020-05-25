@@ -1,15 +1,13 @@
 """Client for communicating with the Annotell platform."""
-import logging
-import mimetypes
-import os
-from pathlib import Path
-from typing import List, Mapping, Optional, Union, Dict
-
 import requests
+import os
+import logging
+from typing import List, Mapping, Optional, Union, Dict
+from pathlib import Path
+import mimetypes
 from PIL import Image
-from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
-
 from . import __version__
+from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 from . import input_api_model as IAM
 
 DEFAULT_HOST = "https://input.annotell.com"
@@ -37,7 +35,7 @@ class InputApiClient:
         self.headers = {
             "Accept-Encoding": "gzip",
             "Accept": "application/json",
-            "User-Agent": f"annotell-cloud-storage/{__version__}"
+            "User-Agent": f"annotell-cloud-storage:{__version__}"
         }
 
     @property
@@ -142,21 +140,6 @@ class InputApiClient:
             images_with_settings, pointcloud_files, job_id, input_list_id, metadata
         )
         return create_input_response
-
-    def create_slam_input_job(self, files: IAM.SlamFiles, metadata: IAM.SlamMetaData, input_list_id: int):
-        """
-        Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
-        started.
-
-        @:param files: class containing URI pointers to pointclouds, to be SLAM:ed, and videos.
-        @:param metadata: class containing.
-        @:param input_list_id: ID of the input list the new input, when created, should be added to.
-        @:returns dict: Json containing id of the created input job.
-        """
-        url = f"{self.host}/v1/inputs/slam"
-        slam_json = dict(files=files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
-        resp = self.session.post(url, json=slam_json, headers=self.headers)
-        return self._raise_on_error(resp).json()
 
     def update_completed_slam_input_job(self, pointcloud_uri: str,
                                         trajectory: IAM.Trajectory,
