@@ -4,6 +4,14 @@ from enum import Enum
 from datetime import datetime
 import dateutil.parser
 
+ENVELOPED_JSON_TAG = "data"
+
+
+def unwrap_enveloped_json(js: dict) -> dict:
+    if js.get(ENVELOPED_JSON_TAG):
+        return js[ENVELOPED_JSON_TAG]
+    return js
+
 
 def ts_to_dt(date_string: str) -> datetime:
     return dateutil.parser.parse(date_string)
@@ -12,6 +20,13 @@ def ts_to_dt(date_string: str) -> datetime:
 class RequestCall:
     def to_dict(self) -> dict:
         raise NotImplementedError
+
+class InvalidatedReasonInput(str, Enum):
+    BAD_CONTENT = "bad-content"
+    SLAM_RECORRECTION = "slam-rerun"
+    DUPLICATE = "duplicate"
+    INCORRECTLY_CREATED = "incorrectly-created"
+
 
 #
 # Request Calls
@@ -414,3 +429,41 @@ class Input(Response):
             f"internal_id={self.internal_id}, " + \
             f"external_id={self.external_id}, " + \
             f"inpyt_type={self.input_type})>"
+
+
+class InvalidatedInputsResponse(Response):
+    def __init__(self, invalidated_input_ids: List[int], not_found_input_ids: List[int], already_invalidated_input_ids: List[int]):
+        self.invalidated_input_ids = invalidated_input_ids
+        self.not_found_input_ids = not_found_input_ids
+        self.already_invalidated_input_ids = already_invalidated_input_ids
+
+    @staticmethod
+    def from_json(js: dict):
+        return InvalidatedInputsResponse(js["invalidatedInputIds"],
+                                         js["notFoundInputIds"],
+                                         js["alreadyInvalidatedInputIds"])
+
+    def __repr__(self):
+        return f"<InvalidatedInputsResponse(" + \
+               f"invalidated_input_ids={self.invalidated_input_ids}, " + \
+               f"not_found_input_ids={self.not_found_input_ids}, " + \
+               f"already_invalidated_input_ids={self.already_invalidated_input_ids})>"
+
+
+class RemovedInputsResponse(Response):
+    def __init__(self, removed_input_ids: List[int], not_found_input_ids: List[int], already_removed_input_ids: List[int]):
+        self.removed_input_ids = removed_input_ids
+        self.not_found_input_ids = not_found_input_ids
+        self.already_removed_input_ids = already_removed_input_ids
+
+    @staticmethod
+    def from_json(js: dict):
+        return InvalidatedInputsResponse(js["removedInputIds"],
+                                         js["notFoundInputIds"],
+                                         js["alreadyRemovedInputIds"])
+
+    def __repr__(self):
+        return f"<RemovedInputsResponse(" + \
+               f"removed_input_ids={self.removed_input_ids}, " + \
+               f"not_found_input_ids={self.not_found_input_ids}, " + \
+               f"already_removed_input_ids={self.already_removed_input_ids})>"

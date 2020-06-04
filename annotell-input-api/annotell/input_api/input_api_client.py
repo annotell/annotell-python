@@ -186,11 +186,33 @@ class InputApiClient:
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
-    def invalidate_input(self):
-        """Not yet implemented."""
+    def invalidate_inputs(self, input_ids: List[int], invalidated_reason: IAM.InvalidatedReasonInput):
+        """
+        Invalidates inputs, and removes them from all input lists
+
+        :param input_ids: The input IDs to invalidate
+        :param invalidated_reason: Description why inputs were invalidate
+        :return InvalidatedInputsResponse: Class containing what inputs were invalidated
+        """
         url = f"{self.host}/v1/inputs/invalidate"
-        resp = self.session.get(url, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        invalidated_json = dict(inputIds=input_ids, invalidatedReason=invalidated_reason)
+        resp = self.session.post(url, json=invalidated_json, headers=self.headers)
+        resp_json = IAM.unwrap_enveloped_json(self._raise_on_error(resp).json())
+        return IAM.InvalidatedInputsResponse.from_json(resp_json)
+
+    def remove_inputs_from_input_list(self, input_list_id: int, input_ids: List[int]):
+        """
+        Removes inputs from specified input list, without invalidating the input
+
+        :param input_list_id: The input list where inputs should be removed
+        :param input_ids: The input IDs to invalidate
+        :return RemovedInputsResponse: Class containing what inputs were removed
+        """
+        url = f"{self.host}/v1/inputs/remove"
+        removed_json = dict(inputListId=input_list_id, inputIds=input_ids)
+        resp = self.session.post(url, json=removed_json, headers=self.headers)
+        resp_json = IAM.unwrap_enveloped_json(self._raise_on_error(resp).json())
+        return IAM.RemovedInputsResponse.from_json(resp_json)
 
     def list_projects(self) -> List[IAM.Project]:
         url = f"{self.host}/v1/inputs/projects"
