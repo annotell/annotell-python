@@ -141,6 +141,24 @@ class InputApiClient:
         )
         return create_input_response
 
+    def create_slam_input_job(self, files: IAM.SlamFiles,
+                              metadata: IAM.SlamMetaData,
+                              input_list_id: int):
+        """
+        Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
+        started.
+
+        :param files: class containing URI pointers to pointclouds, to be SLAM:ed, and videos.
+        :param metadata: class containing metadata necessary for SLAM.
+        :param input_list_id: ID of the input list the new input, when created, will be added to.
+        :returns InputJobCreatedMessage: Class containing id of the created input job.
+        """
+        url = f"{self.host}/v1/inputs/slam"
+        slam_json = dict(files=files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
+        resp = self.session.post(url, json=slam_json, headers=self.headers)
+        json_resp = IAM.unwrap_enveloped_json(self._raise_on_error(resp).json())
+        return IAM.InputJobCreatedMessage.from_json(json_resp)
+
     def update_completed_slam_input_job(self, pointcloud_uri: str,
                                         trajectory: IAM.Trajectory,
                                         job_id: str):
