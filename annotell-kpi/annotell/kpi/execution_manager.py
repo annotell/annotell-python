@@ -156,7 +156,7 @@ class ExecutionManager:
 
     def dataset_metadata_update_from_dict(self, metadata_dict: dict):
         for key in metadata_dict.keys():
-            self.update_dataset_metadata(key=key, value=metadata_dict[key])
+            self.dataset_metadata_update(key=key, value=metadata_dict[key])
 
     def dataset_metadata_update(self, key, value):
         return self.dataset_manager.update_metadata(self.project_id, self.dataset_id, key, value)

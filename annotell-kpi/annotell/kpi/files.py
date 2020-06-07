@@ -46,8 +46,7 @@ class FileManager:
         mem_usage = pandas_df.memory_usage(index=True).sum()
         log.debug(f"storing csv file of size {mem_usage} bytes")
         csv_filename = str(uuid4()) + str(".csv")
-        csv_file = StringIO()
-        pandas_df.to_csv(csv_file)
+        csv_string = pandas_df.to_csv()
 
         file_info = {
             "filename": csv_filename,
@@ -62,7 +61,7 @@ class FileManager:
                                                            f"description={description}&"
                                                            f"project_id={project_id}&"
                                                            f"job_id={job_id}",
-                files={"file": (csv_filename, csv_file)}
+                files={"file": (csv_filename, csv_string)}
             )
         except requests.exceptions.ConnectionError:
             log.error(f"Cannot submit event, the server={self.host} probably did not respond")
