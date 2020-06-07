@@ -200,11 +200,12 @@ class ExecutionManager:
         """ Enables writing intermediate results to csv files
         Returns an ID for the file for downloading later
         """
-        file_id = storage.save_csv_file(pyspark_df=data_frame,
-                                        compute_placement=self.compute_placement,
-                                        root_dir=self.root_dir)
-        file_db = self.file_manager.create_file(file_id, description)
-        return file_db
+        file_id = self.file_manager.save_csv_file(data_frame=data_frame,
+                                                  description=description,
+                                                  project_id=self.project_id,
+                                                  job_id=self.job_id,
+                                                  root_dir=self.root_dir)
+        return file_id
 
     def get_data_path(self, organization_id, project_id, dataset_id):
         return 'organization_id=' + str(organization_id) + '/' + \

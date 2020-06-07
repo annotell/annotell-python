@@ -1,9 +1,13 @@
 import requests
 import datetime
 import json
+from uuid import uuid4
 
 from annotell.kpi.logging import get_logger
 from annotell.auth.authsession import AuthSession
+
+from pandas import DataFrame
+from io import StringIO
 
 log = get_logger()
 
@@ -32,6 +36,33 @@ class FileManager:
                 url=self.host + self.kpi_manager_version + "/file/create",
                 data=json.dumps(file_info),
                 headers=headers
+            )
+        except requests.exceptions.ConnectionError:
+            log.error(f"Cannot submit event, the server={self.host} probably did not respond")
+            return None
+
+    def save_csv_file(self, data_frame, description, project_id, job_id, root_dir):
+        pandas_df: DataFrame = data_frame.toPandas()
+        mem_usage = pandas_df.memory_usage(index=True).sum()
+        log.debug(f"storing csv file of size {mem_usage} bytes")
+        csv_filename = str(uuid4()) + str(".csv")
+        csv_file = StringIO()
+        pandas_df.to_csv(csv_file)
+
+        file_info = {
+            "filename": csv_filename,
+            "description": description,
+            "project_id": self.project_id,
+            "job_id": self.job_id,
+            "created": str(datetime.datetime.now())
+        }
+        try:
+            return self.auth_session.post(
+                url=self.host + self.kpi_manager_version + f"/file/csv/upload?"
+                                                           f"description={description}&"
+                                                           f"project_id={project_id}&"
+                                                           f"job_id={job_id}",
+                files={"file": (csv_filename, csv_file)}
             )
         except requests.exceptions.ConnectionError:
             log.error(f"Cannot submit event, the server={self.host} probably did not respond")

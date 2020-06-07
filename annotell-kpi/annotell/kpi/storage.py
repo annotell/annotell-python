@@ -71,18 +71,3 @@ def load_parquet_files(spark_sql_context: SQLContext,
         event_manager.submit(event_type=event_manager.EVENT_DATA_LOADING_FAILED,
                              context=f"data_path={absolute_data_path} did not exist")
         raise Exception(f"data_path={absolute_data_path} did not exist")
-
-
-def save_csv_file(pyspark_df: DataFrame, compute_placement, root_dir):
-    pandas_df = pyspark_df.toPandas()
-    mem_usage = pandas_df.memory_usage(index=True).sum()
-    log.debug(f"storing csv file of size {mem_usage} bytes")
-    csv_filename = str(uuid4()) + str(".csv")
-    if compute_placement == conf.GOOGLE_CLOUD_DATAPROC:
-        csv_file_path = 'gs://annotell-kpi-manager/csv/' + str(csv_filename)
-        pandas_df.to_csv(csv_file_path)
-        return csv_filename
-    if compute_placement == conf.LOCALHOST:
-        csv_file_path = root_dir + "/csv/" + str(csv_filename)
-        pandas_df.to_csv(csv_file_path)
-        return csv_file_path
