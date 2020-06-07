@@ -73,24 +73,16 @@ def load_parquet_files(spark_sql_context: SQLContext,
         raise Exception(f"data_path={absolute_data_path} did not exist")
 
 
-def save_csv_file(data: DataFrame, compute_placement):
-    mem_usage = data.memory_usage(index=True).sum()
+def save_csv_file(pyspark_df: DataFrame, compute_placement, root_dir):
+    pandas_df = pyspark_df.toPandas()
+    mem_usage = pandas_df.memory_usage(index=True).sum()
     log.debug(f"storing csv file of size {mem_usage} bytes")
-    csv_file_id = uuid4()
+    csv_filename = str(uuid4()) + str(".csv")
     if compute_placement == conf.GOOGLE_CLOUD_DATAPROC:
-        absolute_data_path = 'gs://annotell-kpi-manager/csv/' + str(csv_file_id)
-        data.to_csv(absolute_data_path, compression='gzip')
-        return csv_file_id
-    log.error(f"cannot write files to disk for compute_placement {compute_placement}")
-
-
-def load_csv_file(csv_file_id: str, compute_placement):
-    if compute_placement == conf.GOOGLE_CLOUD_DATAPROC:
-        absolute_data_path = 'gs://annotell-kpi-manager/csv/' + str(csv_file_id)
-        try:
-            pd.read_csv(absolute_data_path)
-            return pd.read_csv(absolute_data_path)
-        except:
-            log.error("unable to load csv file")
-            return None
-    log.error(f"cannot read files from disk for compute_placement {compute_placement}")
+        csv_file_path = 'gs://annotell-kpi-manager/csv/' + str(csv_filename)
+        pandas_df.to_csv(csv_file_path)
+        return csv_filename
+    if compute_placement == conf.LOCALHOST:
+        csv_file_path = root_dir + "/csv/" + str(csv_filename)
+        pandas_df.to_csv(csv_file_path)
+        return csv_file_path

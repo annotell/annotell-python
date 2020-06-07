@@ -7,6 +7,7 @@ import uuid
 
 from annotell.kpi import conf
 from annotell.kpi.events import EventManager
+from annotell.kpi.files import FileManager
 from annotell.kpi.logging import setup_logging
 from annotell.kpi.results import ResultManager
 from annotell.kpi.datasets import DatasetManager
@@ -98,7 +99,7 @@ class ExecutionManager:
         self.session = self.oauth_session.session
 
         # Parse potential filter to be used when loading data
-        self.filter_dict, self.filter_id = parse_filter(filter_json=self.filter_json)
+        self.filter_dict, self.filter_id = self.parse_filter(filter_json=self.filter_json)
 
         # The Event Manager is used to send events used for script diagnostics
         self.event_manager = EventManager(auth_session=self.session,
@@ -118,6 +119,12 @@ class ExecutionManager:
                                             filter_id=self.filter_id,
                                             event_manager=self.event_manager)
 
+        self.file_manager = FileManager(auth_session=self.session,
+                                        host=self.kpi_host,
+                                        project_id=self.project_id,
+                                        job_id=self.job_id,
+                                        kpi_manager_version=conf.KPI_MANAGER_VERSION)
+
         # The Dataset manager is used to modify information about datasets
         self.dataset_manager = DatasetManager(auth_session=self.session,
                                               job_id=self.job_id,
@@ -125,9 +132,9 @@ class ExecutionManager:
                                               kpi_manager_version=conf.KPI_MANAGER_VERSION)
 
         # Data paths are defined by organization, project and dataset ids
-        self.data_path = get_data_path(organization_id=self.organization_id,
-                                       project_id=self.project_id,
-                                       dataset_id=self.dataset_id)
+        self.data_path = self.get_data_path(organization_id=self.organization_id,
+                                            project_id=self.project_id,
+                                            dataset_id=self.dataset_id)
 
         # When submitting the script via the KPI Manager we need to find the location of the script that started
         # the execution manager. To do this we inspect the execution stack.
@@ -147,8 +154,16 @@ class ExecutionManager:
                                               dataset_id=self.dataset_id,
                                               user_id=self.user_id)
 
-    def update_dataset_metadata(self, key, value):
-        self.dataset_manager.update_metadata(self.project_id, self.dataset_id, key, value)
+    def dataset_metadata_update_from_dict(self, metadata_dict: dict):
+        for key in metadata_dict.keys():
+            self.update_dataset_metadata(key=key, value=metadata_dict[key])
+
+    def dataset_metadata_update(self, key, value):
+        return self.dataset_manager.update_metadata(self.project_id, self.dataset_id, key, value)
+
+    def dataset_metadata_get(self):
+        dataset = self.dataset_manager.get_dataset(self.project_id, self.dataset_id)
+        return dataset['dataset']['metadata']
 
     def submit_event(self, event_type: str, context: str):
         self.event_manager.submit(event_type=event_type, context=context)
@@ -181,28 +196,29 @@ class ExecutionManager:
         """
         return self.result_manager.submit_results(results=results)
 
+    def to_csv(self, data_frame: DataFrame, description: str):
+        """ Enables writing intermediate results to csv files
+        Returns an ID for the file for downloading later
+        """
+        file_id = storage.save_csv_file(pyspark_df=data_frame,
+                                        compute_placement=self.compute_placement,
+                                        root_dir=self.root_dir)
+        file_db = self.file_manager.create_file(file_id, description)
+        return file_db
 
-def to_csv(data_frame: DataFrame):
-    """ Enables writing intermediate results to csv files
-    Returns an ID for the file for downloading later
-    """
-    return storage.save_csv_file(data=data_frame)
+    def get_data_path(self, organization_id, project_id, dataset_id):
+        return 'organization_id=' + str(organization_id) + '/' + \
+               'project_id=' + str(project_id) + '/' + \
+               'dataset_id=' + str(dataset_id) + "/*"
 
-
-def get_data_path(organization_id, project_id, dataset_id):
-    return 'organization_id=' + str(organization_id) + '/' + \
-           'project_id=' + str(project_id) + '/' + \
-           'dataset_id=' + str(dataset_id) + "/*"
-
-
-def parse_filter(filter_json: str) -> (str, str):
-    """Filters are passed as json strings to the execution manager.
-    Before we proceed with script execution we transform the json to an object, and get the filter_id.
-    """
-    if filter_json:
-        filter_dict = json.loads(filter_json)
-        filter_id = filter_dict['filter_id']
-    else:
-        filter_id = ''  ## Necessary for later type checks
-        filter_dict = None
-    return filter_dict, filter_id
+    def parse_filter(self, filter_json: str) -> (str, str):
+        """Filters are passed as json strings to the execution manager.
+        Before we proceed with script execution we transform the json to an object, and get the filter_id.
+        """
+        if filter_json:
+            filter_dict = json.loads(filter_json)
+            filter_id = filter_dict['filter_id']
+        else:
+            filter_id = ''  ## Necessary for later type checks
+            filter_dict = None
+        return filter_dict, filter_id
