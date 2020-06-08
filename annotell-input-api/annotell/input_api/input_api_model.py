@@ -155,6 +155,9 @@ class Metadata(RequestCall):
         if not calibration_spec and not calibration_id:
             raise Exception("calibration_spec or calibration_id must be set")
 
+        if calibration_spec and calibration_id:
+            raise Exception("Both calibration_spec and calibration_id cannot be set")
+
         self.external_id = external_id
         self.source_specification = source_specification
         self.calibration_spec = calibration_spec
@@ -164,7 +167,7 @@ class Metadata(RequestCall):
         as_dict = {}
         if self.calibration_spec:
             as_dict['calibrationSpec'] = self.calibration_spec.to_dict()
-        elif self.calibration_id:
+        if self.calibration_id:
             as_dict['calibrationId'] = self.calibration_id
 
         as_dict['externalId'] = self.external_id
