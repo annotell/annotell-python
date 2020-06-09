@@ -7,12 +7,6 @@ import dateutil.parser
 ENVELOPED_JSON_TAG = "data"
 
 
-def unwrap_enveloped_json(js: dict) -> dict:
-    if js.get(ENVELOPED_JSON_TAG):
-        return js[ENVELOPED_JSON_TAG]
-    return js
-
-
 def ts_to_dt(date_string: str) -> datetime:
     return dateutil.parser.parse(date_string)
 
@@ -21,12 +15,12 @@ class RequestCall:
     def to_dict(self) -> dict:
         raise NotImplementedError
 
+
 class InvalidatedReasonInput(str, Enum):
     BAD_CONTENT = "bad-content"
     SLAM_RECORRECTION = "slam-rerun"
     DUPLICATE = "duplicate"
     INCORRECTLY_CREATED = "incorrectly-created"
-
 
 #
 # Request Calls
@@ -142,7 +136,7 @@ class CalibrationSpec(RequestCall):
         }
 
 
-class SourceSpecification(RequestCall):
+class SourceSpecificationImages(RequestCall):
     def __init__(self, images_to_source: Dict[str, str],
                  source_to_pretty_name: Optional[Dict[str, str]] = None,
                  source_order: Optional[List[str]] = None):
@@ -163,7 +157,7 @@ class SourceSpecification(RequestCall):
 
 
 class Metadata(RequestCall):
-    def __init__(self, external_id: str, source_specification: SourceSpecification,
+    def __init__(self, external_id: str, source_specification: SourceSpecificationImages,
                  calibration_spec: Optional[CalibrationSpec] = None,
                  calibration_id: Optional[int] = None):
 
@@ -184,6 +178,122 @@ class Metadata(RequestCall):
 
         as_dict['externalId'] = self.external_id
         as_dict['sourceSpecification'] = self.source_specification.to_dict()
+        return as_dict
+
+
+class SourceSpecificationSlam(RequestCall):
+    def __init__(self, pointclouds_to_source: Dict[str, str],
+                 videos_to_source: Dict[str, str],
+                 source_to_pretty_name: Optional[Dict[str, str]],
+                 source_order: Optional[List[str]]):
+        self.pointclouds_to_source = pointclouds_to_source
+        self.videos_to_source = videos_to_source
+        self.source_to_pretty_name = source_to_pretty_name
+        self.source_order = source_order
+
+    def to_dict(self):
+        as_dict = {
+            "pointcloudsToSource": self.pointclouds_to_source,
+            "videosToSource": self.videos_to_source,
+        }
+        if self.source_to_pretty_name:
+            as_dict["sourceToPrettyName"] = self.source_to_pretty_name
+        if self.source_order:
+            as_dict["sourceOrder"] = self.source_order
+
+        return as_dict
+
+
+class SlamMetaData(RequestCall):
+    def __init__(self, external_id: str,
+                 vehicle_data: List[str],
+                 dynamic_objects: str,
+                 trajectory: Optional[str],
+                 timestamps: List[int],
+                 source_specification: SourceSpecificationSlam,
+                 calibration_id: Optional[int],
+                 calibration_spec: Optional[CalibrationSpec]):
+
+        self.external_id = external_id
+        self.vehicle_data = vehicle_data
+        self.dynamic_objects = dynamic_objects
+        self.trajectory = trajectory
+        self.timestamps = timestamps
+        self.source_specification = source_specification
+        self.calibration_id = calibration_id
+        self.calibration_spec = calibration_spec
+
+    def to_dict(self):
+        as_dict = {
+            "externalId": self.external_id,
+            "vehicleData": self.vehicle_data,
+            "dynamicObjects": self.dynamic_objects,
+            "timestamps": self.timestamps,
+            "sourceSpecification": self.source_specification.to_dict()
+        }
+        if self.trajectory:
+            as_dict["trajectory"] = self.trajectory
+        if self.calibration_id:
+            as_dict["calibrationId"] = self.calibration_id
+        if self.calibration_spec:
+            as_dict["calibrationSpec"] = self.calibration_spec.to_dict()
+
+        return as_dict
+
+
+class ImageSettings(RequestCall):
+    def __init__(self, width: int, height: int):
+        self.width = width
+        self.height = height
+
+    def to_dict(self):
+        return {
+            "width": self.width,
+            "height": self.height
+        }
+
+
+class SlamFiles(RequestCall):
+    def __init__(self, pointclouds: List[str], videos: Optional[Dict[str, ImageSettings]]):
+        self.pointclouds = pointclouds
+        self.videos = videos
+
+    def to_dict(self):
+        as_dict = {"pointclouds": self.pointclouds}
+        if self.videos:
+            as_dict['videos'] = dict([(k, v.to_dict()) for (k, v) in self.videos.items()])
+
+        return as_dict
+
+
+class FilesToUpload(RequestCall):
+    """
+    Used when retrieving upload urls from input api
+    """
+    def __init__(self, files: List[str]):
+        self.files = files
+
+    def to_dict(self):
+        return dict(filesToUpload=self.files)
+
+
+class ImagesFiles(RequestCall):
+    def __init__(self, images_with_settings: Dict[str, ImageSettings]):
+        self.images_with_settings = images_with_settings
+
+    def to_dict(self):
+        return dict(imagesWithSettings=dict([(k, v.to_dict()) for (k, v) in self.images_with_settings.items()]))
+
+
+class ImagesMetadata(RequestCall):
+    def __init__(self, external_id: str, source_specification: Optional[SourceSpecificationImages]):
+        self.external_id = external_id
+        self.source_specification = source_specification
+
+    def to_dict(self):
+        as_dict = dict(externalId=self.external_id)
+        if self.source_specification:
+            as_dict["sourceSpecification"] = self.source_specification.to_dict()
         return as_dict
 
 
@@ -386,6 +496,19 @@ class InputJob(Response):
             f"error_message={self.error_message})>"
 
 
+class InputJobCreatedMessage(Response):
+    def __init__(self, input_job_id: int):
+        self.input_job_id = input_job_id
+
+    @staticmethod
+    def from_json(js: dict):
+        return InputJobCreatedMessage(js["inputJobId"])
+
+    def __repr__(self):
+        return f"<InputJobCreatedMessage(" + \
+               f"input_job_id={self.input_job_id})>"
+
+
 class Data(Response):
     def __init__(self, id, external_id: str, source: Optional[str], created: datetime):
         self.id = id
@@ -467,3 +590,17 @@ class RemovedInputsResponse(Response):
                f"removed_input_ids={self.removed_input_ids}, " + \
                f"not_found_input_ids={self.not_found_input_ids}, " + \
                f"already_removed_input_ids={self.already_removed_input_ids})>"
+
+
+class SlamJobUpdated(Response):
+    def __init__(self, updated: bool):
+        self.updated = updated
+
+    @staticmethod
+    def from_json(js: dict):
+        return SlamJobUpdated(js["updated"])
+
+    def __repr__(self):
+        return f"<SlamJobUpdated(" + \
+               f"updated={self.updated})>"
+
