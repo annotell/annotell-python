@@ -133,20 +133,23 @@ class InputApiClient:
         conversion was successful please see the method `get_input_jobs_status`.
         """
 
-        images_with_settings = self._get_images_with_settings(folder, files.images)
-
         files_on_disk = files.images + files.pointclouds
-        resp = self._get_upload_urls(IAM.FilesToUpload(files_on_disk))
-        files_to_upload_url = resp["files"]
-        files_in_response = list(files_to_upload_url.keys())
-        assert set(files_on_disk) == set(files_in_response)
-        pointcloud_files = files.pointclouds
-        job_id = resp['jobId']
+        upload_urls_response = self._get_upload_urls(IAM.FilesToUpload(files_on_disk))
 
-        self._upload_files(folder, files_to_upload_url)
-        create_input_response = self._create_inputs_point_cloud_with_images(
-            images_with_settings, pointcloud_files, job_id, input_list_id, metadata
-        )
+        files_to_upload_urls = upload_urls_response["files"]
+        files_in_response = list(files_to_upload_urls.keys())
+        assert set(files_on_disk) == set(files_in_response)
+
+        pointcloud_files = files.pointclouds
+        self._upload_files(folder, files_to_upload_urls)
+
+        job_id = upload_urls_response['jobId']
+        images_files = self._get_images_with_settings(folder, files.images)
+        create_input_response = self._create_inputs_point_cloud_with_images(images_files,
+                                                                            pointcloud_files,
+                                                                            job_id,
+                                                                            input_list_id,
+                                                                            metadata)
         return create_input_response
 
     def create_slam_input_job(self, files: IAM.SlamFiles,
