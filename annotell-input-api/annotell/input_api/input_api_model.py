@@ -254,14 +254,14 @@ class ImageSettings(RequestCall):
 
 
 class SlamFiles(RequestCall):
-    def __init__(self, pointclouds: List[str], videos: Optional[Dict[str, ImageSettings]]):
+    def __init__(self, pointclouds: List[str], videos_with_settings: Optional[Dict[str, ImageSettings]]):
         self.pointclouds = pointclouds
-        self.videos = videos
+        self.videos_with_settings = videos_with_settings
 
     def to_dict(self):
         as_dict = {"pointclouds": self.pointclouds}
-        if self.videos:
-            as_dict['videos'] = dict([(k, v.to_dict()) for (k, v) in self.videos.items()])
+        if self.videos_with_settings:
+            as_dict['videos'] = dict([(k, v.to_dict()) for (k, v) in self.videos_with_settings.items()])
 
         return as_dict
 
