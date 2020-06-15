@@ -27,16 +27,76 @@ class InvalidatedReasonInput(str, Enum):
 #
 
 
-class FilesPointCloudWithImages(RequestCall):
-    def __init__(self, images: List[str], pointclouds: List[str]):
+class Image(RequestCall):
+    def __init__(self, filename: str,
+                 external_id: str,
+                 width: Optional[int] = None,
+                 height: Optional[int] = None,
+                 source: str = "CAM"):
+
+        self.filename = filename
+        self.external_id = external_id
+        self.width = width
+        self.height = height
+        self.source = source
+
+    def to_dict(self) -> dict:
+        return dict(filename=self.filename,
+                    externalId=self.external_id,
+                    width=self.width,
+                    height=self.height,
+                    source=self.source)
+
+
+class ImagesFiles(RequestCall):
+    def __init__(self, images: List[Image]):
         self.images = images
-        self.pointclouds = pointclouds
+
+    def to_dict(self) -> dict:
+        return dict(images=[image.to_dict() for image in self.images])
+
+
+class Video(RequestCall):
+    def __init__(self, filename: str,
+                 external_id: str,
+                 width: Optional[int] = None,
+                 height: Optional[int] = None,
+                 source: str = "CAM"):
+
+        self.filename = filename
+        self.external_id = external_id
+        self.width = width
+        self.height = height
+        self.source = source
+
+    def to_dict(self) -> dict:
+        return dict(filename=self.filename,
+                    externalId=self.external_id,
+                    width=self.width,
+                    height=self.height,
+                    source=self.source)
+
+
+class PointCloud(RequestCall):
+    def __init__(self, filename: str, external_id: str, source: Optional[str] = "lidar"):
+        self.filename = filename
+        self.external_id = external_id
+        self.source = source
+
+    def to_dict(self) -> dict:
+        return dict(filename=self.filename,
+                    externalId=self.external_id,
+                    source=self.source)
+
+
+class PointCloudsWithImages(RequestCall):
+    def __init__(self, images: List[Image], point_clouds: List[PointCloud]):
+        self.images = images
+        self.point_clouds = point_clouds
 
     def to_dict(self):
-        return dict(
-            images=self.images,
-            pointclouds=self.pointclouds
-        )
+        return dict(images=[image.to_dict() for image in self.images],
+                    pointClouds=[pc.to_dict() for pc in self.point_clouds])
 
 
 class CameraType(str, Enum):
@@ -137,11 +197,9 @@ class CalibrationSpec(RequestCall):
 
 
 class SourceSpecificationImages(RequestCall):
-    def __init__(self, images_to_source: Dict[str, str],
-                 source_to_pretty_name: Optional[Dict[str, str]] = None,
+    def __init__(self, source_to_pretty_name: Optional[Dict[str, str]] = None,
                  source_order: Optional[List[str]] = None):
 
-        self.images_to_source = images_to_source
         self.source_to_pretty_name = source_to_pretty_name
         self.source_order = source_order
 
@@ -152,12 +210,12 @@ class SourceSpecificationImages(RequestCall):
         if self.source_order:
             as_dict['sourceOrder'] = self.source_order
 
-        as_dict['imagesToSource'] = self.images_to_source
         return as_dict
 
 
 class Metadata(RequestCall):
-    def __init__(self, external_id: str, source_specification: SourceSpecificationImages,
+    def __init__(self, external_id: str,
+                 source_specification: SourceSpecificationImages,
                  calibration_spec: Optional[CalibrationSpec] = None,
                  calibration_id: Optional[int] = None):
 
@@ -182,20 +240,13 @@ class Metadata(RequestCall):
 
 
 class SourceSpecificationSlam(RequestCall):
-    def __init__(self, pointclouds_to_source: Dict[str, str],
-                 videos_to_source: Dict[str, str],
-                 source_to_pretty_name: Optional[Dict[str, str]],
+    def __init__(self, source_to_pretty_name: Optional[Dict[str, str]],
                  source_order: Optional[List[str]]):
-        self.pointclouds_to_source = pointclouds_to_source
-        self.videos_to_source = videos_to_source
         self.source_to_pretty_name = source_to_pretty_name
         self.source_order = source_order
 
     def to_dict(self):
-        as_dict = {
-            "pointcloudsToSource": self.pointclouds_to_source,
-            "videosToSource": self.videos_to_source,
-        }
+        as_dict = dict()
         if self.source_to_pretty_name:
             as_dict["sourceToPrettyName"] = self.source_to_pretty_name
         if self.source_order:
@@ -241,27 +292,15 @@ class SlamMetaData(RequestCall):
         return as_dict
 
 
-class ImageSettings(RequestCall):
-    def __init__(self, width: int, height: int):
-        self.width = width
-        self.height = height
-
-    def to_dict(self):
-        return {
-            "width": self.width,
-            "height": self.height
-        }
-
-
 class SlamFiles(RequestCall):
-    def __init__(self, pointclouds: List[str], videos_with_settings: Optional[Dict[str, ImageSettings]]):
-        self.pointclouds = pointclouds
-        self.videos_with_settings = videos_with_settings
+    def __init__(self, point_clouds: List[PointCloud], videos: Optional[List[Video]]):
+        self.point_clouds = point_clouds
+        self.videos = videos
 
     def to_dict(self):
-        as_dict = {"pointclouds": self.pointclouds}
-        if self.videos_with_settings:
-            as_dict['videos'] = dict([(k, v.to_dict()) for (k, v) in self.videos_with_settings.items()])
+        as_dict = dict(pointclouds=[pc.to_dict() for pc in self.point_clouds])
+        if self.videos:
+            as_dict['videos'] = [video.to_dict() for video in self.videos]
 
         return as_dict
 
@@ -275,14 +314,6 @@ class FilesToUpload(RequestCall):
 
     def to_dict(self):
         return dict(filesToUpload=self.files)
-
-
-class ImagesFiles(RequestCall):
-    def __init__(self, images_with_settings: Dict[str, ImageSettings]):
-        self.images_with_settings = images_with_settings
-
-    def to_dict(self):
-        return dict(imagesWithSettings=dict([(k, v.to_dict()) for (k, v) in self.images_with_settings.items()]))
 
 
 class ImagesMetadata(RequestCall):
@@ -497,8 +528,8 @@ class InputJob(Response):
 
 
 class InputJobCreatedMessage(Response):
-    def __init__(self, input_job_id: int):
-        self.input_job_id = input_job_id
+    def __init__(self, job_id: int):
+        self.job_id = job_id
 
     @staticmethod
     def from_json(js: dict):
@@ -506,7 +537,7 @@ class InputJobCreatedMessage(Response):
 
     def __repr__(self):
         return f"<InputJobCreatedMessage(" + \
-               f"input_job_id={self.input_job_id})>"
+               f"input_job_id={self.job_id})>"
 
 
 class Data(Response):
@@ -604,3 +635,17 @@ class SlamJobUpdated(Response):
         return f"<SlamJobUpdated(" + \
                f"updated={self.updated})>"
 
+
+class UploadUrlsResponse(Response):
+    def __init__(self, files_to_url: Dict[str, str], input_internal_id: int):
+        self.files_to_url = files_to_url
+        self.input_internal_id = input_internal_id
+
+    @staticmethod
+    def from_json(js: dict):
+        return UploadUrlsResponse(js["files"], js["jobId"])
+
+    def __repr__(self):
+        return f"<UploadUrlsResponse(" + \
+               f"files_to_url={self.files_to_url}, " + \
+               f"job_id={self.input_internal_id})>"
