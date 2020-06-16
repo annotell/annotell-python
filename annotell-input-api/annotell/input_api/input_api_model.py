@@ -196,7 +196,7 @@ class CalibrationSpec(RequestCall):
         }
 
 
-class SourceSpecificationImages(RequestCall):
+class SourceSpecification(RequestCall):
     def __init__(self, source_to_pretty_name: Optional[Dict[str, str]] = None,
                  source_order: Optional[List[str]] = None):
 
@@ -213,81 +213,64 @@ class SourceSpecificationImages(RequestCall):
         return as_dict
 
 
-class Metadata(RequestCall):
+class SceneMetaData(RequestCall):
+    def __init__(self, external_id: str, source_specification: Optional[SourceSpecification]):
+        self.external_id = external_id
+        self.source_specification = source_specification
+
+    def to_dict(self):
+        as_dict = dict(externalId=self.external_id)
+        if self.source_specification:
+            as_dict["sourceSpecification"] = self.source_specification.to_dict()
+        return as_dict
+
+
+class CalibratedSceneMetaData(SceneMetaData):
     def __init__(self, external_id: str,
-                 source_specification: SourceSpecificationImages,
+                 source_specification: SourceSpecification,
                  calibration_spec: Optional[CalibrationSpec] = None,
                  calibration_id: Optional[int] = None):
 
         if not calibration_spec and not calibration_id:
             raise Exception("calibration_spec or calibration_id must be set")
 
-        self.external_id = external_id
-        self.source_specification = source_specification
+        super().__init__(external_id, source_specification)
         self.calibration_spec = calibration_spec
         self.calibration_id = calibration_id
 
     def to_dict(self):
-        as_dict = {}
+        as_dict = super().to_dict()
         if self.calibration_spec:
             as_dict['calibrationSpec'] = self.calibration_spec.to_dict()
         elif self.calibration_id:
             as_dict['calibrationId'] = self.calibration_id
 
-        as_dict['externalId'] = self.external_id
-        as_dict['sourceSpecification'] = self.source_specification.to_dict()
         return as_dict
 
 
-class SourceSpecificationSlam(RequestCall):
-    def __init__(self, source_to_pretty_name: Optional[Dict[str, str]],
-                 source_order: Optional[List[str]]):
-        self.source_to_pretty_name = source_to_pretty_name
-        self.source_order = source_order
-
-    def to_dict(self):
-        as_dict = dict()
-        if self.source_to_pretty_name:
-            as_dict["sourceToPrettyName"] = self.source_to_pretty_name
-        if self.source_order:
-            as_dict["sourceOrder"] = self.source_order
-
-        return as_dict
-
-
-class SlamMetaData(RequestCall):
+class SlamMetaData(CalibratedSceneMetaData):
     def __init__(self, external_id: str,
                  vehicle_data: List[str],
                  dynamic_objects: str,
                  trajectory: Optional[str],
                  timestamps: List[int],
-                 source_specification: SourceSpecificationSlam,
+                 source_specification: SourceSpecification,
                  calibration_id: Optional[int],
                  calibration_spec: Optional[CalibrationSpec]):
-
-        self.external_id = external_id
+        super().__init__(external_id, source_specification, calibration_spec, calibration_id)
         self.vehicle_data = vehicle_data
         self.dynamic_objects = dynamic_objects
         self.trajectory = trajectory
         self.timestamps = timestamps
-        self.source_specification = source_specification
-        self.calibration_id = calibration_id
-        self.calibration_spec = calibration_spec
 
     def to_dict(self):
-        as_dict = {
-            "externalId": self.external_id,
-            "vehicleData": self.vehicle_data,
-            "dynamicObjects": self.dynamic_objects,
-            "timestamps": self.timestamps,
-            "sourceSpecification": self.source_specification.to_dict()
-        }
+        as_dict = super().to_dict()
+        as_dict["vehicleData"] = self.vehicle_data
+        as_dict["dynamicObjects"] = self.dynamic_objects
+        as_dict["timestamps"] = self.timestamps
+
         if self.trajectory:
             as_dict["trajectory"] = self.trajectory
-        if self.calibration_id:
-            as_dict["calibrationId"] = self.calibration_id
-        if self.calibration_spec:
-            as_dict["calibrationSpec"] = self.calibration_spec.to_dict()
 
         return as_dict
 
@@ -314,18 +297,6 @@ class FilesToUpload(RequestCall):
 
     def to_dict(self):
         return dict(filesToUpload=self.files)
-
-
-class ImagesMetadata(RequestCall):
-    def __init__(self, external_id: str, source_specification: Optional[SourceSpecificationImages]):
-        self.external_id = external_id
-        self.source_specification = source_specification
-
-    def to_dict(self):
-        as_dict = dict(externalId=self.external_id)
-        if self.source_specification:
-            as_dict["sourceSpecification"] = self.source_specification.to_dict()
-        return as_dict
 
 
 class PoseTransform(RequestCall):

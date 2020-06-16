@@ -38,21 +38,24 @@ class InputApiClient:
             "User-Agent": f"annotell-cloud-storage:{__version__}"
         }
 
-        self.dryrun_header = {"X-Dryrun": ""}
         self.organization_id_header_name = "X-Organization-Id"
+        self.dryrun_header_name = "X-Dryrun"
 
     @property
     def session(self):
         return self.oauth_session.session
+
+    def set_dryrun_header(self):
+        self.headers[self.dryrun_header_name] = ""
 
     def set_organization_id_header(self, organization_id: int):
         self.headers[self.organization_id_header_name] = str(organization_id)
         log.info(f"WARNING: You will now act as if you are part of organization: {organization_id}. "
                  f"This will not work unless you are an Annotell user.")
 
-    def unset_organization_id_header(self):
-        if self.headers.get(self.organization_id_header_name) is not None:
-            self.headers.pop(self.organization_id_header_name)
+    def unset_header(self, header_name):
+        if self.headers.get(header_name) is not None:
+            self.headers.pop(header_name)
 
     @staticmethod
     def _raise_on_error(resp: requests.Response) -> requests.Response:
@@ -112,7 +115,7 @@ class InputApiClient:
     def _create_inputs_point_cloud_with_images(self, point_clouds_with_images: IAM.PointCloudsWithImages,
                                                job_id: str,
                                                input_list_id: int,
-                                               metadata: IAM.Metadata):
+                                               metadata: IAM.CalibratedSceneMetaData):
 
         """Create inputs from uploaded files"""
         log.info(f"Creating inputs for files with job_id={job_id}")
@@ -130,7 +133,7 @@ class InputApiClient:
     def create_inputs_point_cloud_with_images(self, folder: Path,
                                               point_clouds_with_images: IAM.PointCloudsWithImages,
                                               input_list_id: int,
-                                              metadata: IAM.Metadata) -> IAM.CreateInputJobResponse:
+                                              metadata: IAM.CalibratedSceneMetaData) -> IAM.CreateInputJobResponse:
         """
         Upload files and create an input of type 'point_cloud_with_image'.
 
@@ -187,7 +190,7 @@ class InputApiClient:
 
     def upload_and_create_images_input_job(self, folder: Path,
                                            images_files: IAM.ImagesFiles,
-                                           metadata: IAM.ImagesMetadata,
+                                           metadata: IAM.SceneMetaData,
                                            input_list_id: int):
         """
         Verifies the images and metadata given and then uploads images to Google Cloud Storage and
@@ -224,7 +227,7 @@ class InputApiClient:
         return input_job_created_message
 
     def _create_images_input_job(self, images_files: IAM.ImagesFiles,
-                                 metadata: IAM.ImagesMetadata,
+                                 metadata: IAM.SceneMetaData,
                                  input_list_id: int,
                                  internal_id: str = None,
                                  dryrun: bool = False):
@@ -238,9 +241,8 @@ class InputApiClient:
         :returns InputJobCreatedMessage: Class containing id of the created input job, or nothing if dryrun
         """
 
-        headers = {**self.headers}
         if dryrun:
-            headers = {**headers, **self.dryrun_header}
+            self.set_dryrun_header()
 
         create_input_job_url = f"{self.host}/v1/inputs/images"
         create_input_job_json = dict(files=images_files.to_dict(),
@@ -248,9 +250,10 @@ class InputApiClient:
                                      inputListId=input_list_id,
                                      internalId=internal_id)
 
-        resp = self.session.post(create_input_job_url, json=create_input_job_json, headers=headers)
+        resp = self.session.post(create_input_job_url, json=create_input_job_json, headers=self.headers)
         json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
         if dryrun:
+            self.unset_header(self.dryrun_header_name)
             return json_resp
         return IAM.CreateInputJobResponse.from_json(json_resp)
 
