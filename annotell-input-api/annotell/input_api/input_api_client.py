@@ -21,11 +21,13 @@ class InputApiClient:
     def __init__(self, *,
                  auth: None,
                  host: str = DEFAULT_HOST,
-                 auth_host: str = DEFAULT_AUTH_HOST):
+                 auth_host: str = DEFAULT_AUTH_HOST,
+                 client_organization_id: int = None):
         """
         :param auth: auth credentials, see https://github.com/annotell/annotell-python/tree/master/annotell-auth
         :param host: override for input api url
         :param auth_host: override for authentication url
+        :param client_organization_id: Overrides your users organization id. Only works with an Annotell user.
         """
 
         self.host = host
@@ -37,25 +39,16 @@ class InputApiClient:
             "Accept": "application/json",
             "User-Agent": f"annotell-cloud-storage:{__version__}"
         }
+        self.dryrun_header = {"X-Dryrun": ""}
 
-        self.organization_id_header_name = "X-Organization-Id"
-        self.dryrun_header_name = "X-Dryrun"
+        if client_organization_id is not None:
+            self.headers["X-Organization-Id"] = str(client_organization_id)
+            log.info(f"WARNING: You will now act as if you are part of organization: {client_organization_id}. "
+                     f"This will not work unless you are an Annotell user.")
 
     @property
     def session(self):
         return self.oauth_session.session
-
-    def set_dryrun_header(self):
-        self.headers[self.dryrun_header_name] = ""
-
-    def set_organization_id_header(self, organization_id: int):
-        self.headers[self.organization_id_header_name] = str(organization_id)
-        log.info(f"WARNING: You will now act as if you are part of organization: {organization_id}. "
-                 f"This will not work unless you are an Annotell user.")
-
-    def unset_header(self, header_name):
-        if self.headers.get(header_name) is not None:
-            self.headers.pop(header_name)
 
     @staticmethod
     def _raise_on_error(resp: requests.Response) -> requests.Response:
@@ -171,7 +164,8 @@ class InputApiClient:
 
     def create_slam_input_job(self, slam_files: IAM.SlamFiles,
                               metadata: IAM.SlamMetaData,
-                              input_list_id: int):
+                              input_list_id: int,
+                              dryrun=False):
         """
         Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
         started.
@@ -179,14 +173,21 @@ class InputApiClient:
         :param slam_files: class containing files necessary for SLAM.
         :param metadata: class containing metadata necessary for SLAM.
         :param input_list_id: ID of the input list the new input, when created, will be added to.
-        :returns InputJobCreatedMessage: Class containing id of the created input job.
+        :param dryrun: If True the files/metadata will be validated but no input job will be created.
+        :returns InputJobCreatedMessage: Class containing id of the created input job, or nothing if dryrun.
         """
+        if dryrun:
+            headers = {**self.headers, **self.dryrun_header}
+        else:
+            headers = {**self.headers}
 
         url = f"{self.host}/v1/inputs/slam"
         slam_json = dict(files=slam_files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
-        resp = self.session.post(url, json=slam_json, headers=self.headers)
+        resp = self.session.post(url, json=slam_json, headers=headers)
         json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
-        return IAM.CreateInputJobResponse.from_json(json_resp)
+
+        if not dryrun:
+            return IAM.CreateInputJobResponse.from_json(json_resp)
 
     def upload_and_create_images_input_job(self, folder: Path,
                                            images_files: IAM.ImagesFiles,
@@ -208,41 +209,44 @@ class InputApiClient:
         upload_url_resp = self._get_upload_urls(IAM.FilesToUpload(filenames))
 
         internal_id = upload_url_resp.internal_id
-        self._create_images_input_job(images_files=images_files,
-                                      metadata=metadata,
-                                      input_list_id=input_list_id,
-                                      internal_id=internal_id,
-                                      dryrun=True)
+        self.create_images_input_job(images_files=images_files,
+                                     metadata=metadata,
+                                     input_list_id=input_list_id,
+                                     internal_id=internal_id,
+                                     dryrun=True)
 
         files_in_response = upload_url_resp.files_to_url.keys()
         assert set(filenames) == set(files_in_response)
         self._upload_files(folder, upload_url_resp.files_to_url)
 
-        input_job_created_message = self._create_images_input_job(images_files=images_files,
-                                                                  metadata=metadata,
-                                                                  input_list_id=input_list_id,
-                                                                  internal_id=internal_id)
+        input_job_created_message = self.create_images_input_job(images_files=images_files,
+                                                                 metadata=metadata,
+                                                                 input_list_id=input_list_id,
+                                                                 internal_id=internal_id)
 
         log.info(f"Creating input for images with internal_id={input_job_created_message.internal_id}")
         return input_job_created_message
 
-    def _create_images_input_job(self, images_files: IAM.ImagesFiles,
-                                 metadata: IAM.SceneMetaData,
-                                 input_list_id: int,
-                                 internal_id: str = None,
-                                 dryrun: bool = False):
+    def create_images_input_job(self, images_files: IAM.ImagesFiles,
+                                metadata: IAM.SceneMetaData,
+                                input_list_id: int,
+                                internal_id: str = None,
+                                dryrun: bool = False):
         """
         Creates an input job for an image input
 
         :param images_files: Contains all images, with their dimensions
         :param metadata: Contains necessary metadata in order to create and validate inputs
         :param input_list_id: ID of the input list the new input, when created, will be added to.
-        :param dryrun: If True the files/metadata will be validated but no input job created.
+        :param internal_id: When created, the input will use this internal id.
+        :param dryrun: If True the files/metadata will be validated but no input job will be created.
         :returns InputJobCreatedMessage: Class containing id of the created input job, or nothing if dryrun
         """
 
         if dryrun:
-            self.set_dryrun_header()
+            headers = {**self.headers, **self.dryrun_header}
+        else:
+            headers = {**self.headers}
 
         create_input_job_url = f"{self.host}/v1/inputs/images"
         create_input_job_json = dict(files=images_files.to_dict(),
@@ -250,12 +254,10 @@ class InputApiClient:
                                      inputListId=input_list_id,
                                      internalId=internal_id)
 
-        resp = self.session.post(create_input_job_url, json=create_input_job_json, headers=self.headers)
+        resp = self.session.post(create_input_job_url, json=create_input_job_json, headers=headers)
         json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
-        if dryrun:
-            self.unset_header(self.dryrun_header_name)
-            return json_resp
-        return IAM.CreateInputJobResponse.from_json(json_resp)
+        if not dryrun:
+            return IAM.CreateInputJobResponse.from_json(json_resp)
 
     def update_completed_slam_input_job(self, pointcloud_uri: str,
                                         trajectory: IAM.Trajectory,
