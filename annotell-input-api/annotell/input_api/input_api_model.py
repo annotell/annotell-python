@@ -59,8 +59,8 @@ class ImagesFiles(RequestCall):
 class Video(RequestCall):
     def __init__(self, filename: str,
                  external_id: str,
-                 width: Optional[int] = None,
-                 height: Optional[int] = None,
+                 width: int,
+                 height: int,
                  source: str = "CAM"):
 
         self.filename = filename

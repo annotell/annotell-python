@@ -72,12 +72,13 @@ class InputApiClient:
         return IAM.UploadUrlsResponse.from_json(json_resp)
 
     @staticmethod
-    def _is_missing_dimensions(camera_res: Union[IAM.Image, IAM.Video]):
-        return camera_res.width is None or camera_res.height is None
+    def _set_images_dimensions(folder: Path, images: List[IAM.Image]):
 
-    def _set_images_dimensions(self, folder: Path, images: List[IAM.Image]):
+        def _is_image_missing_dimensions(img: IAM.Image):
+            return img.width is None or img.height is None
+
         for image in images:
-            if self._is_missing_dimensions(image):
+            if _is_image_missing_dimensions(image):
                 with Image.open(folder.joinpath(image.filename)) as im:
                     width, height = im.size
                     image.height = height
@@ -177,9 +178,6 @@ class InputApiClient:
         :param input_list_id: ID of the input list the new input, when created, will be added to.
         :returns InputJobCreatedMessage: Class containing id of the created input job.
         """
-        if slam_files.videos is not None and \
-           any([self._is_missing_dimensions(video) for video in slam_files.videos]):
-            log.info("Slam currently needs video dimensions to be specified")
 
         url = f"{self.host}/v1/inputs/slam"
         slam_json = dict(files=slam_files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
