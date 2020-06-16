@@ -298,7 +298,7 @@ class SlamFiles(RequestCall):
         self.videos = videos
 
     def to_dict(self):
-        as_dict = dict(pointclouds=[pc.to_dict() for pc in self.point_clouds])
+        as_dict = dict(pointClouds=[pc.to_dict() for pc in self.point_clouds])
         if self.videos:
             as_dict['videos'] = [video.to_dict() for video in self.videos]
 
@@ -469,22 +469,6 @@ class Request(Response):
             f"input_list_id={self.input_list_id})>"
 
 
-class CreateInputResponse(Response):
-    def __init__(self, internal_id: str, external_id: str, converting_files: List[str]):
-        self.internal_id = internal_id
-        self.external_id = external_id
-        self.converting_files = converting_files
-
-    @staticmethod
-    def from_json(js: dict):
-        return CreateInputResponse(js["internalId"], js["externalId"], js["convertingFiles"])
-
-    def __repr__(self):
-        return f"<CreateInputResponse(" + \
-            f"internal_id={self.internal_id}, external_id={self.external_id}, " + \
-            f"converting_files={self.converting_files})>"
-
-
 class ExportAnnotation(Response):
     def __init__(self, annotation_id: int, export_content: dict):
         self.annotation_id = annotation_id
@@ -527,17 +511,17 @@ class InputJob(Response):
             f"error_message={self.error_message})>"
 
 
-class InputJobCreatedMessage(Response):
-    def __init__(self, job_id: int):
-        self.job_id = job_id
+class CreateInputJobResponse(Response):
+    def __init__(self, internal_id: int):
+        self.internal_id = internal_id
 
     @staticmethod
     def from_json(js: dict):
-        return InputJobCreatedMessage(js["inputJobId"])
+        return CreateInputJobResponse(js["internalId"])
 
     def __repr__(self):
-        return f"<InputJobCreatedMessage(" + \
-               f"input_job_id={self.job_id})>"
+        return f"<CreateInputJobResponse(" + \
+               f"internal_id={self.internal_id})>"
 
 
 class Data(Response):
@@ -623,23 +607,10 @@ class RemovedInputsResponse(Response):
                f"already_removed_input_ids={self.already_removed_input_ids})>"
 
 
-class SlamJobUpdated(Response):
-    def __init__(self, updated: bool):
-        self.updated = updated
-
-    @staticmethod
-    def from_json(js: dict):
-        return SlamJobUpdated(js["updated"])
-
-    def __repr__(self):
-        return f"<SlamJobUpdated(" + \
-               f"updated={self.updated})>"
-
-
 class UploadUrlsResponse(Response):
-    def __init__(self, files_to_url: Dict[str, str], input_internal_id: int):
+    def __init__(self, files_to_url: Dict[str, str], internal_id: int):
         self.files_to_url = files_to_url
-        self.input_internal_id = input_internal_id
+        self.internal_id = internal_id
 
     @staticmethod
     def from_json(js: dict):
@@ -648,4 +619,4 @@ class UploadUrlsResponse(Response):
     def __repr__(self):
         return f"<UploadUrlsResponse(" + \
                f"files_to_url={self.files_to_url}, " + \
-               f"job_id={self.input_internal_id})>"
+               f"internal_id={self.internal_id})>"

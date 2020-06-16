@@ -47,7 +47,7 @@ class InputApiClient:
 
     def set_organization_id_header(self, organization_id: int):
         self.headers[self.organization_id_header_name] = str(organization_id)
-        log.info(f"WARNING: You will now act as if you are part of organization: {organization_id}."
+        log.info(f"WARNING: You will now act as if you are part of organization: {organization_id}. "
                  f"This will not work unless you are an Annotell user.")
 
     def unset_organization_id_header(self):
@@ -115,21 +115,21 @@ class InputApiClient:
 
         """Create inputs from uploaded files"""
         log.info(f"Creating inputs for files with job_id={job_id}")
-        url = f"{self.host}/v1/inputs"
+        url = f"{self.host}/v1/inputs/pointclouds-with-images"
         js = dict(
             files=point_clouds_with_images.to_dict(),
             internalId=job_id,
             inputListId=input_list_id,
-            metadata=metadata.to_dict()
-        )
+            metadata=metadata.to_dict())
+
         resp = self.session.post(url, json=js, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
-        return IAM.CreateInputResponse.from_json(json_resp)
+        return IAM.CreateInputJobResponse.from_json(json_resp)
 
     def create_inputs_point_cloud_with_images(self, folder: Path,
                                               point_clouds_with_images: IAM.PointCloudsWithImages,
                                               input_list_id: int,
-                                              metadata: IAM.Metadata) -> IAM.CreateInputResponse:
+                                              metadata: IAM.Metadata) -> IAM.CreateInputJobResponse:
         """
         Upload files and create an input of type 'point_cloud_with_image'.
 
@@ -160,7 +160,7 @@ class InputApiClient:
         self._set_images_dimensions(folder, point_clouds_with_images.images)
 
         create_input_response = self._create_inputs_point_cloud_with_images(point_clouds_with_images,
-                                                                            upload_urls_response.input_internal_id,
+                                                                            upload_urls_response.internal_id,
                                                                             input_list_id,
                                                                             metadata)
         return create_input_response
@@ -185,7 +185,7 @@ class InputApiClient:
         slam_json = dict(files=slam_files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
         resp = self.session.post(url, json=slam_json, headers=self.headers)
         json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
-        return IAM.InputJobCreatedMessage.from_json(json_resp)
+        return IAM.CreateInputJobResponse.from_json(json_resp)
 
     def upload_and_create_images_input_job(self, folder: Path,
                                            images_files: IAM.ImagesFiles,
@@ -206,11 +206,11 @@ class InputApiClient:
         filenames = [image.filename for image in images_files.images]
         upload_url_resp = self._get_upload_urls(IAM.FilesToUpload(filenames))
 
-        job_id = upload_url_resp.input_internal_id
+        internal_id = upload_url_resp.internal_id
         self._create_images_input_job(images_files=images_files,
                                       metadata=metadata,
                                       input_list_id=input_list_id,
-                                      internal_id=job_id,
+                                      internal_id=internal_id,
                                       dryrun=True)
 
         files_in_response = upload_url_resp.files_to_url.keys()
@@ -220,9 +220,9 @@ class InputApiClient:
         input_job_created_message = self._create_images_input_job(images_files=images_files,
                                                                   metadata=metadata,
                                                                   input_list_id=input_list_id,
-                                                                  internal_id=job_id)
+                                                                  internal_id=internal_id)
 
-        log.info(f"Creating input for images with job_id={input_job_created_message.job_id}")
+        log.info(f"Creating input for images with internal_id={input_job_created_message.internal_id}")
         return input_job_created_message
 
     def _create_images_input_job(self, images_files: IAM.ImagesFiles,
@@ -254,7 +254,7 @@ class InputApiClient:
         json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
         if dryrun:
             return json_resp
-        return IAM.InputJobCreatedMessage.from_json(json_resp)
+        return IAM.CreateInputJobResponse.from_json(json_resp)
 
     def update_completed_slam_input_job(self, pointcloud_uri: str,
                                         trajectory: IAM.Trajectory,
@@ -269,12 +269,12 @@ class InputApiClient:
         :returns SlamJobUpdated: Class with boolean describing if the update was successful or not.
         """
         url = f"{self.host}/v1/inputs/progress"
-        update_json = dict(files=dict(pointclouds=pointcloud_uri),
+        update_json = dict(files=dict(pointClouds=pointcloud_uri),
                            metadata=dict(trajectory=trajectory.to_dict()),
                            jobId=job_id)
         resp = self.session.post(url, json=update_json, headers=self.headers)
-        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
-        return IAM.SlamJobUpdated.from_json(json_resp)
+        json_resp = self._raise_on_error(resp).json()
+        return json_resp
 
     def update_failed_slam_input_job(self, job_id: str, message: str):
         """
@@ -288,8 +288,8 @@ class InputApiClient:
         url = f"{self.host}/v1/inputs/progress"
         update_json = dict(jobId=job_id, message=message)
         resp = self.session.post(url, json=update_json, headers=self.headers)
-        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
-        return IAM.SlamJobUpdated.from_json(json_resp)
+        json_resp = self._raise_on_error(resp).json()
+        return json_resp
 
     def get_internal_ids_for_external_ids(self, external_ids: List[str]) -> Dict[str, List[str]]:
         url = f"{self.host}/v1/inputs/"
