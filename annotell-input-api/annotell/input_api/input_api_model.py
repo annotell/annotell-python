@@ -225,8 +225,11 @@ class CalibratedSceneMetaData(SceneMetaData):
 
         if not calibration_spec and not calibration_id:
             raise Exception("calibration_spec or calibration_id must be set")
+        if calibration_spec and calibration_id:
+            raise Exception("Both calibration_spec and calibration_id cannot be set")
 
         super().__init__(external_id, source_specification)
+
         self.calibration_spec = calibration_spec
         self.calibration_id = calibration_id
 
@@ -234,7 +237,7 @@ class CalibratedSceneMetaData(SceneMetaData):
         as_dict = super().to_dict()
         if self.calibration_spec:
             as_dict['calibrationSpec'] = self.calibration_spec.to_dict()
-        elif self.calibration_id:
+        if self.calibration_id:
             as_dict['calibrationId'] = self.calibration_id
 
         return as_dict

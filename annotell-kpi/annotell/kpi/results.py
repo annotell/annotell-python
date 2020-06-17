@@ -45,7 +45,6 @@ class ResultManager:
         result.set_script_hash(script_hash=self.script_hash)
         result.set_filter_id(filter_id=self.filter_id)
         result.set_execution_mode(execution_mode=self.execution_mode)
-
         headers = {'Content-Type': 'application/json'}
 
         try:
