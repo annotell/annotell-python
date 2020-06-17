@@ -29,20 +29,17 @@ class InvalidatedReasonInput(str, Enum):
 
 class Image(RequestCall):
     def __init__(self, filename: str,
-                 external_id: str,
                  width: Optional[int] = None,
                  height: Optional[int] = None,
                  source: str = "CAM"):
 
         self.filename = filename
-        self.external_id = external_id
         self.width = width
         self.height = height
         self.source = source
 
     def to_dict(self) -> dict:
         return dict(filename=self.filename,
-                    externalId=self.external_id,
                     width=self.width,
                     height=self.height,
                     source=self.source)
@@ -58,34 +55,29 @@ class ImagesFiles(RequestCall):
 
 class Video(RequestCall):
     def __init__(self, filename: str,
-                 external_id: str,
                  width: int,
                  height: int,
                  source: str = "CAM"):
 
         self.filename = filename
-        self.external_id = external_id
         self.width = width
         self.height = height
         self.source = source
 
     def to_dict(self) -> dict:
         return dict(filename=self.filename,
-                    externalId=self.external_id,
                     width=self.width,
                     height=self.height,
                     source=self.source)
 
 
 class PointCloud(RequestCall):
-    def __init__(self, filename: str, external_id: str, source: Optional[str] = "lidar"):
+    def __init__(self, filename: str, source: Optional[str] = "lidar"):
         self.filename = filename
-        self.external_id = external_id
         self.source = source
 
     def to_dict(self) -> dict:
         return dict(filename=self.filename,
-                    externalId=self.external_id,
                     source=self.source)
 
 
@@ -457,19 +449,19 @@ class ExportAnnotation(Response):
 
 class InputJob(Response):
     def __init__(self, id: int, internal_id: str, external_id: str, filename: str,
-                 success: bool, added: datetime, error_message: Optional[str]):
+                 status: str, added: datetime, error_message: Optional[str]):
         self.id = id
         self.internal_id = internal_id
         self.external_id = external_id
         self.filename = filename
-        self.success = success
+        self.status = status
         self.added = added
         self.error_message = error_message
 
     @staticmethod
     def from_json(js: dict):
         return InputJob(int(js["id"]), js["jobId"], js["externalId"], js["filename"],
-                        bool(js["success"]), ts_to_dt(js["added"]), js.get("errorMessage"))
+                        bool(js["status"]), ts_to_dt(js["added"]), js.get("errorMessage"))
 
     def __repr__(self):
         return f"<InputJob(" + \
@@ -477,7 +469,7 @@ class InputJob(Response):
             f"internal_id={self.internal_id}, " + \
             f"external_id={self.external_id}, " + \
             f"filename={self.filename}, " + \
-            f"success={self.success}, " + \
+            f"status={self.status}, " + \
             f"added={self.added}, " + \
             f"error_message={self.error_message})>"
 
@@ -508,7 +500,7 @@ class Data(Response):
             int(js["id"]),
             js.get("externalId"),
             js.get("source"),
-            ts_to_dt(js["created"]["timestamp"])
+            ts_to_dt(js["created"])
         )
 
     def __repr__(self):

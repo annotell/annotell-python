@@ -102,7 +102,7 @@ def inputs(internal_ids, view, get_export_status, get_upload_status, get_input_l
         print(tab)
     elif internal_ids and get_upload_status:
         list_of_jobs = client.get_input_jobs_status(internal_ids=list(internal_ids))
-        headers = ["id", "internal_id", "external_id", "filename", "success", "added", "error_message"]
+        headers = ["id", "internal_id", "external_id", "filename", "status", "added", "error_message"]
         tab = _get_table(list_of_jobs, headers, "UPLOAD STATUS FOR INPUTS")
         print(tab)
 
@@ -132,7 +132,7 @@ def inputs(internal_ids, view, get_export_status, get_upload_status, get_input_l
 def inputs_externalid(external_ids, get_upload_status, get_datas):
     print()
     if external_ids and get_upload_status:
-        headers = ["id", "internal_id", "external_id", "filename", "success", "added", "error_message"]
+        headers = ["id", "internal_id", "external_id", "filename", "status", "added", "error_message"]
         list_of_jobs = client.get_input_jobs_status(external_ids=list(external_ids))
         tab = _get_table(list_of_jobs, headers, title="UPLOAD STATUS FOR INPUTS")
         print(tab)
