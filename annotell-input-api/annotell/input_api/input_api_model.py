@@ -4,6 +4,8 @@ from enum import Enum
 from datetime import datetime
 import dateutil.parser
 
+ENVELOPED_JSON_TAG = "data"
+
 
 def ts_to_dt(date_string: str) -> datetime:
     return dateutil.parser.parse(date_string)
@@ -13,21 +15,80 @@ class RequestCall:
     def to_dict(self) -> dict:
         raise NotImplementedError
 
+
+class InvalidatedReasonInput(str, Enum):
+    BAD_CONTENT = "bad-content"
+    SLAM_RECORRECTION = "slam-rerun"
+    DUPLICATE = "duplicate"
+    INCORRECTLY_CREATED = "incorrectly-created"
+
 #
 # Request Calls
 #
 
 
-class FilesPointCloudWithImages(RequestCall):
-    def __init__(self, images: List[str], pointclouds: List[str]):
+class Image(RequestCall):
+    def __init__(self, filename: str,
+                 width: Optional[int] = None,
+                 height: Optional[int] = None,
+                 source: str = "CAM"):
+
+        self.filename = filename
+        self.width = width
+        self.height = height
+        self.source = source
+
+    def to_dict(self) -> dict:
+        return dict(filename=self.filename,
+                    width=self.width,
+                    height=self.height,
+                    source=self.source)
+
+
+class ImagesFiles(RequestCall):
+    def __init__(self, images: List[Image]):
         self.images = images
-        self.pointclouds = pointclouds
+
+    def to_dict(self) -> dict:
+        return dict(images=[image.to_dict() for image in self.images])
+
+
+class Video(RequestCall):
+    def __init__(self, filename: str,
+                 width: int,
+                 height: int,
+                 source: str = "CAM"):
+
+        self.filename = filename
+        self.width = width
+        self.height = height
+        self.source = source
+
+    def to_dict(self) -> dict:
+        return dict(filename=self.filename,
+                    width=self.width,
+                    height=self.height,
+                    source=self.source)
+
+
+class PointCloud(RequestCall):
+    def __init__(self, filename: str, source: Optional[str] = "lidar"):
+        self.filename = filename
+        self.source = source
+
+    def to_dict(self) -> dict:
+        return dict(filename=self.filename,
+                    source=self.source)
+
+
+class PointCloudsWithImages(RequestCall):
+    def __init__(self, images: List[Image], point_clouds: List[PointCloud]):
+        self.images = images
+        self.point_clouds = point_clouds
 
     def to_dict(self):
-        return dict(
-            images=self.images,
-            pointclouds=self.pointclouds
-        )
+        return dict(images=[image.to_dict() for image in self.images],
+                    pointClouds=[pc.to_dict() for pc in self.point_clouds])
 
 
 class CameraType(str, Enum):
@@ -128,11 +189,9 @@ class CalibrationSpec(RequestCall):
 
 
 class SourceSpecification(RequestCall):
-    def __init__(self, images_to_source: Dict[str, str],
-                 source_to_pretty_name: Optional[Dict[str, str]] = None,
+    def __init__(self, source_to_pretty_name: Optional[Dict[str, str]] = None,
                  source_order: Optional[List[str]] = None):
 
-        self.images_to_source = images_to_source
         self.source_to_pretty_name = source_to_pretty_name
         self.source_order = source_order
 
@@ -143,36 +202,96 @@ class SourceSpecification(RequestCall):
         if self.source_order:
             as_dict['sourceOrder'] = self.source_order
 
-        as_dict['imagesToSource'] = self.images_to_source
         return as_dict
 
 
-class Metadata(RequestCall):
-    def __init__(self, external_id: str, source_specification: SourceSpecification,
+class SceneMetaData(RequestCall):
+    def __init__(self, external_id: str, source_specification: Optional[SourceSpecification]):
+        self.external_id = external_id
+        self.source_specification = source_specification
+
+    def to_dict(self):
+        as_dict = dict(externalId=self.external_id)
+        if self.source_specification:
+            as_dict["sourceSpecification"] = self.source_specification.to_dict()
+        return as_dict
+
+
+class CalibratedSceneMetaData(SceneMetaData):
+    def __init__(self, external_id: str,
+                 source_specification: SourceSpecification,
                  calibration_spec: Optional[CalibrationSpec] = None,
                  calibration_id: Optional[int] = None):
 
         if not calibration_spec and not calibration_id:
             raise Exception("calibration_spec or calibration_id must be set")
-
         if calibration_spec and calibration_id:
             raise Exception("Both calibration_spec and calibration_id cannot be set")
 
-        self.external_id = external_id
-        self.source_specification = source_specification
+        super().__init__(external_id, source_specification)
+
         self.calibration_spec = calibration_spec
         self.calibration_id = calibration_id
 
     def to_dict(self):
-        as_dict = {}
+        as_dict = super().to_dict()
         if self.calibration_spec:
             as_dict['calibrationSpec'] = self.calibration_spec.to_dict()
         if self.calibration_id:
             as_dict['calibrationId'] = self.calibration_id
 
-        as_dict['externalId'] = self.external_id
-        as_dict['sourceSpecification'] = self.source_specification.to_dict()
         return as_dict
+
+
+class SlamMetaData(CalibratedSceneMetaData):
+    def __init__(self, external_id: str,
+                 vehicle_data: List[str],
+                 dynamic_objects: str,
+                 trajectory: Optional[str],
+                 timestamps: List[int],
+                 source_specification: SourceSpecification,
+                 calibration_id: Optional[int],
+                 calibration_spec: Optional[CalibrationSpec]):
+        super().__init__(external_id, source_specification, calibration_spec, calibration_id)
+        self.vehicle_data = vehicle_data
+        self.dynamic_objects = dynamic_objects
+        self.trajectory = trajectory
+        self.timestamps = timestamps
+
+    def to_dict(self):
+        as_dict = super().to_dict()
+        as_dict["vehicleData"] = self.vehicle_data
+        as_dict["dynamicObjects"] = self.dynamic_objects
+        as_dict["timestamps"] = self.timestamps
+
+        if self.trajectory:
+            as_dict["trajectory"] = self.trajectory
+
+        return as_dict
+
+
+class SlamFiles(RequestCall):
+    def __init__(self, point_clouds: List[PointCloud], videos: Optional[List[Video]]):
+        self.point_clouds = point_clouds
+        self.videos = videos
+
+    def to_dict(self):
+        as_dict = dict(pointClouds=[pc.to_dict() for pc in self.point_clouds])
+        if self.videos:
+            as_dict['videos'] = [video.to_dict() for video in self.videos]
+
+        return as_dict
+
+
+class FilesToUpload(RequestCall):
+    """
+    Used when retrieving upload urls from input api
+    """
+    def __init__(self, files: List[str]):
+        self.files = files
+
+    def to_dict(self):
+        return dict(filesToUpload=self.files)
 
 
 class PoseTransform(RequestCall):
@@ -316,22 +435,6 @@ class Request(Response):
             f"input_list_id={self.input_list_id})>"
 
 
-class CreateInputResponse(Response):
-    def __init__(self, internal_id: str, external_id: str, converting_files: List[str]):
-        self.internal_id = internal_id
-        self.external_id = external_id
-        self.converting_files = converting_files
-
-    @staticmethod
-    def from_json(js: dict):
-        return CreateInputResponse(js["internalId"], js["externalId"], js["convertingFiles"])
-
-    def __repr__(self):
-        return f"<CreateInputResponse(" + \
-            f"internal_id={self.internal_id}, external_id={self.external_id}, " + \
-            f"converting_files={self.converting_files})>"
-
-
 class ExportAnnotation(Response):
     def __init__(self, annotation_id: int, export_content: dict):
         self.annotation_id = annotation_id
@@ -349,19 +452,19 @@ class ExportAnnotation(Response):
 
 class InputJob(Response):
     def __init__(self, id: int, internal_id: str, external_id: str, filename: str,
-                 success: bool, added: datetime, error_message: Optional[str]):
+                 status: str, added: datetime, error_message: Optional[str]):
         self.id = id
         self.internal_id = internal_id
         self.external_id = external_id
         self.filename = filename
-        self.success = success
+        self.status = status
         self.added = added
         self.error_message = error_message
 
     @staticmethod
     def from_json(js: dict):
         return InputJob(int(js["id"]), js["jobId"], js["externalId"], js["filename"],
-                        bool(js["success"]), ts_to_dt(js["added"]), js.get("errorMessage"))
+                        bool(js["status"]), ts_to_dt(js["added"]), js.get("errorMessage"))
 
     def __repr__(self):
         return f"<InputJob(" + \
@@ -369,9 +472,22 @@ class InputJob(Response):
             f"internal_id={self.internal_id}, " + \
             f"external_id={self.external_id}, " + \
             f"filename={self.filename}, " + \
-            f"success={self.success}, " + \
+            f"status={self.status}, " + \
             f"added={self.added}, " + \
             f"error_message={self.error_message})>"
+
+
+class CreateInputJobResponse(Response):
+    def __init__(self, internal_id: int):
+        self.internal_id = internal_id
+
+    @staticmethod
+    def from_json(js: dict):
+        return CreateInputJobResponse(js["internalId"])
+
+    def __repr__(self):
+        return f"<CreateInputJobResponse(" + \
+               f"internal_id={self.internal_id})>"
 
 
 class Data(Response):
@@ -387,7 +503,7 @@ class Data(Response):
             int(js["id"]),
             js.get("externalId"),
             js.get("source"),
-            ts_to_dt(js["created"]["timestamp"])
+            ts_to_dt(js["created"])
         )
 
     def __repr__(self):
@@ -417,3 +533,56 @@ class Input(Response):
             f"internal_id={self.internal_id}, " + \
             f"external_id={self.external_id}, " + \
             f"inpyt_type={self.input_type})>"
+
+
+class InvalidatedInputsResponse(Response):
+    def __init__(self, invalidated_input_ids: List[int], not_found_input_ids: List[int], already_invalidated_input_ids: List[int]):
+        self.invalidated_input_ids = invalidated_input_ids
+        self.not_found_input_ids = not_found_input_ids
+        self.already_invalidated_input_ids = already_invalidated_input_ids
+
+    @staticmethod
+    def from_json(js: dict):
+        return InvalidatedInputsResponse(js["invalidatedInputIds"],
+                                         js["notFoundInputIds"],
+                                         js["alreadyInvalidatedInputIds"])
+
+    def __repr__(self):
+        return f"<InvalidatedInputsResponse(" + \
+               f"invalidated_input_ids={self.invalidated_input_ids}, " + \
+               f"not_found_input_ids={self.not_found_input_ids}, " + \
+               f"already_invalidated_input_ids={self.already_invalidated_input_ids})>"
+
+
+class RemovedInputsResponse(Response):
+    def __init__(self, removed_input_ids: List[int], not_found_input_ids: List[int], already_removed_input_ids: List[int]):
+        self.removed_input_ids = removed_input_ids
+        self.not_found_input_ids = not_found_input_ids
+        self.already_removed_input_ids = already_removed_input_ids
+
+    @staticmethod
+    def from_json(js: dict):
+        return InvalidatedInputsResponse(js["removedInputIds"],
+                                         js["notFoundInputIds"],
+                                         js["alreadyRemovedInputIds"])
+
+    def __repr__(self):
+        return f"<RemovedInputsResponse(" + \
+               f"removed_input_ids={self.removed_input_ids}, " + \
+               f"not_found_input_ids={self.not_found_input_ids}, " + \
+               f"already_removed_input_ids={self.already_removed_input_ids})>"
+
+
+class UploadUrlsResponse(Response):
+    def __init__(self, files_to_url: Dict[str, str], internal_id: int):
+        self.files_to_url = files_to_url
+        self.internal_id = internal_id
+
+    @staticmethod
+    def from_json(js: dict):
+        return UploadUrlsResponse(js["files"], js["jobId"])
+
+    def __repr__(self):
+        return f"<UploadUrlsResponse(" + \
+               f"files_to_url={self.files_to_url}, " + \
+               f"internal_id={self.internal_id})>"

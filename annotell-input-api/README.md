@@ -19,6 +19,20 @@ $ annoutil projects
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [0.2.4] - 2020-06-17
+### Changed
+- Changed pointcloud_with_images model. Images and point clouds are now represented as `Image` and `PointCloud` containing filename and source. Consequently, `images_to_source` is removed from `SourceSpecification`.
+
+### Added
+- create Image inputs via `create_images_input_job`
+- It's now possible to invalidate erroneous inputs via `invalidate_inputs`
+- Support for removing specific inputs via `remove_inputs_from_input_list`
+- SLAM support (not generally available)
+
+### Bugfixes
+- Fixed issue where annoutils would not deserialize datas correctly when querying datas by internalId
+
 ## [0.2.3] - 2020-04-21
 ### Changed
 - Changed how timestamps are represented when receiving responses.

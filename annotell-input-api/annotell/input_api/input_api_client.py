@@ -21,11 +21,13 @@ class InputApiClient:
     def __init__(self, *,
                  auth: None,
                  host: str = DEFAULT_HOST,
-                 auth_host: str = DEFAULT_AUTH_HOST):
+                 auth_host: str = DEFAULT_AUTH_HOST,
+                 client_organization_id: int = None):
         """
         :param auth: auth credentials, see https://github.com/annotell/annotell-python/tree/master/annotell-auth
         :param host: override for input api url
         :param auth_host: override for authentication url
+        :param client_organization_id: Overrides your users organization id. Only works with an Annotell user.
         """
 
         self.host = host
@@ -37,12 +39,19 @@ class InputApiClient:
             "Accept": "application/json",
             "User-Agent": f"annotell-cloud-storage:{__version__}"
         }
+        self.dryrun_header = {"X-Dryrun": ""}
+
+        if client_organization_id is not None:
+            self.headers["X-Organization-Id"] = str(client_organization_id)
+            log.info(f"WARNING: You will now act as if you are part of organization: {client_organization_id}. "
+                     f"This will not work unless you are an Annotell user.")
 
     @property
     def session(self):
         return self.oauth_session.session
 
-    def _raise_on_error(self, resp: requests.Response) -> requests.Response:
+    @staticmethod
+    def _raise_on_error(resp: requests.Response) -> requests.Response:
         try:
             resp.raise_for_status()
         except requests.HTTPError as e:
@@ -51,11 +60,31 @@ class InputApiClient:
             raise
         return resp
 
-    def _get_upload_urls(self, files: Mapping[str, List[str]]):
+    def _get_upload_urls(self, files_to_upload: IAM.FilesToUpload):
         """Get upload urls to cloud storage"""
         url = f"{self.host}/v1/inputs/upload-urls"
-        resp = self.session.get(url, json=files, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        resp = self.session.get(url, json=files_to_upload.to_dict(), headers=self.headers)
+        json_resp = self._raise_on_error(resp).json()
+        return IAM.UploadUrlsResponse.from_json(json_resp)
+
+    @staticmethod
+    def _set_images_dimensions(folder: Path, images: List[IAM.Image]):
+
+        def _is_image_missing_dimensions(img: IAM.Image):
+            return img.width is None or img.height is None
+
+        for image in images:
+            if _is_image_missing_dimensions(image):
+                with Image.open(folder.joinpath(image.filename)) as im:
+                    width, height = im.size
+                    image.height = height
+                    image.width = width
+
+    @staticmethod
+    def _unwrap_enveloped_json(js: dict) -> dict:
+        if js.get(IAM.ENVELOPED_JSON_TAG) is not None:
+            return js[IAM.ENVELOPED_JSON_TAG]
+        return js
 
     def _upload_files(self, folder: Path, url_map: Mapping[str, str]):
         """Upload all files to cloud storage"""
@@ -76,35 +105,33 @@ class InputApiClient:
                     log.error(f"Got {resp.status_code} error calling cloud bucket upload, "
                               f"got response\n{resp.content}")
 
-    def _create_inputs_point_cloud_with_images(self, image_files: Mapping[str, Mapping[str, str]],
-                                               pointcloud_files: List[str], job_id: str,
-                                               input_list_id: int, metadata: IAM.Metadata):
+    def _create_inputs_point_cloud_with_images(self, point_clouds_with_images: IAM.PointCloudsWithImages,
+                                               job_id: str,
+                                               input_list_id: int,
+                                               metadata: IAM.CalibratedSceneMetaData):
+
         """Create inputs from uploaded files"""
         log.info(f"Creating inputs for files with job_id={job_id}")
-        url = f"{self.host}/v1/inputs"
-        files_js = dict(
-            imagesWithSettings=image_files,
-            pointclouds=pointcloud_files
-        )
+        url = f"{self.host}/v1/inputs/pointclouds-with-images"
         js = dict(
-            files=files_js,
+            files=point_clouds_with_images.to_dict(),
             internalId=job_id,
             inputListId=input_list_id,
-            metadata=metadata.to_dict()
-        )
+            metadata=metadata.to_dict())
+
         resp = self.session.post(url, json=js, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
-        return IAM.CreateInputResponse.from_json(json_resp)
+        return IAM.CreateInputJobResponse.from_json(json_resp)
 
     def create_inputs_point_cloud_with_images(self, folder: Path,
-                                              files: IAM.FilesPointCloudWithImages,
+                                              point_clouds_with_images: IAM.PointCloudsWithImages,
                                               input_list_id: int,
-                                              metadata: IAM.Metadata) -> IAM.CreateInputResponse:
+                                              metadata: IAM.CalibratedSceneMetaData) -> IAM.CreateInputJobResponse:
         """
         Upload files and create an input of type 'point_cloud_with_image'.
 
         :param folder: path to folder containing files
-        :param files: class containing images and pointclouds that constitute the input
+        :param point_clouds_with_images: class containing images and pointclouds that constitute the input
         :param input_list_id: input list to add input to
         :param metadata:
 
@@ -117,29 +144,120 @@ class InputApiClient:
         If the input_job fails (cannot perform conversion) the input is not added. To see if
         conversion was successful please see the method `get_input_jobs_status`.
         """
-        resp = self._get_upload_urls(files.to_dict())
 
-        images_with_settings = dict()
-        for image in files.images:
-            with Image.open(os.path.join(folder, image)) as im:
-                width, height = im.size
-            images_with_settings[image] = dict(
-                width=width,
-                height=height
-            )
+        files_on_disk = [image.filename for image in point_clouds_with_images.images] + \
+                        [pc.filename for pc in point_clouds_with_images.point_clouds]
 
-        images_on_disk = images_with_settings.keys()
-        images_in_response = resp['images'].keys()
-        assert set(images_on_disk) == set(images_in_response)
-        pointcloud_files = list(resp['pointclouds'].keys())
-        job_id = resp['jobId']
+        upload_urls_response = self._get_upload_urls(IAM.FilesToUpload(files_on_disk))
 
-        items = {**resp['images'], **resp['pointclouds']}
-        self._upload_files(folder, items)
-        create_input_response = self._create_inputs_point_cloud_with_images(
-            images_with_settings, pointcloud_files, job_id, input_list_id, metadata
-        )
+        files_in_response = list(upload_urls_response.files_to_url.keys())
+        assert set(files_on_disk) == set(files_in_response)
+
+        self._upload_files(folder, upload_urls_response.files_to_url)
+        self._set_images_dimensions(folder, point_clouds_with_images.images)
+
+        create_input_response = self._create_inputs_point_cloud_with_images(point_clouds_with_images,
+                                                                            upload_urls_response.internal_id,
+                                                                            input_list_id,
+                                                                            metadata)
         return create_input_response
+
+    def create_slam_input_job(self, slam_files: IAM.SlamFiles,
+                              metadata: IAM.SlamMetaData,
+                              input_list_id: int,
+                              dryrun=False):
+        """
+        Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
+        started.
+
+        :param slam_files: class containing files necessary for SLAM.
+        :param metadata: class containing metadata necessary for SLAM.
+        :param input_list_id: ID of the input list the new input, when created, will be added to.
+        :param dryrun: If True the files/metadata will be validated but no input job will be created.
+        :returns InputJobCreatedMessage: Class containing id of the created input job, or nothing if dryrun.
+        """
+        if dryrun:
+            headers = {**self.headers, **self.dryrun_header}
+        else:
+            headers = {**self.headers}
+
+        url = f"{self.host}/v1/inputs/slam"
+        slam_json = dict(files=slam_files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
+        resp = self.session.post(url, json=slam_json, headers=headers)
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+
+        if not dryrun:
+            return IAM.CreateInputJobResponse.from_json(json_resp)
+
+    def upload_and_create_images_input_job(self, folder: Path,
+                                           images_files: IAM.ImagesFiles,
+                                           metadata: IAM.SceneMetaData,
+                                           input_list_id: int):
+        """
+        Verifies the images and metadata given and then uploads images to Google Cloud Storage and
+        creates an input job.
+        :param folder: Absolute path to directory containing all images.
+        :param images_files: List containing all images for the input.
+        :param metadata: class containing metadata necessary for creating input from images.
+        :param input_list_id: ID of the input list the new input, when created, will be added to.
+        :returns InputJobCreatedMessage: Class containing id of the created input job.
+        """
+
+        self._set_images_dimensions(folder, images_files.images)
+
+        filenames = [image.filename for image in images_files.images]
+        upload_url_resp = self._get_upload_urls(IAM.FilesToUpload(filenames))
+
+        internal_id = upload_url_resp.internal_id
+        self.create_images_input_job(images_files=images_files,
+                                     metadata=metadata,
+                                     input_list_id=input_list_id,
+                                     internal_id=internal_id,
+                                     dryrun=True)
+
+        files_in_response = upload_url_resp.files_to_url.keys()
+        assert set(filenames) == set(files_in_response)
+        self._upload_files(folder, upload_url_resp.files_to_url)
+
+        input_job_created_message = self.create_images_input_job(images_files=images_files,
+                                                                 metadata=metadata,
+                                                                 input_list_id=input_list_id,
+                                                                 internal_id=internal_id)
+
+        log.info(f"Creating input for images with internal_id={input_job_created_message.internal_id}")
+        return input_job_created_message
+
+    def create_images_input_job(self, images_files: IAM.ImagesFiles,
+                                metadata: IAM.SceneMetaData,
+                                input_list_id: int,
+                                internal_id: str = None,
+                                dryrun: bool = False):
+        """
+        Creates an input job for an image input
+
+        :param images_files: Contains all images, with their dimensions
+        :param metadata: Contains necessary metadata in order to create and validate inputs
+        :param input_list_id: ID of the input list the new input, when created, will be added to.
+        :param internal_id: When created, the input will use this internal id.
+        :param dryrun: If True the files/metadata will be validated but no input job will be created.
+        :returns InputJobCreatedMessage: Class containing id of the created input job, or nothing if dryrun
+        """
+
+        if dryrun:
+            headers = {**self.headers, **self.dryrun_header}
+        else:
+            headers = {**self.headers}
+
+        create_input_job_url = f"{self.host}/v1/inputs/images"
+        create_input_job_json = dict(files=images_files.to_dict(),
+                                     metadata=metadata.to_dict(),
+                                     inputListId=input_list_id,
+                                     internalId=internal_id)
+
+        resp = self.session.post(create_input_job_url, json=create_input_job_json, headers=headers)
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        if not dryrun:
+            return IAM.CreateInputJobResponse.from_json(json_resp)
 
     def update_completed_slam_input_job(self, pointcloud_uri: str,
                                         trajectory: IAM.Trajectory,
@@ -148,31 +266,33 @@ class InputApiClient:
         Updates an input job with data about the created SLAM, then sends a message to inputEngine which
         will create an input.
 
-        @:param pointcloud_uri: URI pointing to a SLAM:ed pointcloud in either s3 or gs cloud storage.
-        @:param trajectory: class containing the trajectory of the SLAM:ed pointcloud.
-        @:param job_id: UUID for the input job.
-        @:returns dict: Json containing information whether the input job was successfully updated or not.
+        :param pointcloud_uri: URI pointing to a SLAM:ed pointcloud in either s3 or gs cloud storage.
+        :param trajectory: class containing the trajectory of the SLAM:ed pointcloud.
+        :param job_id: UUID for the input job.
+        :returns SlamJobUpdated: Class with boolean describing if the update was successful or not.
         """
         url = f"{self.host}/v1/inputs/progress"
-        update_json = dict(files=dict(pointclouds=pointcloud_uri),
+        update_json = dict(files=dict(pointClouds=pointcloud_uri),
                            metadata=dict(trajectory=trajectory.to_dict()),
                            jobId=job_id)
         resp = self.session.post(url, json=update_json, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        return json_resp
 
     def update_failed_slam_input_job(self, job_id: str, message: str):
         """
         Updates an input job with an error message, then sends a message to inputEngine which will
         notify the responsible party about the failed input job.
 
-        @:param job_id: UUID for the input job.
-        @:param message: String with the error message.
-        @:returns dict: Json containing information whether the input job was successfully updated or not.
+        :param job_id: UUID for the input job.
+        :param message: String with the error message.
+        :returns SlamJobUpdated: Class with boolean describing if the update was successful or not.
         """
         url = f"{self.host}/v1/inputs/progress"
         update_json = dict(jobId=job_id, message=message)
         resp = self.session.post(url, json=update_json, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        json_resp = self._raise_on_error(resp).json()
+        return json_resp
 
     def get_internal_ids_for_external_ids(self, external_ids: List[str]) -> Dict[str, List[str]]:
         url = f"{self.host}/v1/inputs/"
@@ -186,11 +306,33 @@ class InputApiClient:
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
-    def invalidate_input(self):
-        """Not yet implemented."""
+    def invalidate_inputs(self, input_ids: List[int], invalidated_reason: IAM.InvalidatedReasonInput):
+        """
+        Invalidates inputs, and removes them from all input lists
+
+        :param input_ids: The input IDs to invalidate
+        :param invalidated_reason: Description why inputs were invalidate
+        :return InvalidatedInputsResponse: Class containing what inputs were invalidated
+        """
         url = f"{self.host}/v1/inputs/invalidate"
-        resp = self.session.get(url, headers=self.headers)
-        return self._raise_on_error(resp).json()
+        invalidated_json = dict(inputIds=input_ids, invalidatedReason=invalidated_reason)
+        resp = self.session.post(url, json=invalidated_json, headers=self.headers)
+        resp_json = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        return IAM.InvalidatedInputsResponse.from_json(resp_json)
+
+    def remove_inputs_from_input_list(self, input_list_id: int, input_ids: List[int]):
+        """
+        Removes inputs from specified input list, without invalidating the input
+
+        :param input_list_id: The input list where inputs should be removed
+        :param input_ids: The input IDs to invalidate
+        :return RemovedInputsResponse: Class containing what inputs were removed
+        """
+        url = f"{self.host}/v1/inputs/remove"
+        removed_json = dict(inputListId=input_list_id, inputIds=input_ids)
+        resp = self.session.post(url, json=removed_json, headers=self.headers)
+        resp_json = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        return IAM.RemovedInputsResponse.from_json(resp_json)
 
     def list_projects(self) -> List[IAM.Project]:
         url = f"{self.host}/v1/inputs/projects"
@@ -309,8 +451,13 @@ class InputApiClient:
         json_resp = self._raise_on_error(resp).json()
         return json_resp
 
-    def get_input_jobs_status(self, internal_ids: List[str] = [],
-                              external_ids: List[str] = []) -> List[IAM.InputJob]:
+    def get_input_jobs_status(self, internal_ids: List[str] = None,
+                              external_ids: List[str] = None) -> List[IAM.InputJob]:
+        if internal_ids is None:
+            internal_ids = []
+        if external_ids is None:
+            external_ids = []
+
         base_url = f"{self.host}/v1/inputs/job-status"
         js = dict(
             internalIds=internal_ids,
