@@ -211,20 +211,23 @@ class InputApiClient:
         upload_url_resp = self._get_upload_urls(IAM.FilesToUpload(filenames))
 
         internal_id = upload_url_resp.internal_id
-        input_job_created_message = self._create_images_input_job(images_files=images_files,
-                                                                  metadata=metadata,
-                                                                  input_list_id=input_list_id,
-                                                                  internal_id=internal_id,
-                                                                  dryrun=dryrun)
+        self._create_images_input_job(images_files=images_files,
+                                      metadata=metadata,
+                                      input_list_id=input_list_id,
+                                      internal_id=internal_id,
+                                      dryrun=True)
 
         files_in_response = upload_url_resp.files_to_url.keys()
         assert set(filenames) == set(files_in_response)
 
         if not dryrun:
-            log.info(f"Creating input for images with internal_id={input_job_created_message.internal_id}")
             self._upload_files(folder, upload_url_resp.files_to_url)
-
-        return input_job_created_message
+            input_job_created_message = self._create_images_input_job(images_files=images_files,
+                                                                      metadata=metadata,
+                                                                      input_list_id=input_list_id,
+                                                                      internal_id=internal_id)
+            log.info(f"Creating input for images with internal_id={input_job_created_message.internal_id}")
+            return input_job_created_message
 
     def _create_images_input_job(self, images_files: IAM.ImagesFiles,
                                  metadata: IAM.SceneMetaData,
