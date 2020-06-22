@@ -1,6 +1,5 @@
 """Client for communicating with the Annotell platform."""
 import requests
-import os
 import logging
 from typing import List, Mapping, Optional, Union, Dict
 from pathlib import Path
@@ -75,7 +74,8 @@ class InputApiClient:
 
         for image in images:
             if _is_image_missing_dimensions(image):
-                with Image.open(folder.joinpath(image.filename)) as im:
+                fi = folder.joinpath(image.filename).expanduser()
+                with Image.open(fi) as im:
                     width, height = im.size
                     image.height = height
                     image.width = width
@@ -89,7 +89,7 @@ class InputApiClient:
     def _upload_files(self, folder: Path, url_map: Mapping[str, str]):
         """Upload all files to cloud storage"""
         for (file, upload_url) in url_map.items():
-            fi = folder.joinpath(file)
+            fi = folder.joinpath(file).expanduser()
             log.info(f"Uploading file={fi}")
             with fi.open('rb') as f:
                 content_type = mimetypes.guess_type(file)[0]
@@ -192,7 +192,8 @@ class InputApiClient:
     def upload_and_create_images_input_job(self, folder: Path,
                                            images_files: IAM.ImagesFiles,
                                            metadata: IAM.SceneMetaData,
-                                           input_list_id: int):
+                                           input_list_id: int,
+                                           dryrun: bool = False):
         """
         Verifies the images and metadata given and then uploads images to Google Cloud Storage and
         creates an input job.
@@ -200,7 +201,8 @@ class InputApiClient:
         :param images_files: List containing all images for the input.
         :param metadata: class containing metadata necessary for creating input from images.
         :param input_list_id: ID of the input list the new input, when created, will be added to.
-        :returns InputJobCreatedMessage: Class containing id of the created input job.
+        :param dryrun: If True the files/metadata will be validated but no input job will be created.
+        :returns InputJobCreatedMessage: Class containing id of the created input job, or None if dryrun.
         """
 
         self._set_images_dimensions(folder, images_files.images)
@@ -209,29 +211,29 @@ class InputApiClient:
         upload_url_resp = self._get_upload_urls(IAM.FilesToUpload(filenames))
 
         internal_id = upload_url_resp.internal_id
-        self.create_images_input_job(images_files=images_files,
-                                     metadata=metadata,
-                                     input_list_id=input_list_id,
-                                     internal_id=internal_id,
-                                     dryrun=True)
+        self._create_images_input_job(images_files=images_files,
+                                      metadata=metadata,
+                                      input_list_id=input_list_id,
+                                      internal_id=internal_id,
+                                      dryrun=True)
 
         files_in_response = upload_url_resp.files_to_url.keys()
         assert set(filenames) == set(files_in_response)
-        self._upload_files(folder, upload_url_resp.files_to_url)
 
-        input_job_created_message = self.create_images_input_job(images_files=images_files,
-                                                                 metadata=metadata,
-                                                                 input_list_id=input_list_id,
-                                                                 internal_id=internal_id)
+        if not dryrun:
+            self._upload_files(folder, upload_url_resp.files_to_url)
+            input_job_created_message = self._create_images_input_job(images_files=images_files,
+                                                                      metadata=metadata,
+                                                                      input_list_id=input_list_id,
+                                                                      internal_id=internal_id)
+            log.info(f"Creating input for images with internal_id={input_job_created_message.internal_id}")
+            return input_job_created_message
 
-        log.info(f"Creating input for images with internal_id={input_job_created_message.internal_id}")
-        return input_job_created_message
-
-    def create_images_input_job(self, images_files: IAM.ImagesFiles,
-                                metadata: IAM.SceneMetaData,
-                                input_list_id: int,
-                                internal_id: str = None,
-                                dryrun: bool = False):
+    def _create_images_input_job(self, images_files: IAM.ImagesFiles,
+                                 metadata: IAM.SceneMetaData,
+                                 input_list_id: int,
+                                 internal_id: str = None,
+                                 dryrun: bool = False):
         """
         Creates an input job for an image input
 
@@ -240,7 +242,7 @@ class InputApiClient:
         :param input_list_id: ID of the input list the new input, when created, will be added to.
         :param internal_id: When created, the input will use this internal id.
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
-        :returns InputJobCreatedMessage: Class containing id of the created input job, or nothing if dryrun
+        :returns InputJobCreatedMessage: Class containing id of the created input job, or None if dryrun
         """
 
         if dryrun:
@@ -325,7 +327,7 @@ class InputApiClient:
         Removes inputs from specified input list, without invalidating the input
 
         :param input_list_id: The input list where inputs should be removed
-        :param input_ids: The input IDs to invalidate
+        :param input_ids: The input IDs to remove
         :return RemovedInputsResponse: Class containing what inputs were removed
         """
         url = f"{self.host}/v1/inputs/remove"
