@@ -1,6 +1,5 @@
 """Client for communicating with the Annotell platform."""
 import requests
-import os
 import logging
 from typing import List, Mapping, Optional, Union, Dict
 from pathlib import Path
@@ -75,7 +74,8 @@ class InputApiClient:
 
         for image in images:
             if _is_image_missing_dimensions(image):
-                with Image.open(folder.joinpath(image.filename)) as im:
+                fi = folder.joinpath(image.filename).expanduser()
+                with Image.open(fi) as im:
                     width, height = im.size
                     image.height = height
                     image.width = width
@@ -89,7 +89,7 @@ class InputApiClient:
     def _upload_files(self, folder: Path, url_map: Mapping[str, str]):
         """Upload all files to cloud storage"""
         for (file, upload_url) in url_map.items():
-            fi = folder.joinpath(file)
+            fi = folder.joinpath(file).expanduser()
             log.info(f"Uploading file={fi}")
             with fi.open('rb') as f:
                 content_type = mimetypes.guess_type(file)[0]
@@ -327,7 +327,7 @@ class InputApiClient:
         Removes inputs from specified input list, without invalidating the input
 
         :param input_list_id: The input list where inputs should be removed
-        :param input_ids: The input IDs to invalidate
+        :param input_ids: The input IDs to remove
         :return RemovedInputsResponse: Class containing what inputs were removed
         """
         url = f"{self.host}/v1/inputs/remove"
