@@ -67,7 +67,7 @@ class InputApiClient:
         return IAM.UploadUrlsResponse.from_json(json_resp)
 
     @staticmethod
-    def _set_images_dimensions(folder: Path, images: List[IAM.Image]):
+    def _set_images_dimensions(folder: Path, images: List[IAM.Image]) -> None:
 
         def _is_image_missing_dimensions(img: IAM.Image):
             return img.width is None or img.height is None
@@ -110,7 +110,7 @@ class InputApiClient:
                                                internal_id: str,
                                                input_list_id: int,
                                                metadata: IAM.CalibratedSceneMetaData,
-                                               dryrun: bool = False) -> Union[IAM.CreateInputJobResponse, None]:
+                                               dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
 
         """Create point cloud with images"""
 
@@ -135,7 +135,7 @@ class InputApiClient:
                                               point_clouds_with_images: IAM.PointCloudsWithImages,
                                               input_list_id: int,
                                               metadata: IAM.CalibratedSceneMetaData,
-                                              dryrun: bool = False) -> Union[IAM.CreateInputJobResponse, None]:
+                                              dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Upload files and create an input of type 'point_cloud_with_image'.
 
@@ -184,7 +184,7 @@ class InputApiClient:
     def create_slam_input_job(self, slam_files: IAM.SlamFiles,
                               metadata: IAM.SlamMetaData,
                               input_list_id: int,
-                              dryrun=False) -> Union[IAM.CreateInputJobResponse, None]:
+                              dryrun=False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
         started.
@@ -212,7 +212,7 @@ class InputApiClient:
                                            images_files: IAM.ImagesFiles,
                                            metadata: IAM.SceneMetaData,
                                            input_list_id: int,
-                                           dryrun: bool = False) -> Union[IAM.CreateInputJobResponse, None]:
+                                           dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Verifies the images and metadata given and then uploads images to Google Cloud Storage and
         creates an input job.
@@ -252,7 +252,7 @@ class InputApiClient:
                                  metadata: IAM.SceneMetaData,
                                  input_list_id: int,
                                  internal_id: str = None,
-                                 dryrun: bool = False) -> Union[IAM.CreateInputJobResponse, None]:
+                                 dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Creates an input job for an image input
 
