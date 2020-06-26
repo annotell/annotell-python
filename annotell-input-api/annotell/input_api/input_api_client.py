@@ -384,14 +384,9 @@ class InputApiClient:
         else:
             return [IAM.CalibrationWithContent.from_json(js) for js in json_resp]
 
-    def create_calibration_data(self, calibration: IAM.Calibration, external_id: str
-                                ) -> IAM.CalibrationNoContent:
+    def create_calibration_data(self, calibration_spec: IAM.CalibrationSpec) -> IAM.CalibrationNoContent:
         url = f"{self.host}/v1/inputs/calibration-data"
-        js = dict(
-            externalId=external_id,
-            calibration=calibration.to_dict()
-        )
-        resp = self.session.post(url, json=js, headers=self.headers)
+        resp = self.session.post(url, json=calibration_spec.to_dict(), headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return IAM.CalibrationNoContent.from_json(json_resp)
 
