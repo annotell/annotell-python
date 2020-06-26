@@ -22,7 +22,9 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.6] - 2020-06-26
 ### Changed
-- Removed calibrationSpec from CalibratedSceneMetaData and SlamMetaData.
+- Removed `CalibrationSpec` from `CalibratedSceneMetaData` and `SlamMetaData`. Updated 
+so that `create_calibration_data` in `InputApiClient` only takes a `CalibrationSpec`
+as parameter.
 
 ## [0.2.5] - 2020-06-22
 ### Bugfixes
