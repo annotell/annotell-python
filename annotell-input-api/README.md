@@ -20,9 +20,15 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.6] - 2020-06-26
+### Changed
+- Removed `CalibrationSpec` from `CalibratedSceneMetaData` and `SlamMetaData`. Updated 
+so that `create_calibration_data` in `InputApiClient` only takes a `CalibrationSpec`
+as parameter.
+
 ## [0.2.5] - 2020-06-22
 ### Bugfixes
-- Fixed issue where a folder including a "~" would not expand correctly.
+- Fixed issue where a path including a "~" would not expand correctly.
 
 ## [0.2.4] - 2020-06-17
 ### Changed
