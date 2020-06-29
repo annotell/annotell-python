@@ -233,25 +233,47 @@ class CalibratedSceneMetaData(SceneMetaData):
         return as_dict
 
 
+class TimeCalibration(RequestCall):
+    def __init__(self, offset_spec: Dict[str, float]):
+        self.offset_spec = offset_spec
+
+    def to_dict(self) -> dict:
+        return dict(offsetSpec=self.offset_spec)
+
+
+class TimeSpecification(RequestCall):
+    def __init__(self, start_ts: float, end_ts: float, time_calibration: TimeCalibration):
+        self.start_ts = start_ts
+        self.end_ts = end_ts
+        self.time_calibration = time_calibration
+
+    def to_dict(self) -> dict:
+        as_dict = dict(startTs=self.start_ts,
+                       endTs=self.end_ts,
+                       timeCalibration=self.time_calibration.to_dict())
+
+        return as_dict
+
+
 class SlamMetaData(CalibratedSceneMetaData):
     def __init__(self, external_id: str,
                  vehicle_data: List[str],
                  dynamic_objects: str,
                  trajectory: Optional[str],
-                 timestamps: List[int],
+                 time_specification: TimeSpecification,
                  source_specification: SourceSpecification,
                  calibration_id: int):
         super().__init__(external_id, source_specification, calibration_id)
         self.vehicle_data = vehicle_data
         self.dynamic_objects = dynamic_objects
         self.trajectory = trajectory
-        self.timestamps = timestamps
+        self.time_specification = time_specification
 
     def to_dict(self):
         as_dict = super().to_dict()
         as_dict["vehicleData"] = self.vehicle_data
         as_dict["dynamicObjects"] = self.dynamic_objects
-        as_dict["timestamps"] = self.timestamps
+        as_dict["timeSpecification"] = self.time_specification.to_dict()
 
         if self.trajectory:
             as_dict["trajectory"] = self.trajectory

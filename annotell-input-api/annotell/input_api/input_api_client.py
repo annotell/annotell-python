@@ -35,8 +35,7 @@ class InputApiClient:
 
         self.headers = {
             "Accept-Encoding": "gzip",
-            "Accept": "application/json",
-            "User-Agent": f"annotell-cloud-storage:{__version__}"
+            "Accept": "application/json"
         }
         self.dryrun_header = {"X-Dryrun": ""}
 
