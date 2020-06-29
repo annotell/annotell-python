@@ -20,6 +20,10 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.7] - 2020-06-29
+### Added
+- Require time specification to be send when posting slam requests
+
 ## [0.2.6] - 2020-06-26
 ### Changed
 - Removed `CalibrationSpec` from `CalibratedSceneMetaData` and `SlamMetaData`. Updated 
