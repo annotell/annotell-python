@@ -368,16 +368,16 @@ class InputApiClient:
     def get_calibration_data(self, id: Optional[int] = None, external_id: Optional[str] = None
                              ) -> Union[List[IAM.CalibrationNoContent], List[IAM.CalibrationWithContent]]:
         """
-        Queries the inputApi about either:
-        * A specific calibration (of only the id is given)
-        * Calibrations relate to an external_id (if external_id is given)
-        * All calibrations connected to the users organization.
+        Queries the inputApi for either:
+        * A list containing a specific calibration (of only the id is given)
+        * A list of calibrations connected to an external_id (if only the external_id is given)
+        * A list of calibrations connected to the users organization.
         Note that both id and external_id cannot be given at the same time.
 
         :param id: The id of the calibration to get
         :param external_id: The external id of the calibration(s) to get
-        :return List: Returns a list of CalibrationNoContent if all calibrations where queried,
-         or a list of CalibrationWithContent if any id was user.
+        :return List: A list of CalibrationNoContent if an id or external id was given, or a list of
+        CalibrationWithContent otherwise.
         """
         base_url = f"{self.host}/v1/inputs/calibration-data"
         if id:
