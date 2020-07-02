@@ -108,7 +108,7 @@ class InputApiClient:
         For each external id, returns a count of how many inputs exists with that external id.
 
         :param external_ids: List of external ids
-        :return Dict: Dictionary which maps inputs that has a certain external id
+        :return Dict: Dictionary which maps an external id to a count of inputs with that external id
         """
 
         if len(external_ids) == 0:
