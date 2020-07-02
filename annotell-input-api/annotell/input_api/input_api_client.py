@@ -5,7 +5,6 @@ from typing import List, Mapping, Optional, Union, Dict
 from pathlib import Path
 import mimetypes
 from PIL import Image
-from . import __version__
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 from . import input_api_model as IAM
 
@@ -103,6 +102,24 @@ class InputApiClient:
                 except requests.HTTPError as e:
                     log.error(f"Got {resp.status_code} error calling cloud bucket upload, "
                               f"got response\n{resp.content}")
+
+    def count_inputs_for_external_ids(self, external_ids: List[str]) -> Dict[str, int]:
+        """
+        For each external id, returns a count of how many inputs exists with that external id.
+
+        :param external_ids: List of external ids
+        :return Dict: Dictionary which maps inputs that has a certain external id
+        """
+
+        if len(external_ids) == 0:
+            log.error("You need to specify a list of external ids.")
+            return
+
+        external_ids_csv = ",".join(external_ids)
+        url = f"{self.host}/v1/inputs/count-for-ids?externalIds={external_ids_csv}"
+        resp = self.session.get(url, headers=self.headers)
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        return json_resp
 
     def _create_inputs_point_cloud_with_images(self, point_clouds_with_images: IAM.PointCloudsWithImages,
                                                job_id: str,
