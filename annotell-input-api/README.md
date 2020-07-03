@@ -20,9 +20,13 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.9] - 2020-07-02
+### Added
+- New public method in `InputApiClient`: `count_inputs_for_external_ids`.
+
 ## [0.2.8] - 2020-06-30
 ### Added
-- Docstrings for all public method in the `InputApiClient` class
+- Docstrings for all public methods in the `InputApiClient` class
 
 ## [0.2.7] - 2020-06-29
 ### Added
