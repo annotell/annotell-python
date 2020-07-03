@@ -5,7 +5,6 @@ from typing import List, Mapping, Optional, Union, Dict
 from pathlib import Path
 import mimetypes
 from PIL import Image
-from . import __version__
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 from . import input_api_model as IAM
 
@@ -110,6 +109,24 @@ class InputApiClient:
                               f"got response\n{resp.content}")
                     raise e
 
+    def count_inputs_for_external_ids(self, external_ids: List[str]) -> Dict[str, int]:
+        """
+        For each external id, returns a count of how many inputs exists with that external id.
+
+        :param external_ids: List of external ids
+        :return Dict: Dictionary which maps an external id to a count of inputs with that external id
+        """
+
+        if len(external_ids) == 0:
+            log.error("You need to specify a list of external ids.")
+            return
+
+        external_ids_csv = ",".join(external_ids)
+        url = f"{self.host}/v1/inputs/count-for-ids?externalIds={external_ids_csv}"
+        resp = self.session.get(url, headers=self.headers)
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        return json_resp
+
     def _create_inputs_point_cloud_with_images(self, point_clouds_with_images: IAM.PointCloudsWithImages,
                                                internal_id: str,
                                                input_list_id: int,
@@ -148,7 +165,7 @@ class InputApiClient:
         :param input_list_id: input list to add input to
         :param metadata: Class containing metadata necessary for point cloud with images
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
-        :returns CreateInputJobResponse: Class containing id of the created input job, or nothing if dryrun.
+        :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun.
 
         The files are uploaded to annotell GCS and an input_job is submitted to the inputEngine.
         In order to increase annotation tool performance the supplied pointcloud-file is converted
@@ -195,9 +212,9 @@ class InputApiClient:
 
         :param slam_files: class containing files necessary for SLAM.
         :param metadata: class containing metadata necessary for SLAM.
-        :param input_list_id: ID of the input list the new input, when created, will be added to.
+        :param input_list_id: input list id which the new input will be added to
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
-        :returns CreateInputJobResponse: Class containing id of the created input job, or nothing if dryrun.
+        :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun.
         """
         if dryrun:
             headers = {**self.headers, **self.dryrun_header}
@@ -223,7 +240,7 @@ class InputApiClient:
         :param folder: Absolute path to directory containing all images.
         :param images_files: List containing all images for the input.
         :param metadata: class containing metadata necessary for creating input from images.
-        :param input_list_id: ID of the input list the new input, when created, will be added to.
+        :param input_list_id: input list id which the new input will be added to
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
         :returns InputJobCreatedMessage: Class containing id of the created input job, or None if dryrun.
         """
@@ -262,7 +279,7 @@ class InputApiClient:
 
         :param images_files: Contains all images, with their dimensions
         :param metadata: Contains necessary metadata in order to create and validate inputs
-        :param input_list_id: ID of the input list the new input, when created, will be added to.
+        :param input_list_id: input list id which the new input will be added to
         :param internal_id: When created, the input will use this internal id.
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
         :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun
@@ -319,6 +336,12 @@ class InputApiClient:
         self._raise_on_error(resp).json()
 
     def get_internal_ids_for_external_ids(self, external_ids: List[str]) -> Dict[str, List[str]]:
+        """
+        For each external id returns a list of internal ids, connected to the external id.
+
+        :param external_ids: List of external ids
+        :return Dict: Dictionary mapping each external id to a list of internal ids
+        """
         url = f"{self.host}/v1/inputs/"
         js = external_ids
         resp = self.session.get(url, json=js, headers=self.headers)
@@ -334,8 +357,8 @@ class InputApiClient:
         """
         Invalidates inputs, and removes them from all input lists
 
-        :param input_ids: The input IDs to invalidate
-        :param invalidated_reason: Description why inputs were invalidate
+        :param input_ids: The input ids to invalidate
+        :param invalidated_reason: An Enum describing why inputs were invalidated
         :return InvalidatedInputsResponse: Class containing what inputs were invalidated
         """
         url = f"{self.host}/v1/inputs/invalidate"
@@ -348,8 +371,8 @@ class InputApiClient:
         """
         Removes inputs from specified input list, without invalidating the input
 
-        :param input_list_id: The input list where inputs should be removed
-        :param input_ids: The input IDs to remove
+        :param input_list_id: The input list id where the inputs should be removed
+        :param input_ids: The input ids to remove
         :return RemovedInputsResponse: Class containing what inputs were removed
         """
         url = f"{self.host}/v1/inputs/remove"
@@ -359,12 +382,23 @@ class InputApiClient:
         return IAM.RemovedInputsResponse.from_json(resp_json)
 
     def list_projects(self) -> List[IAM.Project]:
+        """
+        Returns all projects connected to the users organization.
+
+        :return List: List containing all projects connected to the user
+        """
         url = f"{self.host}/v1/inputs/projects"
         resp = self.session.get(url, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return [IAM.Project.from_json(js) for js in json_resp]
 
     def list_input_lists(self, project_id: int) -> List[IAM.InputList]:
+        """
+        Returns a list of all input lists connected to the specified project.
+
+        :param project_id: The id of the project
+        :return List: List with the input lists connected to the project id
+        """
         url = f"{self.host}/v1/inputs/input-lists?projectId={project_id}"
         resp = self.session.get(url, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
@@ -372,6 +406,18 @@ class InputApiClient:
 
     def get_calibration_data(self, id: Optional[int] = None, external_id: Optional[str] = None
                              ) -> Union[List[IAM.CalibrationNoContent], List[IAM.CalibrationWithContent]]:
+        """
+        Queries the inputApi for either:
+        * A list containing a specific calibration (of only the id is given)
+        * A list of calibrations connected to an external_id (if only the external_id is given)
+        * A list of calibrations connected to the users organization.
+        Note that both id and external_id cannot be given at the same time.
+
+        :param id: The id of the calibration to get
+        :param external_id: The external id of the calibration(s) to get
+        :return List: A list of CalibrationNoContent if an id or external id was given, or a list of
+        CalibrationWithContent otherwise.
+        """
         base_url = f"{self.host}/v1/inputs/calibration-data"
         if id:
             url = base_url + f"?id={id}"
@@ -389,12 +435,23 @@ class InputApiClient:
             return [IAM.CalibrationWithContent.from_json(js) for js in json_resp]
 
     def create_calibration_data(self, calibration_spec: IAM.CalibrationSpec) -> IAM.CalibrationNoContent:
+        """
+        Creates a new calibration, given the CalibrationSpec
+        :param calibration_spec: A CalibrationSpec instance containing everything to create a calibration.
+        :return CalibrationNoContent: Class containing the calibration id, external id and time of creation.
+        """
         url = f"{self.host}/v1/inputs/calibration-data"
         resp = self.session.post(url, json=calibration_spec.to_dict(), headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return IAM.CalibrationNoContent.from_json(json_resp)
 
     def get_requests_for_request_ids(self, request_ids: List[int]) -> Dict[int, IAM.Request]:
+        """
+        Returns a list of request objects, given a list of request ids
+
+        :param request_ids: List of request ids
+        :return Dict: Dictionary mapping a request id to a Request object
+        """
         url = f"{self.host}/v1/inputs/requests"
         js = request_ids
         resp = self.session.get(url, json=js, headers=self.headers)
@@ -405,20 +462,16 @@ class InputApiClient:
         return dict_resp
 
     def get_requests_for_input_lists(self, input_list_id: int) -> List[IAM.Request]:
+        """
+        Returns all requests connected to a specific input list
+
+        :param input_list_id: The input list id we want to get the connected Requests for.
+        :return List: List of Request objects
+        """
         url = f"{self.host}/v1/inputs/requests?inputListId={input_list_id}"
         resp = self.session.get(url, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return [IAM.Request.from_json(js) for js in json_resp]
-
-    def get_input_lists_for_inputs(self, internal_ids: List[str]) -> Dict[str, IAM.InputList]:
-        url = f"{self.host}/v1/inputs/input-lists"
-        js = internal_ids
-        resp = self.session.get(url, json=js, headers=self.headers)
-        json_resp = self._raise_on_error(resp).json()
-        dict_resp = dict()
-        for k, v in json_resp.items():
-            dict_resp[k] = IAM.InputList.from_json(v)
-        return dict_resp
 
     def get_input_status(self, internal_ids: List[str]) -> Dict[str, Dict[int, bool]]:
         """
@@ -426,6 +479,10 @@ class InputApiClient:
         dictionary whose keys are the request_ids for the requests where the input is included
         (via the inputList). The key is a boolean denoting if the input is ready for export (true)
         or not (false).
+
+        :param internal_ids: List of internal ids
+        :return Dict: Nested dictionary that for each input and request specify it is ready
+        for export or not.
         """
         url = f"{self.host}/v1/inputs/export-status"
         js = internal_ids
@@ -439,8 +496,17 @@ class InputApiClient:
 
         return json_resp
 
-    def download_annotations(self, internal_ids: List[str], request_id=None
+    def download_annotations(self, internal_ids: List[str], request_id: Optional[int] = None
                              ) -> Dict[str, Union[Dict[int, IAM.ExportAnnotation], IAM.ExportAnnotation]]:
+        """
+        Returns the export ready annotations, either
+        * All annotations connected to a specific request, if a request id is given
+        * All annotations connected to the organization of the user, if no request id is given
+
+        :param internal_ids: List with internal ids
+        :param request_id: An id of a request
+        :return Dict: A dictionary containing the ready annotations
+        """
         base_url = f"{self.host}/v1/inputs/export"
         if request_id:
             url = base_url + f"?requestId={request_id}"
@@ -464,14 +530,30 @@ class InputApiClient:
             return json_resp
 
     def get_view_links(self, internal_ids: List[str]) -> Dict[str, str]:
+        """
+        For each given internal id returns an URL where the input can be viewed in the web app.
+
+        :param internal_ids: List with internal ids
+        :return Dict: Dictionary mapping each internal id with an URL to view the input.
+        """
         base_url = f"{self.host}/v1/inputs/view-links"
         js = internal_ids
         resp = self.session.get(base_url, json=js, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return json_resp
 
-    def get_input_jobs_status(self, internal_ids: List[str] = None,
-                              external_ids: List[str] = None) -> List[IAM.InputJob]:
+    def get_input_jobs_status(self, internal_ids: Optional[List[str]] = None,
+                              external_ids: Optional[List[str]] = None
+                              ) -> List[IAM.InputJob]:
+        """
+        Returns a list of input jobs, either:
+        * All input jobs connected to the given lists of internal and external ids
+        * All input jobs connected to the user organization, if no ids were given
+
+        :param internal_ids: List of internal ids
+        :param external_ids: List of external ids
+        :return List: List containing InputJob objects
+        """
         if internal_ids is None:
             internal_ids = []
         if external_ids is None:
@@ -488,12 +570,24 @@ class InputApiClient:
         return [IAM.InputJob.from_json(js) for js in json_resp]
 
     def get_requests_for_project_id(self, project_id: int) -> List[IAM.Request]:
+        """
+        Returns all Requests connected to a project id
+
+        :param project_id: A project id
+        :return List: List containing Request objects
+        """
         base_url = f"{self.host}/v1/inputs/requests?projectId={project_id}"
         resp = self.session.get(base_url, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return [IAM.Request.from_json(js) for js in json_resp]
 
     def get_datas_for_inputs_by_internal_ids(self, internal_ids: List[str]) -> Mapping[IAM.Input, List[IAM.Data]]:
+        """
+        For every internal id given, returns that input together with all the data connected to that input
+
+        :param internal_ids: List of internal ids
+        :return Mapping: Maps a Input with all the data conntected to it
+        """
         base_url = f"{self.host}/v1/inputs/datas-internal-id"
         js = internal_ids
         resp = self.session.get(base_url, json=js, headers=self.headers)
@@ -508,6 +602,12 @@ class InputApiClient:
         return new_dict
 
     def get_datas_for_inputs_by_external_ids(self, external_ids: List[str]) -> Mapping[IAM.Input, List[IAM.Data]]:
+        """
+        For every external id given, returns that input together with all the data connected to that input
+
+        :param external_ids: List of external ids
+        :return Mapping: Maps a Input with all the data connected to it
+        """
         base_url = f"{self.host}/v1/inputs/datas-external-id"
         js = external_ids
         resp = self.session.get(base_url, json=js, headers=self.headers)
