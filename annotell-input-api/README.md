@@ -20,11 +20,14 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.8] - 2020-07-01
+## [0.3.0] - 2020-07-03
 ### Changed
 - The method `create_inputs_point_cloud_with_images` in `InputApiClient` now takes an extra parameter: `dryrun: bool`. 
 If set to `True` all the validation checks will be run but no inputJob will be created, and
 if it is set to `False` an inputJob will be created if the validation checks all pass.
+
+### Bugfixes
+- Fixed bug where the uploading of .csv files to GCS crashed if run on a windows machine.
 
 ## [0.2.7] - 2020-06-29
 ### Added

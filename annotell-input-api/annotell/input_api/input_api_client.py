@@ -91,7 +91,12 @@ class InputApiClient:
             fi = folder.joinpath(file).expanduser()
             log.info(f"Uploading file={fi}")
             with fi.open('rb') as f:
-                content_type = mimetypes.guess_type(file)[0]
+                if file.split(".")[-1] == "csv":
+                    content_type = "text/csv"
+                else:
+                    content_type = mimetypes.guess_type(file)[0]
+
+                print(content_type)
                 # Needed for pcd
                 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
                 if not content_type:
