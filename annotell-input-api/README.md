@@ -27,7 +27,7 @@ If set to `True` all the validation checks will be run but no inputJob will be c
 if it is set to `False` an inputJob will be created if the validation checks all pass.
 
 ### Bugfixes
-- Fixed bug where the uploading of .csv files to GCS crashed if run on a windows machine.
+- Fixed bug where the uploading of .csv files to GCS crashed if run on some windows machines.
 
 ## [0.2.9] - 2020-07-02
 ### Added
