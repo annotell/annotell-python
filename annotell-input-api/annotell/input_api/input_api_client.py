@@ -65,7 +65,7 @@ class InputApiClient:
         return IAM.UploadUrlsResponse.from_json(json_resp)
 
     @staticmethod
-    def _set_images_dimensions(folder: Path, images: List[IAM.Image]):
+    def _set_images_dimensions(folder: Path, images: List[IAM.Image]) -> None:
 
         def _is_image_missing_dimensions(img: IAM.Image):
             return img.width is None or img.height is None
@@ -90,7 +90,11 @@ class InputApiClient:
             fi = folder.joinpath(file).expanduser()
             log.info(f"Uploading file={fi}")
             with fi.open('rb') as f:
-                content_type = mimetypes.guess_type(file)[0]
+                if file.split(".")[-1] == "csv":
+                    content_type = "text/csv"
+                else:
+                    content_type = mimetypes.guess_type(file)[0]
+
                 # Needed for pcd
                 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
                 if not content_type:
@@ -102,6 +106,7 @@ class InputApiClient:
                 except requests.HTTPError as e:
                     log.error(f"Got {resp.status_code} error calling cloud bucket upload, "
                               f"got response\n{resp.content}")
+                    raise e
 
     def count_inputs_for_external_ids(self, external_ids: List[str]) -> Dict[str, int]:
         """
@@ -122,35 +127,44 @@ class InputApiClient:
         return json_resp
 
     def _create_inputs_point_cloud_with_images(self, point_clouds_with_images: IAM.PointCloudsWithImages,
-                                               job_id: str,
+                                               internal_id: str,
                                                input_list_id: int,
-                                               metadata: IAM.CalibratedSceneMetaData):
+                                               metadata: IAM.CalibratedSceneMetaData,
+                                               dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
 
-        """Create inputs from uploaded files"""
-        log.info(f"Creating inputs for files with job_id={job_id}")
+        """Create point cloud with images"""
+
+        if dryrun:
+            headers = {**self.headers, **self.dryrun_header}
+        else:
+            headers = {**self.headers}
+
         url = f"{self.host}/v1/inputs/pointclouds-with-images"
         js = dict(
             files=point_clouds_with_images.to_dict(),
-            internalId=job_id,
+            internalId=internal_id,
             inputListId=input_list_id,
             metadata=metadata.to_dict())
 
-        resp = self.session.post(url, json=js, headers=self.headers)
-        json_resp = self._raise_on_error(resp).json()
-        return IAM.CreateInputJobResponse.from_json(json_resp)
+        resp = self.session.post(url, json=js, headers=headers)
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        if not dryrun:
+            return IAM.CreateInputJobResponse.from_json(json_resp)
 
     def create_inputs_point_cloud_with_images(self, folder: Path,
                                               point_clouds_with_images: IAM.PointCloudsWithImages,
                                               input_list_id: int,
-                                              metadata: IAM.CalibratedSceneMetaData) -> IAM.CreateInputJobResponse:
+                                              metadata: IAM.CalibratedSceneMetaData,
+                                              dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Upload files and create an input of type 'point_cloud_with_image'.
 
         :param folder: path to folder containing files
         :param point_clouds_with_images: class containing images and pointclouds that constitute the input
-        :param input_list_id: input list id which the new input will be added to
+        :param input_list_id: input list to add input to
         :param metadata: Class containing metadata necessary for point cloud with images
-        :returns CreateInputJobResponse: Class containing id of the created input job, or nothing if dryrun.
+        :param dryrun: If True the files/metadata will be validated but no input job will be created.
+        :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun.
 
         The files are uploaded to annotell GCS and an input_job is submitted to the inputEngine.
         In order to increase annotation tool performance the supplied pointcloud-file is converted
@@ -170,19 +184,27 @@ class InputApiClient:
         files_in_response = list(upload_urls_response.files_to_url.keys())
         assert set(files_on_disk) == set(files_in_response)
 
-        self._upload_files(folder, upload_urls_response.files_to_url)
         self._set_images_dimensions(folder, point_clouds_with_images.images)
+        self._create_inputs_point_cloud_with_images(point_clouds_with_images,
+                                                    upload_urls_response.internal_id,
+                                                    input_list_id,
+                                                    metadata,
+                                                    dryrun=True)
+        if not dryrun:
+            self._upload_files(folder, upload_urls_response.files_to_url)
 
-        create_input_response = self._create_inputs_point_cloud_with_images(point_clouds_with_images,
-                                                                            upload_urls_response.internal_id,
-                                                                            input_list_id,
-                                                                            metadata)
-        return create_input_response
+            create_input_response = self._create_inputs_point_cloud_with_images(point_clouds_with_images,
+                                                                                upload_urls_response.internal_id,
+                                                                                input_list_id,
+                                                                                metadata)
+
+            log.info(f"Creating inputs for files with job_id={create_input_response.internal_id}")
+            return create_input_response
 
     def create_slam_input_job(self, slam_files: IAM.SlamFiles,
                               metadata: IAM.SlamMetaData,
                               input_list_id: int,
-                              dryrun=False):
+                              dryrun=False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
         started.
@@ -191,7 +213,7 @@ class InputApiClient:
         :param metadata: class containing metadata necessary for SLAM.
         :param input_list_id: input list id which the new input will be added to
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
-        :returns InputJobCreatedMessage: Class containing id of the created input job, or nothing if dryrun.
+        :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun.
         """
         if dryrun:
             headers = {**self.headers, **self.dryrun_header}
@@ -210,7 +232,7 @@ class InputApiClient:
                                            images_files: IAM.ImagesFiles,
                                            metadata: IAM.SceneMetaData,
                                            input_list_id: int,
-                                           dryrun: bool = False):
+                                           dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Verifies the images and metadata given and then uploads images to Google Cloud Storage and
         creates an input job.
@@ -250,7 +272,7 @@ class InputApiClient:
                                  metadata: IAM.SceneMetaData,
                                  input_list_id: int,
                                  internal_id: str = None,
-                                 dryrun: bool = False):
+                                 dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Creates an input job for an image input
 
@@ -259,7 +281,7 @@ class InputApiClient:
         :param input_list_id: input list id which the new input will be added to
         :param internal_id: When created, the input will use this internal id.
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
-        :returns InputJobCreatedMessage: Class containing id of the created input job, or None if dryrun
+        :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun
         """
 
         if dryrun:
@@ -280,38 +302,37 @@ class InputApiClient:
 
     def update_completed_slam_input_job(self, pointcloud_uri: str,
                                         trajectory: IAM.Trajectory,
-                                        job_id: str):
+                                        job_id: str) -> None:
         """
         Updates an input job with data about the created SLAM, then sends a message to inputEngine which
-        will create an input.
+        will create an input. The method will throw an error if the operation was unsuccessful.
 
         :param pointcloud_uri: URI pointing to a SLAM:ed pointcloud in either s3 or gs cloud storage.
         :param trajectory: class containing the trajectory of the SLAM:ed pointcloud.
         :param job_id: UUID for the input job.
-        :returns SlamJobUpdated: Class with boolean describing if the update was successful or not.
+        :returns None
         """
         url = f"{self.host}/v1/inputs/progress"
         update_json = dict(files=dict(pointClouds=pointcloud_uri),
                            metadata=dict(trajectory=trajectory.to_dict()),
                            jobId=job_id)
         resp = self.session.post(url, json=update_json, headers=self.headers)
-        json_resp = self._raise_on_error(resp).json()
-        return json_resp
+        self._raise_on_error(resp).json()
 
-    def update_failed_slam_input_job(self, job_id: str, message: str):
+    def update_failed_slam_input_job(self, job_id: str, message: str) -> None:
         """
         Updates an input job with an error message, then sends a message to inputEngine which will
-        notify the responsible party about the failed input job.
+        notify the responsible party about the failed input job. The method will throw an error if
+        the operation was unsuccessful.
 
         :param job_id: UUID for the input job.
         :param message: String with the error message.
-        :returns SlamJobUpdated: Class with boolean describing if the update was successful or not.
+        :returns None
         """
         url = f"{self.host}/v1/inputs/progress"
         update_json = dict(jobId=job_id, message=message)
         resp = self.session.post(url, json=update_json, headers=self.headers)
-        json_resp = self._raise_on_error(resp).json()
-        return json_resp
+        self._raise_on_error(resp).json()
 
     def get_internal_ids_for_external_ids(self, external_ids: List[str]) -> Dict[str, List[str]]:
         """
