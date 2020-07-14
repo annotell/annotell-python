@@ -112,12 +112,12 @@ class InputApiClient:
         try:
             resp.raise_for_status()
         except requests.HTTPError as e:
-            log.error(f"Got status code: {resp.status_code} calling cloud bucket upload, "
-                      f"got response\n{resp.content}. Retries left: {num_retries}")
+            log.error(f"When uploading to GCS got response:\n{resp.status_code}: {resp.content}\n"
+                      f"Retries left: {num_retries}")
 
             if num_retries > 0 and resp.status_code in self.RETRYABLE_STATUS_CODES:
                 sleep_time = self._get_sleep_time(num_retries)
-                log.info(f"Waiting {int(sleep_time)+1} seconds before retrying")
+                log.info(f"Waiting {int(sleep_time)} seconds before retrying")
                 time.sleep(sleep_time)
                 self._upload_file(upload_url, file, headers, num_retries-1)
             else:
