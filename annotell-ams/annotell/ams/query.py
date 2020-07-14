@@ -1,36 +1,16 @@
-import json
-from typing import Optional, List
+from typing import Optional, List, Mapping
 
 import requests
 from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST, AuthSession
 
 from . import __version__
+from .query_model import QueryResponse, StreamingQueryResponse, QueryException
 
-DEFAULT_HOST = "https://api.annotell.com"
-
-
-def _iter_items(resp):
-    # parse each line as a json document
-    for item in resp.iter_lines():
-        if item.startswith(b"{"):
-            item = item if not item.endswith(b",") else item[:-1]
-            yield json.loads(item)
+DEFAULT_HOST = "https://query.annotell.com"
+DEFAULT_LIMIT = 10
 
 
-class QueryResponse:
-    def __init__(self, response):
-        self.raw_response = response
-        self.status_code = response.status_code
-
-    def items(self):
-        return _iter_items(self.raw_response)
-
-
-class QueryException(RuntimeError):
-    pass
-
-
-class QueryClient:
+class QueryApiClient:
     def __init__(self, *,
                  auth=None,
                  host=DEFAULT_HOST,
@@ -43,33 +23,36 @@ class QueryClient:
         """
         self.host = host
         self.metadata_url = "%s/v1/search/metadata/query" % self.host
+        self.judgements_query_url = "%s/v1/search/judgements/query" % self.host
+        self.kpi_query_url = "%s/v1/search/kpi/query" % self.host
 
         self.oauth_session = AuthSession(auth=auth, host=auth_host)
+
+        self.headers = {
+            "Accept-Encoding": "gzip",
+            "Accept": "application/json",
+            "User-Agent": "annotell-ams/query:%s" % __version__
+        }
 
     @property
     def session(self):
         return self.oauth_session.session
 
-    def stream_metadata(self,
-                        query_filter: str,
-                        limit: Optional[int] = 10,
-                        includes: Optional[List[str]] = None,
-                        excludes: Optional[List[str]] = None):
-        """
-        Returns an iterator with result items
-        :param query_filter:
-        :param limit: set to None for no limit
-        :param excludes: list
-        :param includes: list
-        :return:
-        """
+    def _create_request_body(self, *,
+                             query_filter: Optional[str] = None,
+                             limit: Optional[int] = DEFAULT_LIMIT,
+                             includes: Optional[List[str]] = None,
+                             excludes: Optional[List[str]] = None,
+                             aggregates: Mapping[str, dict] = dict()):
         if excludes is None:
             excludes = []
         if includes is None:
             includes = []
 
+        qf = "" if query_filter is None else query_filter
+
         body = {
-            "queryFilter": query_filter,
+            "queryFilter": qf,
             "limit": limit,
             "fields": {
                 "includes": includes,
@@ -77,24 +60,75 @@ class QueryClient:
             }
         }
 
-        headers = {
-            "Accept-Encoding": "gzip",
-            "Accept": "application/json",
-            "User-Agent": "annotell-ams/query:%s" % __version__
-        }
+        if aggregates:
+            body['aggregates'] = aggregates
+
+        return body
+
+    def _return_request_resp(self, resp):
+        try:
+            resp.raise_for_status()
+            return resp
+        except requests.exceptions.HTTPError as e:
+            msg = resp.content.decode()
+            raise QueryException("Got %s error %s" % (resp.status_code, msg)) from e
+
+    def _stream_query(self, url: str, **kwargs):
+        body = self._create_request_body(**kwargs)
 
         params = {"stream": "true"}
 
         resp = self.session.post(
-            url=self.metadata_url,
+            url=url,
             params=params,
             json=body,
-            headers=headers,
+            headers=self.headers,
             stream=True)
+        return StreamingQueryResponse(self._return_request_resp(resp))
 
-        try:
-            resp.raise_for_status()
-            return QueryResponse(resp)
-        except requests.exceptions.HTTPError as e:
-            msg = resp.content.decode()
-            raise QueryException("Got %s error %s" % (resp.status_code, msg)) from e
+    def _query(self, url: str, **kwargs):
+        body = self._create_request_body(**kwargs)
+        resp = self.session.post(url=url, json=body, headers=self.headers)
+        return QueryResponse(self._return_request_resp(resp))
+
+    def stream_metadata(self,
+                        query_filter: Optional[str] = None,
+                        limit: Optional[int] = 10,
+                        includes: Optional[List[str]] = None,
+                        excludes: Optional[List[str]] = None):
+        """
+        Returns a StreamingQueryResponse with result items
+        :param query_filter:
+        :param limit: set to None for no limit
+        :param excludes: list
+        :param includes: list
+        :return:
+        """
+
+        return self._stream_query(self.metadata_url,
+                                  query_filter=query_filter,
+                                  limit=limit,
+                                  includes=includes,
+                                  excludes=excludes)
+
+    def query_kpi_data_entries(self,
+                               query_filter: Optional[str] = None,
+                               limit: Optional[int] = DEFAULT_LIMIT,
+                               includes: Optional[List[str]] = None,
+                               excludes: Optional[List[str]] = None,
+                               aggregates: Mapping[str, dict] = dict()):
+        """
+        Returns a QueryResponse with result items
+        :param query_filter:
+        :param limit: set to None for no limit
+        :param excludes: list
+        :param includes: list
+        :param aggregates: dict
+        :return:
+        """
+        return self._query(self.kpi_query_url,
+                           query_filter=query_filter,
+                           limit=limit,
+                           includes=includes,
+                           excludes=excludes,
+                           aggregates=aggregates)

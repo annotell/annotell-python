@@ -9,12 +9,17 @@ Set env ANNOTELL_CREDENTIALS, see [annotell-auth](https://github.com/annotell/an
 ## Metadata Example
 Stream all items matching a query
 ```python
-from annotell.ams.query import QueryClient
-query_client = QueryClient()
+from annotell.ams.query import QueryApiClient
+query_client = QueryApiClient()
 resp = query_client.stream_metadata(query_filter="id = X")
 for item in resp.items():
     print(item)
 ```
 
 ## Change log
+2.0.0
+- Rename QueryApi to QueryApiClient
+- Add KPI query method
+
+1.3.0
 - Change constructor for authentication to only accept `auth`. 
