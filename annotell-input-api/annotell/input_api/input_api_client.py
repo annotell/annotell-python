@@ -1,16 +1,23 @@
 """Client for communicating with the Annotell platform."""
-import requests
 import logging
-from typing import List, Mapping, Optional, Union, Dict
-from pathlib import Path
 import mimetypes
+import random
+from pathlib import Path
+from typing import List, Mapping, Optional, Union, Dict, BinaryIO
+
+import requests
+import time
 from PIL import Image
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
+
 from . import input_api_model as IAM
 
 DEFAULT_HOST = "https://input.annotell.com"
 
 log = logging.getLogger(__name__)
+
+MAX_NUM_RETRIES = 23
+MAX_RETRY_WAIT_TIME = 60  # seconds
 
 
 class InputApiClient:
@@ -29,14 +36,14 @@ class InputApiClient:
         """
 
         self.host = host
-
         self.oauth_session = AuthSession(host=auth_host, auth=auth)
-
         self.headers = {
             "Accept-Encoding": "gzip",
             "Accept": "application/json"
         }
         self.dryrun_header = {"X-Dryrun": ""}
+
+        self.RETRYABLE_STATUS_CODES = [408, 429, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 598, 599]
 
         if client_organization_id is not None:
             self.headers["X-Organization-Id"] = str(client_organization_id)
@@ -52,8 +59,6 @@ class InputApiClient:
         try:
             resp.raise_for_status()
         except requests.HTTPError as e:
-            log.error(
-                f"Got {resp.status_code} error calling url={resp.url}, got response:\n{resp.content}")
             raise
         return resp
 
@@ -66,7 +71,6 @@ class InputApiClient:
 
     @staticmethod
     def _set_images_dimensions(folder: Path, images: List[IAM.Image]) -> None:
-
         def _is_image_missing_dimensions(img: IAM.Image):
             return img.width is None or img.height is None
 
@@ -84,29 +88,52 @@ class InputApiClient:
             return js[IAM.ENVELOPED_JSON_TAG]
         return js
 
-    def _upload_files(self, folder: Path, url_map: Mapping[str, str]):
-        """Upload all files to cloud storage"""
-        for (file, upload_url) in url_map.items():
-            fi = folder.joinpath(file).expanduser()
-            log.info(f"Uploading file={fi}")
-            with fi.open('rb') as f:
-                if file.split(".")[-1] == "csv":
-                    content_type = "text/csv"
-                else:
-                    content_type = mimetypes.guess_type(file)[0]
+    @staticmethod
+    def _get_content_type(filename: str) -> str:
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
+        if filename.split(".")[-1] == "csv":
+            content_type = "text/csv"
+        else:
+            content_type = mimetypes.guess_type(filename)[0]
+            content_type = content_type if content_type is not None else 'application/octet-stream'
 
-                # Needed for pcd
-                # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
-                if not content_type:
-                    content_type = 'application/octet-stream'
+        return content_type
+
+    @staticmethod
+    def _get_sleep_time(num_retries_left: int) -> int:
+        max_sleep_time = pow(2, MAX_NUM_RETRIES - num_retries_left)
+        sleep_time = random.random()*max_sleep_time
+        sleep_time = sleep_time if sleep_time < MAX_RETRY_WAIT_TIME else MAX_RETRY_WAIT_TIME
+        return sleep_time
+
+    def _upload_file(self, upload_url: str, file: BinaryIO, headers, num_retries=MAX_NUM_RETRIES) -> None:
+        log.info(f"Uploading file={file.name}")
+        resp = self.session.put(upload_url, data=file, headers=headers)
+        try:
+            resp.raise_for_status()
+        except requests.HTTPError as e:
+            log.error(f"Got status code: {resp.status_code} calling cloud bucket upload, "
+                      f"got response\n{resp.content}. Retries left: {num_retries}")
+
+            if num_retries > 0 and resp.status_code in self.RETRYABLE_STATUS_CODES:
+                sleep_time = self._get_sleep_time(num_retries)
+                log.info(f"Waiting {int(sleep_time)+1} seconds before retrying")
+                time.sleep(sleep_time)
+                self._upload_file(upload_url, file, headers, num_retries-1)
+            else:
+                raise e
+
+        except Exception as e:
+            raise e
+
+    def _upload_files(self, folder: Path, url_map: Mapping[str, str]) -> None:
+        """Upload all files to cloud storage"""
+        for (filename, upload_url) in url_map.items():
+            file_path = folder.joinpath(filename).expanduser()
+            with file_path.open('rb') as file:
+                content_type = self._get_content_type(filename)
                 headers = {"Content-Type": content_type}
-                resp = self.session.put(upload_url, data=f, headers=headers)
-                try:
-                    resp.raise_for_status()
-                except requests.HTTPError as e:
-                    log.error(f"Got {resp.status_code} error calling cloud bucket upload, "
-                              f"got response\n{resp.content}")
-                    raise e
+                self._upload_file(upload_url, file, headers)
 
     def count_inputs_for_external_ids(self, external_ids: List[str]) -> Dict[str, int]:
         """
@@ -293,6 +320,7 @@ class InputApiClient:
         create_input_job_json = dict(files=images_files.to_dict(),
                                      metadata=metadata.to_dict(),
                                      inputListId=input_list_id,
+                                     inputType="image_sequence",
                                      internalId=internal_id)
 
         resp = self.session.post(create_input_job_url, json=create_input_job_json, headers=headers)
