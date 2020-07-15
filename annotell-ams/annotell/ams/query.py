@@ -1,4 +1,4 @@
-from typing import Optional, List, Mapping
+from typing import Optional, List, Mapping, Union
 
 import requests
 from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST, AuthSession
@@ -9,6 +9,8 @@ from .query_model import QueryResponse, StreamingQueryResponse, QueryException
 DEFAULT_HOST = "https://query.annotell.com"
 DEFAULT_LIMIT = 10
 
+FIELDS_TYPE = Union[List[str], str, None]
+AGGREGATES_TYPE = Optional[Mapping[str, dict]]
 
 class QueryApiClient:
     def __init__(self, *,
@@ -41,9 +43,9 @@ class QueryApiClient:
     def _create_request_body(self, *,
                              query_filter: Optional[str] = None,
                              limit: Optional[int] = DEFAULT_LIMIT,
-                             includes: Optional[List[str]] = None,
-                             excludes: Optional[List[str]] = None,
-                             aggregates: Mapping[str, dict] = dict()):
+                             includes: FIELDS_TYPE = None,
+                             excludes: FIELDS_TYPE = None,
+                             aggregates: AGGREGATES_TYPE = None):
         if excludes is None:
             excludes = []
         if includes is None:
@@ -73,57 +75,64 @@ class QueryApiClient:
             msg = resp.content.decode()
             raise QueryException("Got %s error %s" % (resp.status_code, msg)) from e
 
-    def _stream_query(self, url: str, **kwargs):
+    def _query(self, url: str, stream: bool = False, **kwargs):
+
+        aggs = kwargs.get("aggregates")
+        if aggs and stream:
+            raise ValueError("Cannot use aggregates in streaming mode")
+
         body = self._create_request_body(**kwargs)
 
-        params = {"stream": "true"}
+        params = {"stream": "true"} if stream else None
 
         resp = self.session.post(
             url=url,
-            params=params,
             json=body,
             headers=self.headers,
-            stream=True)
-        return StreamingQueryResponse(self._return_request_resp(resp))
+            params=params,
+            stream=stream
+        )
+        r = self._return_request_resp(resp)
+        return StreamingQueryResponse(r) if stream else QueryResponse(r)
 
-    def _query(self, url: str, **kwargs):
-        body = self._create_request_body(**kwargs)
-        resp = self.session.post(url=url, json=body, headers=self.headers)
-        return QueryResponse(self._return_request_resp(resp))
-
-    def stream_metadata(self,
-                        query_filter: Optional[str] = None,
-                        limit: Optional[int] = 10,
-                        includes: Optional[List[str]] = None,
-                        excludes: Optional[List[str]] = None):
+    def query_metadata(self,
+                       query_filter: Optional[str] = None,
+                       limit: Optional[int] = DEFAULT_LIMIT,
+                       includes: FIELDS_TYPE = None,
+                       excludes: FIELDS_TYPE = None,
+                       aggregates: AGGREGATES_TYPE = None,
+                       stream: bool = False):
         """
-        Returns a StreamingQueryResponse with result items
+        Returns a QueryResponse or StreamingQueryResponse with result items
         :param query_filter:
         :param limit: set to None for no limit
         :param excludes: list
         :param includes: list
+        :param stream, use stream if you want to get more than 10000 items
         :return:
         """
-
-        return self._stream_query(self.metadata_url,
-                                  query_filter=query_filter,
-                                  limit=limit,
-                                  includes=includes,
-                                  excludes=excludes)
+        return self._query(self.metadata_url, stream,
+                           query_filter=query_filter,
+                           limit=limit,
+                           includes=includes,
+                           excludes=excludes,
+                           aggregates=aggregates)
 
     def query_kpi_data_entries(self,
                                query_filter: Optional[str] = None,
                                limit: Optional[int] = DEFAULT_LIMIT,
-                               includes: Optional[List[str]] = None,
-                               excludes: Optional[List[str]] = None,
-                               aggregates: Mapping[str, dict] = dict()):
+                               includes: FIELDS_TYPE = None,
+                               excludes: FIELDS_TYPE = None,
+                               aggregates: AGGREGATES_TYPE = None,
+                               stream: bool = False):
         """
-        Returns a QueryResponse with result items
+        Returns a QueryResponse or StreamingQueryResponse with result items
         :param query_filter:
         :param limit: set to None for no limit
         :param excludes: list
         :param includes: list
         :param aggregates: dict
+        :param stream, use stream if you want to get more than 10000 items
         :return:
         """
         return self._query(self.kpi_query_url,
@@ -131,4 +140,30 @@ class QueryApiClient:
                            limit=limit,
                            includes=includes,
                            excludes=excludes,
-                           aggregates=aggregates)
+                           aggregates=aggregates,
+                           stream=stream)
+
+    def query_judgements(self,
+                         query_filter: Optional[str] = None,
+                         limit: Optional[int] = DEFAULT_LIMIT,
+                         includes: FIELDS_TYPE = None,
+                         excludes: FIELDS_TYPE = None,
+                         aggregates: AGGREGATES_TYPE = None,
+                         stream: bool = False):
+        """
+        Returns a QueryResponse or StreamingQueryResponse with result items
+        :param query_filter:
+        :param limit: set to None for no limit
+        :param excludes: list
+        :param includes: list
+        :param aggregates: dict
+        :param stream, use stream if you want to get more than 10000 items
+        :return:
+        """
+        return self._query(self.judgements_query_url,
+                           query_filter=query_filter,
+                           limit=limit,
+                           includes=includes,
+                           excludes=excludes,
+                           aggregates=aggregates,
+                           stream=stream)
