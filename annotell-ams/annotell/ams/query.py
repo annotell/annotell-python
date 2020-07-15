@@ -8,6 +8,7 @@ from .query_model import QueryResponse, StreamingQueryResponse, QueryException
 
 DEFAULT_HOST = "https://query.annotell.com"
 DEFAULT_LIMIT = 10
+MAX_LIMIT = 10000
 
 FIELDS_TYPE = Union[List[str], str, None]
 AGGREGATES_TYPE = Optional[Mapping[str, dict]]
@@ -80,6 +81,14 @@ class QueryApiClient:
         aggs = kwargs.get("aggregates")
         if aggs and stream:
             raise ValueError("Cannot use aggregates in streaming mode")
+
+        limit = kwargs.get("limit")
+        if limit is not None:
+            if not isinstance(limit, int):
+                raise ValueError("Limit must be int")
+
+            if not stream and limit > MAX_LIMIT:
+                raise ValueError(f"Use stream to get more than {MAX_LIMIT} items")
 
         body = self._create_request_body(**kwargs)
 
