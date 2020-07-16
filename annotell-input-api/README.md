@@ -20,6 +20,12 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2020-07-16
+### Changed
+- If the upload of point clouds or images crashes and returns status code 429, 408 or 5xx the script will
+retry the upload before crashing. The default settings may be changed when initializing the `InputApiClient`
+by specifying values to the `max_upload_retry_attempts` and `max_upload_retry_wait_time` parameters.
+
 ## [0.3.0] - 2020-07-03
 ### Changed
 - The method `create_inputs_point_cloud_with_images` in `InputApiClient` now takes an extra parameter: `dryrun: bool`. 
