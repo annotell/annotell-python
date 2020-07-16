@@ -333,7 +333,6 @@ class InputApiClient:
         create_input_job_json = dict(files=images_files.to_dict(),
                                      metadata=metadata.to_dict(),
                                      inputListId=input_list_id,
-                                     inputType="image_sequence",
                                      internalId=internal_id)
 
         resp = self.session.post(create_input_job_url, json=create_input_job_json, headers=headers)
