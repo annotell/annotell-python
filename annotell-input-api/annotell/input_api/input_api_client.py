@@ -16,10 +16,6 @@ DEFAULT_HOST = "https://input.annotell.com"
 
 log = logging.getLogger(__name__)
 
-#  Using similar retry strategy as gsutil
-#  https://cloud.google.com/storage/docs/gsutil/addlhelp/RetryHandlingStrategy
-MAX_NUM_RETRIES = 23
-MAX_RETRY_WAIT_TIME = 60  # seconds
 RETRYABLE_STATUS_CODES = [408, 429, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 598, 599]
 
 
@@ -30,12 +26,16 @@ class InputApiClient:
                  auth: None,
                  host: str = DEFAULT_HOST,
                  auth_host: str = DEFAULT_AUTH_HOST,
-                 client_organization_id: int = None):
+                 client_organization_id: int = None,
+                 max_upload_retry_attempts: int = 23,
+                 max_upload_retry_wait_time: int = 60):
         """
         :param auth: auth credentials, see https://github.com/annotell/annotell-python/tree/master/annotell-auth
         :param host: override for input api url
         :param auth_host: override for authentication url
         :param client_organization_id: Overrides your users organization id. Only works with an Annotell user.
+        :param max_upload_retry_attempts: Max number of attempts to retry uploading a file to GCS.
+        :param max_upload_retry_wait_time:  Max with time before retrying an upload to GCS.
         """
 
         self.host = host
@@ -46,6 +46,8 @@ class InputApiClient:
         }
         self.dryrun_header = {"X-Dryrun": ""}
 
+        self.MAX_NUM_RETRIES = max_upload_retry_attempts
+        self.MAX_RETRY_WAIT_TIME = max_upload_retry_wait_time  # seconds
         if client_organization_id is not None:
             self.headers["X-Organization-Id"] = str(client_organization_id)
             log.info(f"WARNING: You will now act as if you are part of organization: {client_organization_id}. "
@@ -100,14 +102,24 @@ class InputApiClient:
 
         return content_type
 
-    @staticmethod
-    def _get_sleep_time(num_retries_left: int) -> int:
-        max_sleep_time = pow(2, MAX_NUM_RETRIES - num_retries_left)
+    def _get_wait_time(self, num_retries_left: int) -> int:
+        """
+        Calculates the wait time before attempting another file upload to GCS
+
+        :param num_retries_left: Number of upload retries left
+        :return: int: The time to wait before retrying upload
+        """
+        max_sleep_time = pow(2, self.MAX_NUM_RETRIES - num_retries_left)
         sleep_time = random.random()*max_sleep_time
-        sleep_time = sleep_time if sleep_time < MAX_RETRY_WAIT_TIME else MAX_RETRY_WAIT_TIME
+        sleep_time = sleep_time if sleep_time < self.MAX_RETRY_WAIT_TIME else self.MAX_RETRY_WAIT_TIME
         return sleep_time
 
-    def _upload_file(self, upload_url: str, file: BinaryIO, headers, num_retries=MAX_NUM_RETRIES) -> None:
+    #  Using similar retry strategy as gsutil
+    #  https://cloud.google.com/storage/docs/gsutil/addlhelp/RetryHandlingStrategy
+    def _upload_file(self, upload_url: str, file: BinaryIO, headers: Dict[str, str], num_retries: int) -> None:
+        """
+        Upload the file to GCS, retries if the upload fails with some specific status codes.
+        """
         log.info(f"Uploading file={file.name}")
         resp = self.session.put(upload_url, data=file, headers=headers)
         try:
@@ -117,7 +129,7 @@ class InputApiClient:
                       f"Retries left: {num_retries}")
 
             if num_retries > 0 and resp.status_code in RETRYABLE_STATUS_CODES:
-                sleep_time = self._get_sleep_time(num_retries)
+                sleep_time = self._get_wait_time(num_retries)
                 log.info(f"Waiting {int(sleep_time)} seconds before retrying")
                 time.sleep(sleep_time)
                 self._upload_file(upload_url, file, headers, num_retries-1)
@@ -134,7 +146,7 @@ class InputApiClient:
             with file_path.open('rb') as file:
                 content_type = self._get_content_type(filename)
                 headers = {"Content-Type": content_type}
-                self._upload_file(upload_url, file, headers)
+                self._upload_file(upload_url, file, headers, self.MAX_NUM_RETRIES)
 
     def count_inputs_for_external_ids(self, external_ids: List[str]) -> Dict[str, int]:
         """
