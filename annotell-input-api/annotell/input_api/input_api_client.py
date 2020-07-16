@@ -16,8 +16,11 @@ DEFAULT_HOST = "https://input.annotell.com"
 
 log = logging.getLogger(__name__)
 
+#  Using similar retry strategy as gsutil
+#  https://cloud.google.com/storage/docs/gsutil/addlhelp/RetryHandlingStrategy
 MAX_NUM_RETRIES = 23
 MAX_RETRY_WAIT_TIME = 60  # seconds
+RETRYABLE_STATUS_CODES = [408, 429, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 598, 599]
 
 
 class InputApiClient:
@@ -42,8 +45,6 @@ class InputApiClient:
             "Accept": "application/json"
         }
         self.dryrun_header = {"X-Dryrun": ""}
-
-        self.RETRYABLE_STATUS_CODES = [408, 429, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 598, 599]
 
         if client_organization_id is not None:
             self.headers["X-Organization-Id"] = str(client_organization_id)
@@ -115,7 +116,7 @@ class InputApiClient:
             log.error(f"When uploading to GCS got response:\n{resp.status_code}: {resp.content}\n"
                       f"Retries left: {num_retries}")
 
-            if num_retries > 0 and resp.status_code in self.RETRYABLE_STATUS_CODES:
+            if num_retries > 0 and resp.status_code in RETRYABLE_STATUS_CODES:
                 sleep_time = self._get_sleep_time(num_retries)
                 log.info(f"Waiting {int(sleep_time)} seconds before retrying")
                 time.sleep(sleep_time)
