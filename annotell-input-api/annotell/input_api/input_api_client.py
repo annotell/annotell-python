@@ -46,7 +46,7 @@ class InputApiClient:
         }
         self.dryrun_header = {"X-Dryrun": ""}
 
-        self.MAX_NUM_RETRIES = max_upload_retry_attempts
+        self.MAX_NUM_UPLOAD_RETRIES = max_upload_retry_attempts
         self.MAX_RETRY_WAIT_TIME = max_upload_retry_wait_time  # seconds
         if client_organization_id is not None:
             self.headers["X-Organization-Id"] = str(client_organization_id)
@@ -102,21 +102,21 @@ class InputApiClient:
 
         return content_type
 
-    def _get_wait_time(self, num_retries_left: int) -> int:
+    def _get_wait_time(self, upload_attempt: int) -> int:
         """
         Calculates the wait time before attempting another file upload to GCS
 
-        :param num_retries_left: Number of upload retries left
+        :param upload_attempt: How many attempts to upload that have been made
         :return: int: The time to wait before retrying upload
         """
-        max_sleep_time = pow(2, self.MAX_NUM_RETRIES - num_retries_left)
-        sleep_time = random.random()*max_sleep_time
-        sleep_time = sleep_time if sleep_time < self.MAX_RETRY_WAIT_TIME else self.MAX_RETRY_WAIT_TIME
-        return sleep_time
+        max_wait_time = pow(2, upload_attempt - 1)
+        wait_time = random.random()*max_wait_time
+        wait_time = wait_time if wait_time < self.MAX_RETRY_WAIT_TIME else self.MAX_RETRY_WAIT_TIME
+        return wait_time
 
     #  Using similar retry strategy as gsutil
     #  https://cloud.google.com/storage/docs/gsutil/addlhelp/RetryHandlingStrategy
-    def _upload_file(self, upload_url: str, file: BinaryIO, headers: Dict[str, str], num_retries: int) -> None:
+    def _upload_file(self, upload_url: str, file: BinaryIO, headers: Dict[str, str], upload_attempt: int = 1) -> None:
         """
         Upload the file to GCS, retries if the upload fails with some specific status codes.
         """
@@ -125,14 +125,14 @@ class InputApiClient:
         try:
             resp.raise_for_status()
         except requests.HTTPError as e:
-            log.error(f"When uploading to GCS got response:\n{resp.status_code}: {resp.content}\n"
-                      f"Retries left: {num_retries}")
+            log.error(f"On upload attempt ({upload_attempt}/{self.MAX_NUM_UPLOAD_RETRIES}) to GCS "
+                      f"got response:\n{resp.status_code}: {resp.content}")
 
-            if num_retries > 0 and resp.status_code in RETRYABLE_STATUS_CODES:
-                sleep_time = self._get_wait_time(num_retries)
-                log.info(f"Waiting {int(sleep_time)} seconds before retrying")
-                time.sleep(sleep_time)
-                self._upload_file(upload_url, file, headers, num_retries-1)
+            if upload_attempt < self.MAX_NUM_UPLOAD_RETRIES and resp.status_code in RETRYABLE_STATUS_CODES:
+                wait_time = self._get_wait_time(upload_attempt)
+                log.info(f"Waiting {int(wait_time)} seconds before retrying")
+                time.sleep(wait_time)
+                self._upload_file(upload_url, file, headers, upload_attempt + 1)
             else:
                 raise e
 
@@ -146,7 +146,7 @@ class InputApiClient:
             with file_path.open('rb') as file:
                 content_type = self._get_content_type(filename)
                 headers = {"Content-Type": content_type}
-                self._upload_file(upload_url, file, headers, self.MAX_NUM_RETRIES)
+                self._upload_file(upload_url, file, headers)
 
     def count_inputs_for_external_ids(self, external_ids: List[str]) -> Dict[str, int]:
         """
