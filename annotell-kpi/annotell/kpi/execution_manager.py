@@ -235,7 +235,7 @@ class ExecutionManager:
 
     def get_experimentation_data_path(self, organization_id, project_id):
         return 'organization_id=' + str(organization_id) + '/' + \
-               'project_id=' + str(project_id) + '/experimentation_files/*'
+               'project_id=' + str(project_id) + '/experimentation_files'
 
     def parse_filter(self, filter_json: str) -> (str, str):
         """Filters are passed as json strings to the execution manager.
