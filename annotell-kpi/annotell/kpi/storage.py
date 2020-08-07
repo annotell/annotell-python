@@ -33,6 +33,20 @@ def internal_data_loader(absolute_data_path: str,
     return filtered_data_frame
 
 
+def internal_experimentation_data_loader(absolute_data_path: str,
+                                         experimentation_data_path: str,
+                                         compute_placement: str,
+                                         spark_sql_context: SQLContext,
+                                         event_manager: EventManager):
+    log.debug(f"absolute_data_path={absolute_data_path}")
+    log.debug(f"experimentation_data_path={experimentation_data_path}")
+    data_frame = load_parquet_files(spark_sql_context, compute_placement,
+                                    absolute_data_path, experimentation_data_path,
+                                    None, event_manager)
+    event_manager.submit(event_type=event_manager.EVENT_DATA_LOADED, context=f"/{experimentation_data_path}")
+    return data_frame
+
+
 def filter_data_frame(filter_dict, data_frame, event_manager):
     if filter_dict:
         column_filters = filter_dict['content']['column_filters']

@@ -4,6 +4,7 @@ import inspect
 import json
 import os
 import uuid
+from typing import BinaryIO
 
 from annotell.kpi import conf
 from annotell.kpi.events import EventManager
@@ -136,6 +137,11 @@ class ExecutionManager:
                                             project_id=self.project_id,
                                             dataset_id=self.dataset_id)
 
+        # Experimentation data paths are defined by organization and project
+        # To facilitate experimentation we offer a way to load parquet files not associated with any specific dataset
+        self.experimentation_data_path = self.get_experimentation_data_path(organization_id=self.organization_id,
+                                                                            project_id=self.project_id)
+
         # When submitting the script via the KPI Manager we need to find the location of the script that started
         # the execution manager. To do this we inspect the execution stack.
         abs_path = os.path.abspath((inspect.stack()[1])[1])
@@ -184,6 +190,20 @@ class ExecutionManager:
             partitions=partitions,
             event_manager=self.event_manager), self.spark_context, self.spark_sql_context
 
+    def load_experimentation_file(self, filename) -> BinaryIO:
+        """Loads a file to be used when experimenting.
+
+        To facilitate rapid iteration when experimenting we provide a method for uploading and using arbitrary parquet
+        files. The purpose here is not to replace the dataset concept, but rather to enable more rapid interation
+        while in the experimentation phase.
+        """
+        return storage.internal_experimentation_data_loader(
+            absolute_data_path=self.absolute_data_path,
+            experimentation_data_path=self.experimentation_data_path,
+            compute_placement=self.compute_placement,
+            spark_sql_context=self.spark_sql_context,
+            event_manager=self.event_manager)
+
     def submit_result(self, result: Result):
         """ Submits a result for storage.
         Needs to be of type Result.
@@ -211,6 +231,10 @@ class ExecutionManager:
         return 'organization_id=' + str(organization_id) + '/' + \
                'project_id=' + str(project_id) + '/' + \
                'dataset_id=' + str(dataset_id) + "/*"
+
+    def get_experimentation_data_path(self, organization_id, project_id):
+        return 'organization_id=' + str(organization_id) + '/' + \
+               'project_id=' + str(project_id) + '/experimentation_files/*'
 
     def parse_filter(self, filter_json: str) -> (str, str):
         """Filters are passed as json strings to the execution manager.
