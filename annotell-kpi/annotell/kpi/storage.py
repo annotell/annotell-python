@@ -73,7 +73,7 @@ def load_parquet_files(spark_sql_context: SQLContext,
                        compute_placement: str,
                        absolute_data_path: str,
                        data_path: str,
-                       partitions: int,
+                       partitions,
                        event_manager: EventManager):
     log.debug(f"compute_placement={compute_placement}")
     if compute_placement == conf.GOOGLE_CLOUD_DATAPROC:

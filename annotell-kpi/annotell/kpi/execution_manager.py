@@ -190,7 +190,7 @@ class ExecutionManager:
             partitions=partitions,
             event_manager=self.event_manager), self.spark_context, self.spark_sql_context
 
-    def load_experimentation_file(self, filename) -> BinaryIO:
+    def load_experimentation_file(self, filename) -> DataFrame:
         """Loads a file to be used when experimenting.
 
         To facilitate rapid iteration when experimenting we provide a method for uploading and using arbitrary parquet
