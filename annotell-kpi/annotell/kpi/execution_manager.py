@@ -200,6 +200,7 @@ class ExecutionManager:
         return storage.internal_experimentation_data_loader(
             absolute_data_path=self.absolute_data_path,
             experimentation_data_path=self.experimentation_data_path,
+            filename=filename,
             compute_placement=self.compute_placement,
             spark_sql_context=self.spark_sql_context,
             event_manager=self.event_manager)
