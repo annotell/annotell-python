@@ -41,7 +41,7 @@ def get_credentials(auth):
     if isinstance(auth, str):
         if auth.endswith(".json"):
             return parse_credentials(auth)
-        raise ValueError("Bad auth credentials file, but be json")
+        raise ValueError("Bad auth credentials file, must be json")
     elif isinstance(auth, AnnotellCredentials):
         return auth
     else:
