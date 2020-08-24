@@ -1,0 +1,1730 @@
+{
+	"info": {
+		"_postman_id": "acfc07fc-6b56-4532-b69b-6a6749ff6369",
+		"name": "KPI Manager v.1.1.4",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Healthcheck",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/healthcheck",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "API Releases",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/public/releases",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"public",
+						"releases"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Authentication Test",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/v1/auth-test",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"auth-test"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Project Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"project_id\": 1,\n    \"name\": \"Annotell Example Project\",\n    \"description\": \"used to estimate the value of Pi\",\n    \"metadata\": {\n    \t\"contant_person\": \"daniel@annotell.com\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/project/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"project",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Project Get",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"project_id\": 315,\n    \"name\": \"adcam\",\n    \"description\": \"a breaking system\",\n    \"metadata\": {\n    \t\"some additional info\": \"and more\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/project?project_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"project"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Project Update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"project_id\": 1,\n    \"name\": \"L2G8810\",\n    \"description\": \"Lidar\",\n    \"metadata\": {\n    \t\"some additional info\": \"bump more\",\n    \t\"apa\": \"bepa\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/project/update",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"project",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Project List",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/projects/list",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"projects",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Project Delete",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/project/delete?project_id=5",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"project",
+						"delete"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Project Verify Setup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"kpi_ids\": [1]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/project/verify?project_id=1&dataset_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"project",
+						"verify"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "1"
+						},
+						{
+							"key": "dataset_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Events Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"job_id\": \"test\",\n    \"event_type\": \"test\",\n    \"context\": \"testing\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/event/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"event",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Events Get",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/events?job_id=test",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"events"
+					],
+					"query": [
+						{
+							"key": "job_id",
+							"value": "test"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "KPI Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"project_id\" : 1,\n    \"kpi_id\": 1,\n    \"description\": \"estimate of pi\",\n    \"kpi_type\": \"math\",\n    \"kpi_tags\": [\n    \t\"approximation\",\n    \t\"numerical\"\n\t],\n\t\"kpi_groups\": [\n    \t\"irrational_number\",\n    \t\"transcendental_number\"\n\t]\n}\n\n\n\n\n\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/kpi/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"kpi",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "KPI Create Batch",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\n    \"project_id\" : 314,\n    \"kpi_id\": 3166,\n    \"kpi_type\": \"math\",\n    \"kpi_tags\": [\n    \t\"used_for_round_things\",\n    \t\"archimedes\"\n\t],\n\t\"kpi_groups\": [\n    \t\"constants\",\n    \t\"irrational_numbers\"\n\t],\n\t\"description\": \"dont disturb my circles\"\n}]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/kpi/create/batch",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"kpi",
+						"create",
+						"batch"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "KPI List",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/kpi/list?project_id=3",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"kpi",
+						"list"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "KPI Get",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/kpi?kpi_id=8972247&project_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"kpi"
+					],
+					"query": [
+						{
+							"key": "kpi_id",
+							"value": "8972247"
+						},
+						{
+							"key": "project_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "KPI Update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"project_id\" : 1,\n    \"kpi_id\": 8972247,\n    \"script_hash\": \"apa\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/kpi/update",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"kpi",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "KPI Update Script Hash",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/kpi/script_hash/update/auto?kpi_id=8972247&project_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"kpi",
+						"script_hash",
+						"update",
+						"auto"
+					],
+					"query": [
+						{
+							"key": "kpi_id",
+							"value": "8972247"
+						},
+						{
+							"key": "project_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "KPI Delete",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/kpi/delete?kpi_id=314&project_id=314",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"kpi",
+						"delete"
+					],
+					"query": [
+						{
+							"key": "kpi_id",
+							"value": "314"
+						},
+						{
+							"key": "project_id",
+							"value": "314"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "KPI Delete Batch",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[314]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/kpi/delete/batch?project_id=314",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"kpi",
+						"delete",
+						"batch"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "314"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Result Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"project_id\": 1,\n\t\"kpi_id\": 1,\n\t\"content\": {\n\t\t\"pi_estimate\": 3.14159412312314\n\t},\n\t\"result_type\": \"numerical_estimate\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/result/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"result",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Result List",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/results?kpi_id=314&project_id=314&job_id=test2",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"results"
+					],
+					"query": [
+						{
+							"key": "kpi_id",
+							"value": "314"
+						},
+						{
+							"key": "project_id",
+							"value": "314"
+						},
+						{
+							"key": "job_id",
+							"value": "test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Result Get Latest",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/result/latest?kpi_id=1&project_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"result",
+						"latest"
+					],
+					"query": [
+						{
+							"key": "kpi_id",
+							"value": "1"
+						},
+						{
+							"key": "project_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"project_id\": 314,\n  \"content\": {\n\t\"column_filters\" : [\n\t\t{\n\t\t\t\"column\": \"RecordingName\",\n\t\t\t\"values\": [\"LIDAR_LJ02769_20200303_093621_PDX-003-001-054_VBS01_000000.mf4\"]\n\t\t}]\n\t},\n  \"description\": \"used for loop 2-3\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/filter",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"filter"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Get",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"project_id\": 314,\n  \"content\": {\n\t\"column_filters\" : [\n\t\t{\n\t\t\t\"column\": \"recording_name\",\n\t\t\t\"values\": [\"A350\", \"A360\"]\n\t\t}]\n\t},\n  \"description\": \"used for loop 2-3\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/filter?filter_id=0507bba3-aed9-49fc-aacb-51590971dd60",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"filter"
+					],
+					"query": [
+						{
+							"key": "filter_id",
+							"value": "0507bba3-aed9-49fc-aacb-51590971dd60"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Delete",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/filter/delete?filter_id=0507bba3-aed9-49fc-aacb-51590971dd60",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"filter",
+						"delete"
+					],
+					"query": [
+						{
+							"key": "filter_id",
+							"value": "0507bba3-aed9-49fc-aacb-51590971dd60"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Delete Batch",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\"f3397e4a-8e4d-4041-a1a8-b2b70716850f\", \"d33a50c2-7bc1-47e0-afed-da2051a089cf\", \"aeeb58c8-cef7-4d73-9c1b-a7b909f27db2\", \"eadade95-43fd-4309-a568-415d422bbb33\", \"0fdd2598-5ed7-47d6-8690-f83b0112fc44\", \"733fd077-14fc-4a60-8c02-519224c55248\", \"cf600667-96a7-40d8-80fd-d973903344b0\", \"de5066d5-eabc-4bf2-9db7-5fdd548723e6\", \"61cf0d6d-61f1-431b-9e8f-970eb8ff720f\", \"a6f72c1c-a914-4cf9-8af6-9a6d6be3695a\"]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/filter/delete/batch",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"filter",
+						"delete",
+						"batch"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter List",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/filters",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"filters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Script Download",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/script/download?script_hash=f514a21ea3c6514b014e2c6517e424f7",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"script",
+						"download"
+					],
+					"query": [
+						{
+							"key": "script_hash",
+							"value": "f514a21ea3c6514b014e2c6517e424f7"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Script Hash",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "script_file",
+							"type": "file",
+							"src": "/Users/langkilde/projects/magna/annotell_example/calculate_pi_kpi.py"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/script/hash/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"script",
+						"hash",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Calculation Request Submit",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"client_id\": \"a8ffc7acb57b4d94\",\n\t\"client_secret\": \"b265235c340d4c60a2c2c4db04ab5f56\",\n\t\"project_id\": 1,\n\t\"dataset_id\": 1,\n\t\"filter_id\": \"c3107ed7-ed10-49bf-aa05-dfe68e4b26da\",\n\t\"kpi_ids\": [1, 2]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/calculation_request/submit",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"calculation_request",
+						"submit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Calculation Request Status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/calculation_request/status?calculation_request_id=c455f561-8c16-400a-b133-e83853934912",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"calculation_request",
+						"status"
+					],
+					"query": [
+						{
+							"key": "calculation_request_id",
+							"value": "c455f561-8c16-400a-b133-e83853934912"
+						},
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Job Submit",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "script_file",
+							"type": "file",
+							"src": "/home/alexander/annotell/datasets/5dafc576aa7b3d60fd62759e77ab6925.py"
+						},
+						{
+							"key": "credentials_file",
+							"type": "file",
+							"src": "/home/alexander/Downloads/credentials-f14d04ab143849de.json"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/job/submit?project_id=3&dataset_id=35",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"job",
+						"submit"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "3"
+						},
+						{
+							"key": "dataset_id",
+							"value": "35"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Job State",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/job/state?job_id=3a88522b-4969-463d-ba89-ee772fb0a2e8",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"job",
+						"state"
+					],
+					"query": [
+						{
+							"key": "job_id",
+							"value": "3a88522b-4969-463d-ba89-ee772fb0a2e8"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Job Cancel",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "script_file",
+							"type": "file",
+							"src": "/Users/langkilde/projects/magna/annotell_example/calculate_pi_kpi.py"
+						},
+						{
+							"key": "credentials_file",
+							"type": "file",
+							"src": "/Users/langkilde/projects/magna/annotell_example/credentials.json"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/job/cancel?job_id=91818aeb-201f-4594-9448-b220bc795c20",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"job",
+						"cancel"
+					],
+					"query": [
+						{
+							"key": "job_id",
+							"value": "91818aeb-201f-4594-9448-b220bc795c20"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Job Logs",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/job/logs?job_id=7490738e-8d81-4490-acd5-713de03144e8",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"job",
+						"logs"
+					],
+					"query": [
+						{
+							"key": "job_id",
+							"value": "7490738e-8d81-4490-acd5-713de03144e8"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/file/create?filename=test&project_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"file",
+						"create"
+					],
+					"query": [
+						{
+							"key": "filename",
+							"value": "test"
+						},
+						{
+							"key": "project_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File Get",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/file?job_id=4b073084-90d6-4e16-abd3-6b1c3c9656c1&project_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"file"
+					],
+					"query": [
+						{
+							"key": "job_id",
+							"value": "4b073084-90d6-4e16-abd3-6b1c3c9656c1"
+						},
+						{
+							"key": "project_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File Download",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/file/download?filename=032c0352-b7f9-4732-8ddd-0b11547aec60.csv",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"file",
+						"download"
+					],
+					"query": [
+						{
+							"key": "filename",
+							"value": "032c0352-b7f9-4732-8ddd-0b11547aec60.csv"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File Upload",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/langkilde/projects/magna/annotell_example/csv/ab9cc3f7-d93c-43d6-8963-2abccd3eb131.csv"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/file/csv/upload?project_id=1&job_id=test&description=a file",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"file",
+						"csv",
+						"upload"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "1"
+						},
+						{
+							"key": "job_id",
+							"value": "test"
+						},
+						{
+							"key": "description",
+							"value": "a file"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File Upload Experimental",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/langkilde/projects/magna/annotell_example/csv/ab9cc3f7-d93c-43d6-8963-2abccd3eb131.csv"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/file/experimental/upload?project_id=1&description=a file",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"file",
+						"experimental",
+						"upload"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "1"
+						},
+						{
+							"key": "description",
+							"value": "a file"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Report Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"kpi_ids\": [1],\n\t\"project_id\": 1,\n\t\"dataset_id\": 1,\n\t\"calculation_request_id\": \"c455f561-8c16-400a-b133-e83853934912\",\n\t\"description\": \"a test report\",\n\t\"metadata\": {\n\t\t\"some\": \"keys\",\n\t\t\"and\": \"values\"\n\t}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/report/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"report",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dataset Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"project_id\": 1,\n    \"dataset_id\": 1,\n    \"metadata\": {\n        \"description\": \"Data recorded in order to check CVApp latency (eqv. CVApp performance)\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/dataset/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"dataset",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dataset Get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://kpi.annotell.com/v1/dataset?project_id=1&dataset_id=19",
+					"protocol": "https",
+					"host": [
+						"kpi",
+						"annotell",
+						"com"
+					],
+					"path": [
+						"v1",
+						"dataset"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "1"
+						},
+						{
+							"key": "dataset_id",
+							"value": "19"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dataset Update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"project_id\": 1,\n    \"dataset_id\": 1,\n    \"metadata\": {\n        \"description\": \"random numbers used to calculate pi\",\n        \"random_number_count\": 1000000\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/dataset/update",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"dataset",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dataset Info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/v1/dataset/info?project_id=1&dataset_id=19",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"dataset",
+						"info"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "1"
+						},
+						{
+							"key": "dataset_id",
+							"value": "19"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dataset List Files",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/v1/dataset/list/files?organization_id=1&project_id=1&dataset_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"dataset",
+						"list",
+						"files"
+					],
+					"query": [
+						{
+							"key": "organization_id",
+							"value": "1"
+						},
+						{
+							"key": "project_id",
+							"value": "1"
+						},
+						{
+							"key": "dataset_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dataset Download Sample",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/v1/dataset/download/sample?project_id=1&dataset_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"dataset",
+						"download",
+						"sample"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "1"
+						},
+						{
+							"key": "dataset_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dataset Schema",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/v1/dataset/schema?organization_id=1&project_id=1&dataset_id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"dataset",
+						"schema"
+					],
+					"query": [
+						{
+							"key": "organization_id",
+							"value": "1"
+						},
+						{
+							"key": "project_id",
+							"value": "1"
+						},
+						{
+							"key": "dataset_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Metrics Test",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/v1/metrics",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"metrics"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzUxMiJ9.eyJpc3MiOiJhbm5vdGVsbC5jb20iLCJzdWIiOiJkYW5pZWwubGFuZ2tpbGRlQGdtYWlsLmNvbSIsImV4cCI6MTU5ODI1ODE3NCwiaWF0IjoxNTk4MjUwOTc0LCJyb2xlcyI6WyJhZG1pbiJdLCJ1c2VySWQiOjE3NTUsInVzZXJPcmdJZCI6MjB9.AHAw8ZMPpIxoYHV55czxFKGoAryO21tTZ5cAwp81eFxsXDQcXA8ciZ50dJ9PkbVryrMnqbIqv5j46lGFupeU-MbyAOtGX5wNntdwwvX8oACHDs4MOQgRXzwM0CLXAWwS5YsFdEGYC4Re5K8HmpUxY5nL-9joFIKRHMjsytSptbp-B3AC",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "a34007ba-bd89-4f3b-8910-2c2630dbc4f0",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "25282b90-7ed6-4aef-a534-cb5bc7d4545f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "47beb84f-09cc-4217-9abb-9bb6a8c079de",
+			"key": "base_url",
+			"value": "https://kpi.annotell.com"
+		},
+		{
+			"id": "4482452e-cb2e-4010-98ed-5d00e1b3a3f1",
+			"key": "auth_host",
+			"value": "https://user.annotell.com"
+		},
+		{
+			"id": "00eb8db4-804f-4c72-b8c3-cd019c21c48b",
+			"key": "client_id",
+			"value": "REPLACE WITH CREDENTIALS"
+		},
+		{
+			"id": "8207898e-7108-48ac-bfc7-4d75cd40bd09",
+			"key": "client_secret",
+			"value": "REPLACE WITH CREDENTIALS"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
