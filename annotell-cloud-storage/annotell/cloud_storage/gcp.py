@@ -39,6 +39,4 @@ def upload_blob(bucket_name: str, source_file_name: str, destination_blob_name: 
 
     blob.upload_from_filename(source_file_name)
 
-    log.info('File {} uploaded to {}'.format(
-        source_file_name,
-        destination_blob_name))
+    log.info('File {} uploaded to {}'.format(source_file_name, destination_blob_name))
