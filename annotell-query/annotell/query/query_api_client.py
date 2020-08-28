@@ -34,7 +34,7 @@ class QueryApiClient:
         self.headers = {
             "Accept-Encoding": "gzip",
             "Accept": "application/json",
-            "User-Agent": "annotell-ams/query:%s" % __version__
+            "User-Agent": "annotell-query:%s" % __version__
         }
 
     @property

@@ -1,23 +1,24 @@
-# Annotell Management System
+# Annotell Query API Client
 
-Python 3 library providing access to AMS. 
+Python 3 library providing access to the Annotell Query API. 
 
-To install with pip run `pip install annotell-ams`
+To install with pip run `pip install annotell-query`
 
 Set env ANNOTELL_CREDENTIALS, see [annotell-auth](https://github.com/annotell/annotell-python/tree/master/annotell-auth). 
 
-## Metadata Example
+## Judgement Query Example
 Stream all items matching a query
 ```python
-from annotell.ams.query import QueryApiClient
+from annotell.query.query_api_client import QueryApiClient
 query_client = QueryApiClient()
-resp = query_client.stream_metadata(query_filter="id = X")
+resp = query_client.query_judgements(query_filter="requestId = X")
 for item in resp.items():
     print(item)
 ```
 
 ## Change log
 2.0.0
+- Rename library to annotell-query
 - Rename QueryApi to QueryApiClient
 - Add KPI query method
 
