@@ -6,7 +6,7 @@ To install with pip run `pip install annotell-query`
 
 Set env ANNOTELL_CREDENTIALS, see [annotell-auth](https://github.com/annotell/annotell-python/tree/master/annotell-auth). 
 
-## Metadata Example
+## Judgement Query Example
 Stream all items matching a query
 ```python
 from annotell.query.query_api_client import QueryApiClient
