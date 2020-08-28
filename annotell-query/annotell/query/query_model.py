@@ -35,6 +35,9 @@ class QueryResponse(AbstractQueryResponse):
     def aggregates(self):
         return self.json.get("aggregates") or dict()
 
+    @property
+    def head(self):
+        return self.items()[0] if self.returned_hits > 0 else None
 
 class StreamingQueryResponse(AbstractQueryResponse):
 
