@@ -3,14 +3,14 @@ import re
 
 URL = 'https://github.com/annotell/annotell-python'
 
-package_name = 'annotell-ams'
+package_name = 'annotell-query'
 
 with open('README.md') as f:
     LONG_DESCRIPTION = f.read()
 
 # resolve version by opening file. We cannot do import during install
 # since the package does not yet exist
-with open('annotell/ams/__init__.py', 'r') as fd:
+with open('annotell/query/__init__.py', 'r') as fd:
     match = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                       fd.read(), re.MULTILINE)
     version = match.group(1) if match else None
@@ -28,7 +28,7 @@ setup(
     packages=packages,
     namespace_packages=["annotell"],
     version=version,
-    description='Annotell AMS',
+    description='Annotell Query API Client',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     author='Annotell',
