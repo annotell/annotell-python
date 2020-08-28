@@ -17,10 +17,13 @@ def internal_data_loader(
     filter_dict: dict,
     spark_sql_context: SQLContext,
     partitions: int,
-    event_manager: EventManager
+    event_manager: EventManager,
+    merge_schema: bool
 ):
     log.debug(f"absolute_data_path={absolute_data_path}")
-    data_frame = load_parquet_files(spark_sql_context, compute_placement, absolute_data_path, data_path, partitions, event_manager)
+    data_frame = load_parquet_files(
+        spark_sql_context, compute_placement, absolute_data_path, data_path, partitions, event_manager, merge_schema
+    )
     event_manager.submit(event_type=event_manager.EVENT_DATA_LOADED, context=f"/{data_path}")
     num_partitions = data_frame.rdd.getNumPartitions()
     event_manager.submit(event_type=event_manager.EVENT_DATA_LOADED, context=f"num_partitions={num_partitions}")
@@ -69,7 +72,13 @@ def filter_data_frame(filter_dict, data_frame, event_manager):
 
 
 def load_parquet_files(
-    spark_sql_context: SQLContext, compute_placement: str, absolute_data_path: str, data_path: str, partitions, event_manager: EventManager
+    spark_sql_context: SQLContext,
+    compute_placement: str,
+    absolute_data_path: str,
+    data_path: str,
+    partitions,
+    event_manager: EventManager,
+    merge_schema: bool
 ):
     log.debug(f"compute_placement={compute_placement}")
     if compute_placement == conf.GOOGLE_CLOUD_DATAPROC:
@@ -78,9 +87,9 @@ def load_parquet_files(
         absolute_data_path = AMAZON_KPI_BUCKET + data_path
     try:
         if partitions:
-            return spark_sql_context.read.parquet(absolute_data_path, mergeSchema=True).repartition(partitions)
+            return spark_sql_context.read.parquet(absolute_data_path, mergeSchema=merge_schema).repartition(partitions)
         else:
-            return spark_sql_context.read.parquet(absolute_data_path, mergeSchema=True)
+            return spark_sql_context.read.parquet(absolute_data_path, mergeSchema=merge_schema)
     except sql_utils.AnalysisException:
         event_manager.submit(event_type=event_manager.EVENT_DATA_LOADING_FAILED, context=f"data_path={absolute_data_path} did not exist")
         raise Exception(f"data_path={absolute_data_path} did not exist")

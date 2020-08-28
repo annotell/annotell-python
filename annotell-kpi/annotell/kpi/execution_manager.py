@@ -174,7 +174,7 @@ class ExecutionManager:
     def submit_event(self, event_type: str, context: str):
         self.event_manager.submit(event_type=event_type, context=context)
 
-    def load_data(self, partitions=None) -> (DataFrame, SparkContext, SQLContext):
+    def load_data(self, partitions=None, merge_schema: bool=False) -> (DataFrame, SparkContext, SQLContext):
         """Loads data from either local disk or cloud infrastructure depending on Execution Mode.
 
         To enable both local development, and cloud based execution, of KPI scripts data loading is handled
@@ -188,7 +188,8 @@ class ExecutionManager:
             filter_dict=self.filter_dict,
             spark_sql_context=self.spark_sql_context,
             partitions=partitions,
-            event_manager=self.event_manager), self.spark_context, self.spark_sql_context
+            event_manager=self.event_manager,
+            merge_schema=merge_schema), self.spark_context, self.spark_sql_context
 
     def load_experimentation_file(self, filename) -> DataFrame:
         """Loads a file to be used when experimenting.
