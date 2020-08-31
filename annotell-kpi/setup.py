@@ -43,7 +43,8 @@ setup(
     keywords=['KPI', 'Annotell', 'SDK'],
     install_requires=[
         'pyspark',
-        'annotell-auth>=1.4.0,<2', 'mongoengine'
+        'annotell-auth>=1.4.0,<2',
+        'mongoengine'
     ],
     python_requires='~=3.6',
     include_package_data=True,
