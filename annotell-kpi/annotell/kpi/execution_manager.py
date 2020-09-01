@@ -91,9 +91,7 @@ class ExecutionManager:
         # Determine if credentials are to be used from arguments or environment variables
         if self.client_secret:
             log.info(f"[authentication      ] using submitted credentials")
-            self.oauth_session = AuthSession(host=auth_host,
-                                             client_id=self.client_id,
-                                             client_secret=self.client_secret)
+            self.oauth_session = AuthSession(host=auth_host, client_id=self.client_id, client_secret=self.client_secret)
         else:
             log.info(f"[authentication      ] using environment credentials")
             self.oauth_session = AuthSession(host=auth_host)
@@ -103,44 +101,45 @@ class ExecutionManager:
         self.filter_dict, self.filter_id = self.parse_filter(filter_json=self.filter_json)
 
         # The Event Manager is used to send events used for script diagnostics
-        self.event_manager = EventManager(auth_session=self.session,
-                                          job_id=self.job_id,
-                                          host=self.kpi_host,
-                                          kpi_manager_version=conf.KPI_MANAGER_VERSION)
+        self.event_manager = EventManager(
+            auth_session=self.session, job_id=self.job_id, host=self.kpi_host, kpi_manager_version=conf.KPI_MANAGER_VERSION
+        )
 
         # The Result Manager is used to send results to storage
-        self.result_manager = ResultManager(auth_session=self.session,
-                                            host=self.kpi_host,
-                                            kpi_manager_version=conf.KPI_MANAGER_VERSION,
-                                            execution_mode=self.execution_mode,
-                                            script_hash=self.script_hash,
-                                            job_id=self.job_id,
-                                            project_id=self.project_id,
-                                            dataset_id=self.dataset_id,
-                                            filter_id=self.filter_id,
-                                            event_manager=self.event_manager)
+        self.result_manager = ResultManager(
+            auth_session=self.session,
+            host=self.kpi_host,
+            kpi_manager_version=conf.KPI_MANAGER_VERSION,
+            execution_mode=self.execution_mode,
+            script_hash=self.script_hash,
+            job_id=self.job_id,
+            project_id=self.project_id,
+            dataset_id=self.dataset_id,
+            filter_id=self.filter_id,
+            event_manager=self.event_manager
+        )
 
-        self.file_manager = FileManager(auth_session=self.session,
-                                        host=self.kpi_host,
-                                        project_id=self.project_id,
-                                        job_id=self.job_id,
-                                        kpi_manager_version=conf.KPI_MANAGER_VERSION)
+        self.file_manager = FileManager(
+            auth_session=self.session,
+            host=self.kpi_host,
+            project_id=self.project_id,
+            job_id=self.job_id,
+            kpi_manager_version=conf.KPI_MANAGER_VERSION
+        )
 
         # The Dataset manager is used to modify information about datasets
-        self.dataset_manager = DatasetManager(auth_session=self.session,
-                                              job_id=self.job_id,
-                                              kpi_host=self.kpi_host,
-                                              kpi_manager_version=conf.KPI_MANAGER_VERSION)
+        self.dataset_manager = DatasetManager(
+            auth_session=self.session, job_id=self.job_id, kpi_host=self.kpi_host, kpi_manager_version=conf.KPI_MANAGER_VERSION
+        )
 
         # Data paths are defined by organization, project and dataset ids
-        self.data_path = self.get_data_path(organization_id=self.organization_id,
-                                            project_id=self.project_id,
-                                            dataset_id=self.dataset_id)
+        self.data_path = self.get_data_path(organization_id=self.organization_id, project_id=self.project_id, dataset_id=self.dataset_id)
 
         # Experimentation data paths are defined by organization and project
         # To facilitate experimentation we offer a way to load parquet files not associated with any specific dataset
-        self.experimentation_data_path = self.get_experimentation_data_path(organization_id=self.organization_id,
-                                                                            project_id=self.project_id)
+        self.experimentation_data_path = self.get_experimentation_data_path(
+            organization_id=self.organization_id, project_id=self.project_id
+        )
 
         # When submitting the script via the KPI Manager we need to find the location of the script that started
         # the execution manager. To do this we inspect the execution stack.
@@ -155,10 +154,9 @@ class ExecutionManager:
         atexit.register(self.event_manager.script_completed)
 
         # Submits an event to indicate the initialization completed successfully
-        self.event_manager.script_initialized(organization_id=self.organization_id,
-                                              project_id=self.project_id,
-                                              dataset_id=self.dataset_id,
-                                              user_id=self.user_id)
+        self.event_manager.script_initialized(
+            organization_id=self.organization_id, project_id=self.project_id, dataset_id=self.dataset_id, user_id=self.user_id
+        )
 
     def dataset_metadata_update_from_dict(self, metadata_dict: dict):
         for key in metadata_dict.keys():
@@ -174,7 +172,7 @@ class ExecutionManager:
     def submit_event(self, event_type: str, context: str):
         self.event_manager.submit(event_type=event_type, context=context)
 
-    def load_data(self, partitions=None, merge_schema: bool=False) -> (DataFrame, SparkContext, SQLContext):
+    def load_data(self, partitions=None, merge_schema: bool = True) -> (DataFrame, SparkContext, SQLContext):
         """Loads data from either local disk or cloud infrastructure depending on Execution Mode.
 
         To enable both local development, and cloud based execution, of KPI scripts data loading is handled
@@ -204,7 +202,8 @@ class ExecutionManager:
             filename=filename,
             compute_placement=self.compute_placement,
             spark_sql_context=self.spark_sql_context,
-            event_manager=self.event_manager)
+            event_manager=self.event_manager
+        )
 
     def submit_result(self, result: Result):
         """ Submits a result for storage.
@@ -222,11 +221,9 @@ class ExecutionManager:
         """ Enables writing intermediate results to csv files
         Returns an ID for the file for downloading later
         """
-        file_id = self.file_manager.save_csv_file(data_frame=data_frame,
-                                                  description=description,
-                                                  project_id=self.project_id,
-                                                  job_id=self.job_id,
-                                                  root_dir=self.root_dir)
+        file_id = self.file_manager.save_csv_file(
+            data_frame=data_frame, description=description, project_id=self.project_id, job_id=self.job_id, root_dir=self.root_dir
+        )
         return file_id
 
     def get_data_path(self, organization_id, project_id, dataset_id):
