@@ -20,6 +20,10 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2020-09-01
+### Changed
+- SLAM - startTs and endTs not optional in Slam request
+
 ## [0.3.1] - 2020-07-16
 ### Changed
 - If the upload of point clouds or images crashes and returns status code 429, 408 or 5xx the script will
