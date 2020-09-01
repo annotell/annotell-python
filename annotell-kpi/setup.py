@@ -42,7 +42,7 @@ setup(
     download_url='%s/tarball/%s' % (URL, version),
     keywords=['KPI', 'Annotell', 'SDK'],
     install_requires=[
-        'pyspark',
+        'pyspark<3.0.0',
         'annotell-auth>=1.4.0,<2',
         'mongoengine'
     ],

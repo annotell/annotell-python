@@ -87,9 +87,9 @@ def load_parquet_files(
         absolute_data_path = AMAZON_KPI_BUCKET + data_path
     try:
         if partitions:
-            return spark_sql_context.read.parquet(absolute_data_path, mergeSchema=merge_schema).repartition(partitions)
+            return spark_sql_context.read.option(mergeSchema=merge_schema).parquet(absolute_data_path).repartition(partitions)
         else:
-            return spark_sql_context.read.parquet(absolute_data_path, mergeSchema=merge_schema)
+            return spark_sql_context.read.options(mergeSchema=merge_schema).parquet(absolute_data_path)
     except sql_utils.AnalysisException:
         event_manager.submit(event_type=event_manager.EVENT_DATA_LOADING_FAILED, context=f"data_path={absolute_data_path} did not exist")
         raise Exception(f"data_path={absolute_data_path} did not exist")
