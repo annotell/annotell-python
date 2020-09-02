@@ -248,9 +248,14 @@ class TimeSpecification(RequestCall):
         self.time_calibration = time_calibration
 
     def to_dict(self) -> dict:
-        as_dict = dict(startTs=self.start_ts,
-                       endTs=self.end_ts,
-                       timeCalibration=self.time_calibration.to_dict())
+        
+        as_dict = dict(timeCalibration=self.time_calibration.to_dict())
+            
+        if self.start_ts:
+            as_dict["startTs"] = self.start_ts
+        if self.end_ts:
+            as_dict["endTs"] = self.end_ts
+        
 
         return as_dict
 
