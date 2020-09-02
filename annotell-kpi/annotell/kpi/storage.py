@@ -1,3 +1,4 @@
+import os
 from pyspark.sql import SQLContext
 from pyspark.sql import utils as sql_utils
 from pyspark.sql.functions import col
@@ -37,7 +38,8 @@ def internal_experimentation_data_loader(
     filename: str,
     compute_placement: str,
     spark_sql_context: SQLContext,
-    event_manager: EventManager
+    event_manager: EventManager,
+    merge_schema: bool
 ):
     log.debug(f"absolute_data_path={absolute_data_path}")
     log.debug(f"experimentation_data_path={experimentation_data_path}")
@@ -45,7 +47,13 @@ def internal_experimentation_data_loader(
     full_path = experimentation_data_path + "/" + filename
     log.debug(f"full_path={full_path}")
     data_frame = load_parquet_files(
-        spark_sql_context, compute_placement, absolute_data_path, data_path=full_path, partitions=None, event_manager=event_manager
+        spark_sql_context,
+        compute_placement,
+        absolute_data_path,
+        data_path=full_path,
+        partitions=None,
+        event_manager=event_manager,
+        merge_schema=merge_schema
     )
     event_manager.submit(event_type=event_manager.EVENT_DATA_LOADED, context=f"/{experimentation_data_path}")
     return data_frame
@@ -78,13 +86,15 @@ def load_parquet_files(
     data_path: str,
     partitions,
     event_manager: EventManager,
-    merge_schema: bool
+    merge_schema: bool = True
 ):
     log.debug(f"compute_placement={compute_placement}")
     if compute_placement == conf.GOOGLE_CLOUD_DATAPROC:
         absolute_data_path = GOOGLE_KPI_BUCKET + data_path
     if compute_placement == conf.AMAZON_SPARK_EMR:
         absolute_data_path = AMAZON_KPI_BUCKET + data_path
+    if compute_placement == conf.LOCALHOST:
+        absolute_data_path = os.path.join(absolute_data_path.rsplit("/", 4)[0], data_path)
     try:
         if partitions:
             return spark_sql_context.read.option(mergeSchema=merge_schema).parquet(absolute_data_path).repartition(partitions)

@@ -189,7 +189,7 @@ class ExecutionManager:
             event_manager=self.event_manager,
             merge_schema=merge_schema), self.spark_context, self.spark_sql_context
 
-    def load_experimentation_file(self, filename) -> DataFrame:
+    def load_experimentation_file(self, filename, merge_schema: bool = True) -> DataFrame:
         """Loads a file to be used when experimenting.
 
         To facilitate rapid iteration when experimenting we provide a method for uploading and using arbitrary parquet
@@ -202,7 +202,8 @@ class ExecutionManager:
             filename=filename,
             compute_placement=self.compute_placement,
             spark_sql_context=self.spark_sql_context,
-            event_manager=self.event_manager
+            event_manager=self.event_manager,
+            merge_schema=merge_schema
         )
 
     def submit_result(self, result: Result):
