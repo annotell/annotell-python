@@ -75,6 +75,8 @@ class QueryApiClient:
         except requests.exceptions.HTTPError as e:
             msg = resp.content.decode()
             raise QueryException("Got %s error %s" % (resp.status_code, msg)) from e
+        except requests.exceptions.ChunkedEncodingError as e:
+            raise QueryException("Got unexpected content in the streaming response from the the server") from e
 
     def _query(self, url: str, stream: bool = False, **kwargs):
 
