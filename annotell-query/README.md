@@ -17,6 +17,10 @@ for item in resp.items():
 ```
 
 ## Change log
+
+2.1.0
+- Use server default query limits 
+
 2.0.0
 - Rename library to annotell-query
 - Rename QueryApi to QueryApiClient

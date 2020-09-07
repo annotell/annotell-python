@@ -7,7 +7,9 @@ from . import __version__
 from .query_model import QueryResponse, StreamingQueryResponse, QueryException
 
 DEFAULT_HOST = "https://query.annotell.com"
-DEFAULT_LIMIT = 10
+
+# placeholder, get the default limit from the server
+DEFAULT_LIMIT = -1
 MAX_LIMIT = 10000
 
 FIELDS_TYPE = Union[List[str], str, None]
@@ -56,12 +58,13 @@ class QueryApiClient:
 
         body = {
             "queryFilter": qf,
-            "limit": limit,
             "fields": {
                 "includes": includes,
                 "excludes": excludes
             }
         }
+        if limit is not None and limit != DEFAULT_LIMIT:
+            body['limit'] = limit
 
         if aggregates:
             body['aggregates'] = aggregates
