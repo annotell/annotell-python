@@ -267,18 +267,21 @@ class SlamMetaData(CalibratedSceneMetaData):
                  trajectory: Optional[str],
                  time_specification: TimeSpecification,
                  source_specification: SourceSpecification,
-                 calibration_id: int):
+                 calibration_id: int,
+                 sequence_id: int):
         super().__init__(external_id, source_specification, calibration_id)
         self.vehicle_data = vehicle_data
         self.dynamic_objects = dynamic_objects
         self.trajectory = trajectory
         self.time_specification = time_specification
+        self.sequence_id = sequence_id
 
     def to_dict(self):
         as_dict = super().to_dict()
         as_dict["vehicleData"] = self.vehicle_data
         as_dict["dynamicObjects"] = self.dynamic_objects
         as_dict["timeSpecification"] = self.time_specification.to_dict()
+        as_dict["sequenceId"] = self.sequence_id
 
         if self.trajectory:
             as_dict["trajectory"] = self.trajectory

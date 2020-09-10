@@ -20,6 +20,10 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.3] - 2020-09-10
+### Changed
+- SLAM - add required sequence-id
+
 ## [0.3.2] - 2020-09-01
 ### Changed
 - SLAM - startTs and endTs not optional in Slam request
