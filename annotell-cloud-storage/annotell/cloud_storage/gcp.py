@@ -1,4 +1,3 @@
-import os
 import logging
 from typing import Optional
 from google.cloud import storage
@@ -12,9 +11,6 @@ _storage_client: Optional[storage.Client] = None
 def storage_client() -> storage.Client:
     global _storage_client
     if _storage_client is None:
-        credentials = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-        if not credentials:
-            raise RuntimeError("Please point to a service account json file in env GOOGLE_APPLICATION_CREDENTIALS")
         _storage_client = storage.Client()
     return _storage_client
 
