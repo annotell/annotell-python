@@ -314,14 +314,16 @@ class FilesToUpload(RequestCall):
 
 
 class PoseTransform(RequestCall):
-    def __init__(self, timestamp: float, position: List[float], rotation_quaternion: List[float]):
+    def __init__(self, timestamp: int, utc_timestamp: float, position: List[float], rotation_quaternion: List[float]):
         self.timestamp = timestamp
+        self.utc_timestamp = utc_timestamp
         self.position = position
         self.rotation_quaternion = rotation_quaternion
 
     def to_dict(self):
         return {
             "timestamp": self.timestamp,
+            "utc_timestamp": self.utc_timestamp,
             "position": self.position,
             "rotation_quaternion": self.rotation_quaternion
         }
