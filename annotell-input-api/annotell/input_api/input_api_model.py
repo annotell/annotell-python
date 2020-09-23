@@ -270,7 +270,7 @@ class SlamMetaData(CalibratedSceneMetaData):
                  calibration_id: int,
                  sequence_id: int,
                  sub_sequence_id: int,
-                 settings: dict = None):
+                 settings: Optional[dict] = None):
         super().__init__(external_id, source_specification, calibration_id)
         self.vehicle_data = vehicle_data
         self.dynamic_objects = dynamic_objects
