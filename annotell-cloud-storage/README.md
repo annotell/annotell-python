@@ -15,3 +15,7 @@ from annotell.cloud_storage import gcp
 bucket_name = "my-bucket"
 gcp.list_blobs(bucket_name)
 ```
+
+# Change log
+
+0.5.0 remove check to enforce that GOOGLE_APPLICATION_CREDENTIALS are set

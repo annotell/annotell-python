@@ -97,7 +97,7 @@ def load_parquet_files(
         absolute_data_path = os.path.join(absolute_data_path.rsplit("/", 4)[0], data_path)
     try:
         if partitions:
-            return spark_sql_context.read.option(mergeSchema=merge_schema).parquet(absolute_data_path).repartition(partitions)
+            return spark_sql_context.read.options(mergeSchema=merge_schema).parquet(absolute_data_path).repartition(partitions)
         else:
             return spark_sql_context.read.options(mergeSchema=merge_schema).parquet(absolute_data_path)
     except sql_utils.AnalysisException:
