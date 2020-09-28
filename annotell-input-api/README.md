@@ -1,6 +1,6 @@
-# Annotell Input Api
+# Annotell Input API Client
 
-Python 3 library providing access to Annotell Input Api 
+Python 3 library providing access to Annotell Input API 
 
 To install with pip run `pip install annotell-input-api`
 
