@@ -46,7 +46,8 @@ class ExportApiClient:
             “requestId”: <int>,
             “annotationId”: <int>,
             “passed”: <bool>,
-            “errors”: <optional list of error maps>
+            “itemErrors”: <optional list of error maps>,
+            "generalErrors": <optional list of error maps>
         }
         error:
         {
@@ -54,6 +55,7 @@ class ExportApiClient:
             “objectId”: <optional string>
             “checkId”: <optional string>
         }
+        objectId does not apply for generalErrors
 
         :return:
         """
