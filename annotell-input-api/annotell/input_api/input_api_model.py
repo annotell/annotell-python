@@ -22,6 +22,13 @@ class InvalidatedReasonInput(str, Enum):
     DUPLICATE = "duplicate"
     INCORRECTLY_CREATED = "incorrectly-created"
 
+class InputBatchStatus(str, Enum):
+    CREATED = 'created'
+    OPEN = 'open'
+    READY = 'ready'
+    INPROGESS = 'in-progress'
+    COMPLETED = 'completed'
+
 #
 # Request Calls
 #
@@ -413,21 +420,47 @@ class InputList(Response):
             f"name={self.name}, " + \
             f"created={self.created})>"
 
+class InputBatch(Response):
+    def __init__(self, id: int, project_id: int, external_id: str, title: str, status: InputBatchStatus,  created: datetime, updated: datetime):
+        self.id = id
+        self.project_id = project_id
+        self.external_id = external_id
+        self.title = title
+        self.status = status
+        self.created = created
+        self.updated = updated
+
+    @staticmethod
+    def from_json(js: dict):
+        return InputBatch(int(js["id"]), int(js["projectId"]), js["externalId"], js["title"], js["status"],
+                         ts_to_dt(js["created"]), ts_to_dt(js["created"]))
+
+    def __repr__(self):
+        return f"<InputBatch(" + \
+            f"id={self.id}, " + \
+            f"project_id={self.project_id}, " + \
+            f"external_id={self.external_id}, " + \
+            f"title={self.title}, " + \
+            f"status={self.status}, " + \
+            f"created={self.created}, " + \
+            f"updated={self.updated})>"
+
 
 class Project(Response):
     def __init__(self, id: int, created: datetime, title: str, description: str,
-                 deadline: Optional[str], status: str):
+                 deadline: Optional[str], status: str, external_id: str):
         self.id = id
         self.created = created
         self.title = title
         self.description = description
         self.deadline = deadline
         self.status = status
+        self.external_id = external_id
 
     @staticmethod
     def from_json(js: dict):
         return Project(int(js["id"]), ts_to_dt(js["created"]), js["title"],
-                       js["description"], js.get("deadline"), js["status"])
+                       js["description"], js.get("deadline"), js["status"], js["externalId"])
 
     def __repr__(self):
         return f"<Project(" + \
@@ -436,23 +469,26 @@ class Project(Response):
             f"title={self.title}, " + \
             f"description={self.description}, " + \
             f"deadline={self.deadline}, " + \
-            f"status={self.status})>"
+            f"status={self.status}, " + \
+            f"external_id={self.external_id})>"
 
 
 class Request(Response):
     def __init__(self, id: int, created: datetime, project_id: int, title: str, description: str,
-                 input_list_id: int):
+                 input_list_id: int, input_batch_id: int, external_id: str):
         self.id = id
         self.created = created
         self.project_id = project_id
         self.title = title
         self.description = description
         self.input_list_id = input_list_id
+        self.input_batch_id = input_batch_id
+        self.external_id = external_id
 
     @staticmethod
     def from_json(js: dict):
         return Request(int(js["id"]), ts_to_dt(js["created"]), int(js["projectId"]),
-                       js["title"], js["description"], int(js["inputListId"]))
+                       js["title"], js["description"], int(js["inputListId"]), int(js["inputBatchId"]), js["externalId"])
 
     def __repr__(self):
         return f"<Request(" + \
@@ -461,7 +497,9 @@ class Request(Response):
             f"project_id={self.project_id}, " + \
             f"title={self.title}, " + \
             f"description={self.description}, " + \
-            f"input_list_id={self.input_list_id})>"
+            f"input_list_id={self.input_list_id}, " + \
+            f"input_batch_id={self.input_batch_id}, " + \
+            f"external_id={self.external_id})>"
 
 
 class ExportAnnotation(Response):
