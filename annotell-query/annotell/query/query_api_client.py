@@ -1,7 +1,8 @@
 from typing import Optional, List, Mapping, Union
-
 import requests
-from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST, AuthSession
+import logging
+
+from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST, FaultTolerantAuthRequestSession
 
 from . import __version__
 from .query_model import QueryResponse, StreamingQueryResponse, QueryException
@@ -14,6 +15,9 @@ MAX_LIMIT = 10000
 
 FIELDS_TYPE = Union[List[str], str, None]
 AGGREGATES_TYPE = Optional[Mapping[str, dict]]
+
+log = logging.getLogger(__name__)
+
 
 class QueryApiClient:
     def __init__(self, *,
@@ -31,7 +35,7 @@ class QueryApiClient:
         self.judgements_query_url = "%s/v1/search/judgements/query" % self.host
         self.kpi_query_url = "%s/v1/search/kpi/query" % self.host
 
-        self.oauth_session = AuthSession(auth=auth, host=auth_host)
+        self._auth_req_session = FaultTolerantAuthRequestSession(auth=auth, host=auth_host)
 
         self.headers = {
             "Accept-Encoding": "gzip",
@@ -41,7 +45,7 @@ class QueryApiClient:
 
     @property
     def session(self):
-        return self.oauth_session.session
+        return self._auth_req_session
 
     def _create_request_body(self, *,
                              query_filter: Optional[str] = None,
