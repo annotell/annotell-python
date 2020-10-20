@@ -32,6 +32,10 @@ sess.get("https://api.annotell.com")
 
 ## Changelog
 
+### 1.5
+Add FaultTolerantAuthRequestSession that handles token refresh on long running sessions. 
+
 ### 1.4
 - Add support for `auth` parameter, with path to credentials file or `AnnotellCredentials` object
 - Drop support for legacy API token
+

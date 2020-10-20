@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
 from typing import Optional
-from .credentials_parser import resolve_credentials
-
+import requests
 from authlib.integrations.requests_client import OAuth2Session
+from authlib.common.errors import AuthlibBaseError
+from .credentials_parser import resolve_credentials
 
 DEFAULT_HOST = "https://user.annotell.com"
 
@@ -75,4 +76,44 @@ class AuthSession:
             self.init()
         return self.oauth_session.session
 
+
+class FaultTolerantAuthRequestSession:
+    """An object that can be used like a Request session that handles token refresh"""
+    def __init__(self, auth=None, host=DEFAULT_HOST):
+        self.auth = auth
+        self.host = host
+        self._oauth_session = AuthSession(auth=auth, host=host)
+
+    @property
+    def request_session(self) -> requests.Session:
+        return self._oauth_session.session
+
+    def get(self, *args, **kwargs) -> requests.Response:
+        return self._query(self.request_session.get, *args, **kwargs)
+
+    def post(self, *args, **kwargs) -> requests.Response:
+        return self._query(self.request_session.post, *args, **kwargs)
+
+    def put(self, *args, **kwargs) -> requests.Response:
+        return self._query(self.request_session.put, *args, **kwargs)
+
+    def patch(self, *args, **kwargs) -> requests.Response:
+        return self._query(self.request_session.patch, *args, **kwargs)
+
+    def delete(self, *args, **kwargs) -> requests.Response:
+        return self._query(self.request_session.delete, *args, **kwargs)
+
+    def _query(self, fun, *args, **kwargs):
+        # add retry if the token has expired, this can happen when the session
+        # is left open for many hours without any queries
+        try:
+            resp = fun(*args, **kwargs)
+        except AuthlibBaseError as e:
+            if e.error == "invalid_token":
+                log.warning("Got invalid token, resetting auth session")
+                self._oauth_session = AuthSession(auth=self.auth, host=self.host)
+                resp = fun(*args, **kwargs)
+            else:
+                raise
+        return resp
 
