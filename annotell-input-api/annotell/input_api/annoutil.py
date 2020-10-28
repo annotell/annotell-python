@@ -7,7 +7,6 @@ import click
 
 client = InputApiClient(auth=None)
 
-
 def _tabulate(body, headers, title=None):
     tab = tabulate(
         body,
@@ -55,19 +54,19 @@ def projects(project_id, get_requests, get_input_lists):
         tab = _get_table(list_of_input_lists, headers, "INPUTLISTS")
         print(tab)
     elif get_requests and project_id:
-        headers = ["id", "created", "project_id", "title", "description", "input_list_id"]
+        headers = ["id", "created", "project_id", "title", "description", "input_list_id", "input_batch_id", "external_id"]
         list_of_requests = client.get_requests_for_project_id(project_id=project_id)
         tab = _get_table(list_of_requests, headers, "REQUESTS")
         print(tab)
     elif project_id:
         list_of_projects = client.list_projects()
         target_project = [p for p in list_of_projects if p.id == project_id]
-        headers = ["id", "created", "title", "description", "deadline", "status"]
+        headers = ["id", "created", "title", "description", "deadline", "status", "external_id"]
         tab = _get_table(target_project, headers, "PROJECTS")
         print(tab)
     else:
         list_of_projects = client.list_projects()
-        headers = ["id", "created", "title", "description", "deadline", "status"]
+        headers = ["id", "created", "title", "description", "deadline", "status", "external_id"]
         tab = _get_table(list_of_projects, headers, "PROJECTS")
         print(tab)
 
@@ -192,7 +191,7 @@ def calibration_externalid(external_id):
 @click.argument('request_ids', nargs=-1)
 @click.command()
 def requests(request_ids):
-    headers = ["id", "created", "project_id", "title", "description", "input_list_id"]
+    headers = ["id", "created", "project_id", "title", "description", "input_list_id", "input_batch_id", "external_id"]
     request_ids_list = [int(rid) for rid in request_ids]
     dict_of_requests = client.get_requests_for_request_ids(
         request_ids=request_ids_list
@@ -213,6 +212,16 @@ def input_lists(input_list_id, get_requests):
         tab = _get_table(list_of_requests, headers, "REQUESTS")
         print(tab)
 
+@click.command(name="batches")
+@click.argument('project', nargs=1, type=str, default=None, required=False)
+def input_batch(project):
+    print()
+    if project:
+        headers = ["external_id", "title",  "status", "created", "updated"]
+        list_of_batches = client.list_project_batches(project)
+        tab = _get_table(list_of_batches, headers, "BATCHES")
+        print(tab)
+
 
 cli.add_command(projects)
 cli.add_command(inputs)
@@ -221,6 +230,7 @@ cli.add_command(calibration)
 cli.add_command(calibration_externalid)
 cli.add_command(requests)
 cli.add_command(input_lists)
+cli.add_command(input_batch)
 
 
 def main():

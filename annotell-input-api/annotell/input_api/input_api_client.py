@@ -148,6 +148,45 @@ class InputApiClient:
                 headers = {"Content-Type": content_type}
                 self._upload_file(upload_url, file, headers)
 
+    def _resolve_request_url(self,
+                             resource_path: str,
+                             project: Optional[str] = None,
+                             batch: Optional[str] = None) -> str:
+        """
+        Resolves which request url to use for input based on if project and batch is specified
+        """
+        url = f"{self.host}/v1/inputs/"
+
+        if project is not None:
+            url += f"project/{project}/"
+            if batch is not None:
+                url += f"batch/{batch}/"
+
+        url += resource_path
+
+        return url
+
+    def _post_input_request(self, resource_path: str,
+                            input_request: dict,
+                            project: Optional[str],
+                            batch: Optional[str],
+                            input_list_id: Optional[int],
+                            dryrun: bool = False):
+        if dryrun:
+            headers = {**self.headers, **self.dryrun_header}
+        else:
+            headers = {**self.headers}
+
+        if (input_list_id is not None):
+            input_request['inputListId'] = input_list_id
+
+        print(input_request)
+        request_url = self._resolve_request_url(resource_path, project, batch)
+        resp = self.session.post(request_url, json=input_request, headers=headers)
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        if not dryrun:
+            return IAM.CreateInputJobResponse.from_json(json_resp)
+
     def count_inputs_for_external_ids(self, external_ids: List[str]) -> Dict[str, int]:
         """
         For each external id, returns a count of how many inputs exists with that external id.
@@ -168,41 +207,36 @@ class InputApiClient:
 
     def _create_inputs_point_cloud_with_images(self, point_clouds_with_images: IAM.PointCloudsWithImages,
                                                internal_id: str,
-                                               input_list_id: int,
                                                metadata: IAM.CalibratedSceneMetaData,
+                                               project: Optional[str],
+                                               batch: Optional[str],
+                                               input_list_id: Optional[int],
                                                dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
-
         """Create point cloud with images"""
 
-        if dryrun:
-            headers = {**self.headers, **self.dryrun_header}
-        else:
-            headers = {**self.headers}
-
-        url = f"{self.host}/v1/inputs/pointclouds-with-images"
         js = dict(
             files=point_clouds_with_images.to_dict(),
             internalId=internal_id,
-            inputListId=input_list_id,
             metadata=metadata.to_dict())
 
-        resp = self.session.post(url, json=js, headers=headers)
-        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
-        if not dryrun:
-            return IAM.CreateInputJobResponse.from_json(json_resp)
+        return self._post_input_request('pointclouds-with-images', js, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
 
     def create_inputs_point_cloud_with_images(self, folder: Path,
                                               point_clouds_with_images: IAM.PointCloudsWithImages,
-                                              input_list_id: int,
                                               metadata: IAM.CalibratedSceneMetaData,
+                                              project: Optional[str] = None,
+                                              batch: Optional[str] = None,
+                                              input_list_id: Optional[int] = None,
                                               dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Upload files and create an input of type 'point_cloud_with_image'.
 
         :param folder: path to folder containing files
         :param point_clouds_with_images: class containing images and pointclouds that constitute the input
-        :param input_list_id: input list to add input to
         :param metadata: Class containing metadata necessary for point cloud with images
+        :param project: project to add input to
+        :param batch: batch, defaults to latest open batch
+        :param input_list_id: input list to add input to (alternative to project-batch)
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
         :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun.
 
@@ -211,7 +245,7 @@ class InputApiClient:
         into potree after upload (server side). Supported fileformats for pointcloud files are
         currently .csv & .pcd (more information about formatting can be found in the readme.md).
         The job is successful once it converts the pointcloud file into potree, at which time an
-        input of type 'point_cloud_with_image' is created for the designated `input_list_id`.
+        input of type 'point_cloud_with_image' is created for the designated `project` `batch` or `input_list_id`.
         If the input_job fails (cannot perform conversion) the input is not added. To see if
         conversion was successful please see the method `get_input_jobs_status`.
         """
@@ -227,23 +261,30 @@ class InputApiClient:
         self._set_images_dimensions(folder, point_clouds_with_images.images)
         self._create_inputs_point_cloud_with_images(point_clouds_with_images,
                                                     upload_urls_response.internal_id,
-                                                    input_list_id,
                                                     metadata,
+                                                    project=project,
+                                                    batch=batch,
+                                                    input_list_id=input_list_id,
                                                     dryrun=True)
         if not dryrun:
             self._upload_files(folder, upload_urls_response.files_to_url)
 
             create_input_response = self._create_inputs_point_cloud_with_images(point_clouds_with_images,
                                                                                 upload_urls_response.internal_id,
-                                                                                input_list_id,
-                                                                                metadata)
+                                                                                metadata,
+                                                                                project=project,
+                                                                                batch=batch,
+                                                                                input_list_id=input_list_id,
+                                                                                )
 
             log.info(f"Creating inputs for files with job_id={create_input_response.internal_id}")
             return create_input_response
 
     def create_slam_input_job(self, slam_files: IAM.SlamFiles,
                               metadata: IAM.SlamMetaData,
-                              input_list_id: int,
+                              project: Optional[str] = None,
+                              batch: Optional[str] = None,
+                              input_list_id: Optional[int] = None,
                               dryrun=False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
@@ -251,27 +292,23 @@ class InputApiClient:
 
         :param slam_files: class containing files necessary for SLAM.
         :param metadata: class containing metadata necessary for SLAM.
-        :param input_list_id: input list id which the new input will be added to
+        :param project: project to add input to
+        :param batch: batch, defaults to latest open batch
+        :param input_list_id: input list to add input to (alternative to project-batch)
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
         :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun.
         """
-        if dryrun:
-            headers = {**self.headers, **self.dryrun_header}
-        else:
-            headers = {**self.headers}
 
-        url = f"{self.host}/v1/inputs/slam"
         slam_json = dict(files=slam_files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
-        resp = self.session.post(url, json=slam_json, headers=headers)
-        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
 
-        if not dryrun:
-            return IAM.CreateInputJobResponse.from_json(json_resp)
+        return self._post_input_request('slam', slam_json, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
 
     def upload_and_create_images_input_job(self, folder: Path,
                                            images_files: IAM.ImagesFiles,
                                            metadata: IAM.SceneMetaData,
-                                           input_list_id: int,
+                                           project: Optional[str] = None,
+                                           batch: Optional[str] = None,
+                                           input_list_id: Optional[int] = None,
                                            dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Verifies the images and metadata given and then uploads images to Google Cloud Storage and
@@ -279,7 +316,9 @@ class InputApiClient:
         :param folder: Absolute path to directory containing all images.
         :param images_files: List containing all images for the input.
         :param metadata: class containing metadata necessary for creating input from images.
-        :param input_list_id: input list id which the new input will be added to
+        :param project: project to add input to
+        :param batch: batch, defaults to latest open batch
+        :param input_list_id: input list to add input to (alternative to project-batch)
         :param dryrun: If True the files/metadata will be validated but no input job will be created.
         :returns InputJobCreatedMessage: Class containing id of the created input job, or None if dryrun.
         """
@@ -292,8 +331,10 @@ class InputApiClient:
         internal_id = upload_url_resp.internal_id
         self._create_images_input_job(images_files=images_files,
                                       metadata=metadata,
-                                      input_list_id=input_list_id,
                                       internal_id=internal_id,
+                                      project=project,
+                                      batch=batch,
+                                      input_list_id=input_list_id,
                                       dryrun=True)
 
         files_in_response = upload_url_resp.files_to_url.keys()
@@ -303,15 +344,20 @@ class InputApiClient:
             self._upload_files(folder, upload_url_resp.files_to_url)
             input_job_created_message = self._create_images_input_job(images_files=images_files,
                                                                       metadata=metadata,
-                                                                      input_list_id=input_list_id,
-                                                                      internal_id=internal_id)
+                                                                      internal_id=internal_id,
+                                                                      project=project,
+                                                                      batch=batch,
+                                                                      input_list_id=input_list_id
+                                                                      )
             log.info(f"Creating input for images with internal_id={input_job_created_message.internal_id}")
             return input_job_created_message
 
     def _create_images_input_job(self, images_files: IAM.ImagesFiles,
                                  metadata: IAM.SceneMetaData,
-                                 input_list_id: int,
-                                 internal_id: str = None,
+                                 internal_id: str,
+                                 project: Optional[str],
+                                 batch: Optional[str],
+                                 input_list_id: Optional[int],
                                  dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Creates an input job for an image input
@@ -324,21 +370,11 @@ class InputApiClient:
         :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun
         """
 
-        if dryrun:
-            headers = {**self.headers, **self.dryrun_header}
-        else:
-            headers = {**self.headers}
-
-        create_input_job_url = f"{self.host}/v1/inputs/images"
         create_input_job_json = dict(files=images_files.to_dict(),
                                      metadata=metadata.to_dict(),
-                                     inputListId=input_list_id,
                                      internalId=internal_id)
 
-        resp = self.session.post(create_input_job_url, json=create_input_job_json, headers=headers)
-        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
-        if not dryrun:
-            return IAM.CreateInputJobResponse.from_json(json_resp)
+        return self._post_input_request('images', create_input_job_json, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
 
     def update_completed_slam_input_job(self, pointcloud_uri: str,
                                         trajectory: IAM.Trajectory,
@@ -426,10 +462,21 @@ class InputApiClient:
 
         :return List: List containing all projects connected to the user
         """
-        url = f"{self.host}/v1/inputs/projects"
+        url = f"{self.host}/v1/inputs/project"
         resp = self.session.get(url, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return [IAM.Project.from_json(js) for js in json_resp]
+
+    def list_project_batches(self, project: str) -> List[IAM.Project]:
+        """
+        Returns all `batches` for the `project`.
+
+        :return List: List containing all batches
+        """
+        url = f"{self.host}/v1/inputs/project/{project}/batch"
+        resp = self.session.get(url, headers=self.headers)
+        json_resp = self._raise_on_error(resp).json()
+        return [IAM.InputBatch.from_json(js) for js in json_resp]
 
     def list_input_lists(self, project_id: int) -> List[IAM.InputList]:
         """

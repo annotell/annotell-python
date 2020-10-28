@@ -20,6 +20,14 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.5] - 2020-10-19
+### Added
+- Add support for `project` and `batch` identifiers for input request. 
+    Specifying project and batch adds input to specified batch.
+    When only sending project, inputs are added to the latest open batch for the project. 
+### Deprecated
+- `input_list_id` will be removed in the 0.4.x version
+
 ## [0.3.4] - 2020-09-10
 ### Changed
 - SLAM - add required `sub_sequence_id` and optional `settings`
