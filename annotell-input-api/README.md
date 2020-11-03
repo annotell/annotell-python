@@ -20,6 +20,10 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.6] - 2020-11-02
+### Changed
+- SLAM - add cuboid timespans, `dynamic_objects` not includes both `cuboids` and `cuboid_timespans`
+
 ## [0.3.5] - 2020-10-19
 ### Added
 - Add support for `project` and `batch` identifiers for input request. 

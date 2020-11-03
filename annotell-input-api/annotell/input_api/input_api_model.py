@@ -22,6 +22,7 @@ class InvalidatedReasonInput(str, Enum):
     DUPLICATE = "duplicate"
     INCORRECTLY_CREATED = "incorrectly-created"
 
+
 class InputBatchStatus(str, Enum):
     CREATED = 'created'
     OPEN = 'open'
@@ -255,22 +256,33 @@ class TimeSpecification(RequestCall):
         self.time_calibration = time_calibration
 
     def to_dict(self) -> dict:
-        
+
         as_dict = dict(timeCalibration=self.time_calibration.to_dict())
-            
+
         if self.start_ts:
             as_dict["startTs"] = self.start_ts
         if self.end_ts:
             as_dict["endTs"] = self.end_ts
-        
 
         return as_dict
+
+
+class SlamDynamicObjects():
+    def __init__(self,
+                 cuboids: List[str],
+                 cuboid_timespans: List[str]
+                 ):
+        self.cuboids = cuboids
+        self.cuboid_timespans = cuboid_timespans
+
+    def to_dict(self):
+        return dict(cuboids=self.cuboids, cuboidTimespans=self.cuboid_timespans)
 
 
 class SlamMetaData(CalibratedSceneMetaData):
     def __init__(self, external_id: str,
                  vehicle_data: List[str],
-                 dynamic_objects: str,
+                 dynamic_objects: SlamDynamicObjects,
                  trajectory: Optional[str],
                  time_specification: TimeSpecification,
                  source_specification: SourceSpecification,
@@ -294,7 +306,7 @@ class SlamMetaData(CalibratedSceneMetaData):
         as_dict["timeSpecification"] = self.time_specification.to_dict()
         as_dict["sequenceId"] = self.sequence_id
         as_dict["subSequenceId"] = self.sub_sequence_id
-        
+
         if self.settings:
             as_dict["settings"] = self.settings
 
@@ -321,6 +333,7 @@ class FilesToUpload(RequestCall):
     """
     Used when retrieving upload urls from input api
     """
+
     def __init__(self, files: List[str]):
         self.files = files
 
@@ -420,6 +433,7 @@ class InputList(Response):
             f"name={self.name}, " + \
             f"created={self.created})>"
 
+
 class InputBatch(Response):
     def __init__(self, id: int, project_id: int, external_id: str, title: str, status: InputBatchStatus,  created: datetime, updated: datetime):
         self.id = id
@@ -433,7 +447,7 @@ class InputBatch(Response):
     @staticmethod
     def from_json(js: dict):
         return InputBatch(int(js["id"]), int(js["projectId"]), js["externalId"], js["title"], js["status"],
-                         ts_to_dt(js["created"]), ts_to_dt(js["created"]))
+                          ts_to_dt(js["created"]), ts_to_dt(js["created"]))
 
     def __repr__(self):
         return f"<InputBatch(" + \
