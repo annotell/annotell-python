@@ -302,7 +302,7 @@ class SlamMetaData(CalibratedSceneMetaData):
     def to_dict(self):
         as_dict = super().to_dict()
         as_dict["vehicleData"] = self.vehicle_data
-        as_dict["dynamicObjects"] = self.dynamic_objects
+        as_dict["dynamicObjects"] = self.dynamic_objects.to_dict()
         as_dict["timeSpecification"] = self.time_specification.to_dict()
         as_dict["sequenceId"] = self.sequence_id
         as_dict["subSequenceId"] = self.sub_sequence_id
