@@ -12,7 +12,7 @@ from annotell.kpi.files import FileManager
 from annotell.kpi.logging import setup_logging
 from annotell.kpi.results import ResultManager
 from annotell.kpi.datasets import DatasetManager
-from annotell.kpi.compute import setup_spark, get_dataproc_job_id
+from annotell.kpi.compute import setup_spark, get_dataproc_job_id, get_emr_job_id
 from annotell.kpi.models import Result
 from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 
@@ -86,6 +86,8 @@ class ExecutionManager:
         # If running in Google Cloud, replace job_id with ID from Yarn tags
         if self.compute_placement == 'GOOGLE_CLOUD_DATAPROC':
             self.job_id = get_dataproc_job_id(sc.getConf())
+        if self.compute_placement == 'AMAZON_SPARK_EMR':
+            self.job_id = get_emr_job_id(sc.getConf())
         log.info(f"[job_id              ] {self.job_id}")
 
         # Determine if credentials are to be used from arguments or environment variables
