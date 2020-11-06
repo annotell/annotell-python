@@ -8,7 +8,7 @@ from typing import List, Mapping, Optional, Union, Dict, BinaryIO
 import requests
 import time
 from PIL import Image
-from annotell.auth.authsession import AuthSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
+from annotell.auth.authsession import FaultTolerantAuthRequestSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 
 from . import input_api_model as IAM
 
@@ -39,7 +39,7 @@ class InputApiClient:
         """
 
         self.host = host
-        self.oauth_session = AuthSession(host=auth_host, auth=auth)
+        self.oauth_session = FaultTolerantAuthRequestSession(host=auth_host, auth=auth)
         self.headers = {
             "Accept-Encoding": "gzip",
             "Accept": "application/json"

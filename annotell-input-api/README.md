@@ -20,6 +20,10 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.7] - 2020-11-06
+### Changed
+- bug fix related to oauth session
+
 ## [0.3.6] - 2020-11-02
 ### Changed
 - SLAM - add cuboid timespans, `dynamic_objects` not includes both `cuboids` and `cuboid_timespans`
