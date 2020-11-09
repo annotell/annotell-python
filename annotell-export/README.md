@@ -14,5 +14,9 @@ see [annotell-auth](https://github.com/annotell/annotell-python/tree/master/anno
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2020-11-09
+- Update docs
+- Bump annotell-auth to 1.5.0
+
 ## [0.1.0] - 2020-09-28
 - First draft 
