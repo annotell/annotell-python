@@ -42,8 +42,6 @@ class ExportApiClient:
         :param customer_callback_id: customer callback id
         :feedback
         {
-            “inputInternalId”: <uuid>,
-            “requestId”: <int>,
             “annotationId”: <int>,
             “passed”: <bool>,
             “itemErrors”: <optional list of error maps>,
