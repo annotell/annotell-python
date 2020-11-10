@@ -39,7 +39,7 @@ class InputApiClient:
         """
 
         self.host = host
-        self.oauth_session = FaultTolerantAuthRequestSession(host=auth_host, auth=auth)
+        self._auth_req_session = FaultTolerantAuthRequestSession(host=auth_host, auth=auth)
         self.headers = {
             "Accept-Encoding": "gzip",
             "Accept": "application/json"
@@ -55,7 +55,7 @@ class InputApiClient:
 
     @property
     def session(self):
-        return self.oauth_session.session
+        return self._auth_req_session
 
     @staticmethod
     def _raise_on_error(resp: requests.Response) -> requests.Response:
