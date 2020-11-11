@@ -187,6 +187,21 @@ class InputApiClient:
         if not dryrun:
             return IAM.CreateInputJobResponse.from_json(json_resp)
 
+    def get_inputs(self, project_id: int, invalidated: bool) -> List[IAM.Input]:
+        """
+        Gets inputs for project, with option to filter for invalidated inputs
+
+        :param project_id: Project id to filter
+        :param invalidated: Returns invalidated inputs if True, otherwise valid inputs
+        :return List: List of Inputs
+        """
+
+        url = f"{self.host}/v1/inputs?projectId={project_id}&invalidated={invalidated}"
+        resp = self.session.get(url, headers=self.headers)
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        return [IAM.Input.from_json(js) for js in json_resp]
+
+
     def count_inputs_for_external_ids(self, external_ids: List[str]) -> Dict[str, int]:
         """
         For each external id, returns a count of how many inputs exists with that external id.
@@ -428,11 +443,11 @@ class InputApiClient:
         resp = self.session.get(url, headers=self.headers)
         return self._raise_on_error(resp).json()
 
-    def invalidate_inputs(self, input_ids: List[int], invalidated_reason: IAM.InvalidatedReasonInput):
+    def invalidate_inputs(self, input_ids: List[str], invalidated_reason: IAM.InvalidatedReasonInput):
         """
         Invalidates inputs, and removes them from all input lists
 
-        :param input_ids: The input ids to invalidate
+        :param input_ids: The input internal ids to invalidate
         :param invalidated_reason: An Enum describing why inputs were invalidated
         :return InvalidatedInputsResponse: Class containing what inputs were invalidated
         """
