@@ -46,7 +46,8 @@ def cli():
 @click.argument('project_id', nargs=1, default=None, required=False, type=int)
 @click.option('--get-requests', is_flag=True)
 @click.option('--get-input-lists', is_flag=True)
-def projects(project_id, get_requests, get_input_lists):
+@click.option('--get-invalidated-inputs', is_flag=True)
+def projects(project_id, get_requests, get_input_lists, get_invalidated_inputs):
     print()
     if get_input_lists and project_id:
         list_of_input_lists = client.list_input_lists(project_id)
@@ -57,6 +58,12 @@ def projects(project_id, get_requests, get_input_lists):
         headers = ["id", "created", "project_id", "title", "description", "input_list_id", "input_batch_id", "external_id"]
         list_of_requests = client.get_requests_for_project_id(project_id=project_id)
         tab = _get_table(list_of_requests, headers, "REQUESTS")
+        print(tab)
+    elif get_invalidated_inputs and project_id:
+        headers = ["internal_id", "external_id", "input_type", "invalidated", "invalidated_reason"]
+
+        list_of_inputs = client.get_inputs(project_id=project_id)
+        tab = _get_table(list_of_inputs, headers, "INPUTS")
         print(tab)
     elif project_id:
         list_of_projects = client.list_projects()
