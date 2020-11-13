@@ -20,6 +20,13 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.8] - 2020-11-13
+### Added
+- `get_inputs` which accepts a project ID or project identifier (external ID) and returns inputs connected to the project. `invalidated` filter parameter to optionally filter only invalidated inputs. Also exposed in annoutil as `annoutil projects 1 --invalidated`.
+
+### Changed
+- `invalidate_inputs` now accepts annotell `internal_ids (UUID)` instead of Annotell specific input ids.
+
 ## [0.3.7] - 2020-11-06
 ### Changed
 - bug fix related to oauth session
