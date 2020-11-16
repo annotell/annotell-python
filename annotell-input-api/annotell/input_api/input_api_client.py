@@ -180,7 +180,6 @@ class InputApiClient:
         if (input_list_id is not None):
             input_request['inputListId'] = input_list_id
 
-        print(input_request)
         request_url = self._resolve_request_url(resource_path, project, batch)
         resp = self.session.post(request_url, json=input_request, headers=headers)
         json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
