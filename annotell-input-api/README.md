@@ -20,6 +20,10 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.9] - 2020-11-24
+### Added
+- `publish_project_batch` which accepts project identifier and batch identifier and marks the batch as ready for annotation.
+
 ## [0.3.8] - 2020-11-13
 ### Added
 - `get_inputs` which accepts a project ID or project identifier (external ID) and returns inputs connected to the project. `invalidated` filter parameter to optionally filter only invalidated inputs. Also exposed in annoutil as `annoutil projects 1 --invalidated`.

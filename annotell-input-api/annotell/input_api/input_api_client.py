@@ -504,6 +504,18 @@ class InputApiClient:
         json_resp = self._raise_on_error(resp).json()
         return [IAM.InputList.from_json(js) for js in json_resp]
 
+    def publish_project_batches(self, project: str, batch: str) -> IAM.InputBatch:
+        """
+        Publish input batch, marking the input batch ready for annotation.
+        After publishing, no more inputs can be added to the input batch
+
+        :return InputBatch: Updated input batch
+        """
+        url = f"{self.host}/v1/inputs/project/{project}/batch/{batch}"
+        resp = self.session.post(url, headers=self.headers)
+        json_resp = self._raise_on_error(resp).json()
+        return IAM.InputBatch.from_json(json_resp)
+
     def get_calibration_data(self, id: Optional[int] = None, external_id: Optional[str] = None
                              ) -> Union[List[IAM.CalibrationNoContent], List[IAM.CalibrationWithContent]]:
         """
