@@ -511,7 +511,7 @@ class InputApiClient:
 
         :return InputBatch: Updated input batch
         """
-        url = f"{self.host}/v1/inputs/project/{project}/batch/{batch}"
+        url = f"{self.host}/v1/inputs/project/{project}/batch/{batch}/publish"
         resp = self.session.post(url, headers=self.headers)
         json_resp = self._raise_on_error(resp).json()
         return IAM.InputBatch.from_json(json_resp)
