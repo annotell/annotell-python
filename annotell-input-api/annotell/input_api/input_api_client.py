@@ -513,7 +513,7 @@ class InputApiClient:
         """
         url = f"{self.host}/v1/inputs/project/{project}/batch/{batch}/publish"
         resp = self.session.post(url, headers=self.headers)
-        json_resp = self._raise_on_error(resp).json()
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
         return IAM.InputBatch.from_json(json_resp)
 
     def get_calibration_data(self, id: Optional[int] = None, external_id: Optional[str] = None
