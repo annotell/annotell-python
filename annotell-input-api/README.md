@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.3.9] - 2020-11-24
 ### Added
-- `publish_project_batch` which accepts project identifier and batch identifier and marks the batch as ready for annotation.
+- `publish_batch` which accepts project identifier and batch identifier and marks the batch as ready for annotation.
 
 ## [0.3.8] - 2020-11-13
 ### Added

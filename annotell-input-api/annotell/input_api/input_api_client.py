@@ -504,7 +504,7 @@ class InputApiClient:
         json_resp = self._raise_on_error(resp).json()
         return [IAM.InputList.from_json(js) for js in json_resp]
 
-    def publish_project_batches(self, project: str, batch: str) -> IAM.InputBatch:
+    def publish_batch(self, project: str, batch: str) -> IAM.InputBatch:
         """
         Publish input batch, marking the input batch ready for annotation.
         After publishing, no more inputs can be added to the input batch
