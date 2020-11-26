@@ -24,6 +24,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Bump of required python version to >=3.7
 - New explicit models for `lidar` and `camera calibration` added.
+- `publish_batch` which accepts project identifier and batch identifier and marks the batch as ready for annotation.
 
 ### Changed
 - Deprecation warning for the old `lidar`  and `camera calibration` models. No other change in functionality. 
