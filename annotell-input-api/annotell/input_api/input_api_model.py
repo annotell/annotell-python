@@ -85,6 +85,13 @@ class PointCloudsWithImages(RequestCall):
         return dict(images=[image.to_dict() for image in self.images],
                     pointClouds=[pc.to_dict() for pc in self.point_clouds])
 
+class PointCloudFiles(RequestCall):
+    def __init__(self, point_clouds: List[Image]):
+        self.point_clouds = point_clouds
+
+    def to_dict(self) -> dict:
+        return dict(pointClouds=[point_cloud.to_dict() for point_cloud in self.point_clouds])
+
 
 class Calibration(RequestCall):
     def __init__(self, calibration_dict: Dict[str, Union[CameraCalibration, CameraCalibrationExplicit, LidarCalibrationExplicit, LidarCalibration]]):  # noqa:E501
@@ -127,7 +134,7 @@ class SourceSpecification(RequestCall):
 
 
 class SceneMetaData(RequestCall):
-    def __init__(self, external_id: str, source_specification: Optional[SourceSpecification]):
+    def __init__(self, external_id: str, source_specification: Optional[SourceSpecification] = None):
         self.external_id = external_id
         self.source_specification = source_specification
 
@@ -140,8 +147,8 @@ class SceneMetaData(RequestCall):
 
 class CalibratedSceneMetaData(SceneMetaData):
     def __init__(self, external_id: str,
-                 source_specification: SourceSpecification,
-                 calibration_id: int):
+                 calibration_id: int,
+                 source_specification: Optional[SourceSpecification] = None):
 
         super().__init__(external_id, source_specification)
         self.calibration_id = calibration_id
