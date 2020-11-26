@@ -20,9 +20,14 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.9] - 2020-11-24
+## [0.3.9] - 2020-11-26
 ### Added
+- Bump of required python version to >=3.7
+- New explicit models for `lidar` and `camera calibration` added.
 - `publish_batch` which accepts project identifier and batch identifier and marks the batch as ready for annotation.
+
+### Changed
+- Deprecation warning for the old `lidar`  and `camera calibration` models. No other change in functionality. 
 
 ## [0.3.8] - 2020-11-13
 ### Added
