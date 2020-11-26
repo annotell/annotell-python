@@ -20,6 +20,14 @@ $ annoutil projects
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.9] - 2020-11-26
+### Added
+- Bump of required python version to >=3.7
+- New explicit models for `lidar` and `camera calibration` added.
+
+### Changed
+- Deprecation warning for the old `lidar`  and `camera calibration` models. No other change in functionality. 
+
 ## [0.3.8] - 2020-11-13
 ### Added
 - `get_inputs` which accepts a project ID or project identifier (external ID) and returns inputs connected to the project. `invalidated` filter parameter to optionally filter only invalidated inputs. Also exposed in annoutil as `annoutil projects 1 --invalidated`.

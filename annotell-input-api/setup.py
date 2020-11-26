@@ -43,7 +43,7 @@ setup(
         'requests>=2.23.0',
         'tabulate>=0.8.7'
     ],
-    python_requires='~=3.6',
+    python_requires='>=3.7',
     include_package_data=True,
     package_data={
         '': ['*.md', 'LICENSE'],
