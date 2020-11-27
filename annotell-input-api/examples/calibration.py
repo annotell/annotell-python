@@ -49,5 +49,5 @@ if __name__ == "__main__":
 
     calibration = create_calibration_spec("2020-06-16", ["lidar"], ["RFC01"])
 
-    # Create the calibration using the inputApi client
+    # Create the calibration using the Input API client
     created_calibration = client.create_calibration_data(calibration_spec=calibration)

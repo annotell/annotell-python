@@ -601,7 +601,7 @@ class InputApiClient:
     def get_calibration_data(self, id: Optional[int] = None, external_id: Optional[str] = None
                              ) -> Union[List[IAM.CalibrationNoContent], List[IAM.CalibrationWithContent]]:
         """
-        Queries the inputApi for either:
+        Queries the Input API for either:
         * A list containing a specific calibration (of only the id is given)
         * A list of calibrations connected to an external_id (if only the external_id is given)
         * A list of calibrations connected to the users organization.

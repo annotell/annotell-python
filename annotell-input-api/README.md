@@ -28,9 +28,9 @@ client.list_projects()
 
 ## Create Images
 
-Images inputs can be created from python via the _upload_and_create_images_input_job_ method. An important feature here is the ability to add a _**dryrun**_ parameter to the method call, this will make a call to the inputApi but only run the validation steps and not create any inputs.
+Images inputs can be created from python via the _upload_and_create_images_input_job_ method. An important feature here is the ability to add a _**dryrun**_ parameter to the method call, this will make a call to the Input API but only run the validation steps and not create any inputs.
 
-**We start out by creating a representation of our images.** The representation consists of the image name \(excluding the path to the image\) and the source of the image. In this case, we want to create a scene consisting of two image _image1_. We also specify a folder where the image is located.
+**We start out by creating a representation of our images.** The representation consists of the image name \(excluding the path to the image\) and the source of the image. In this case, we want to create a scene consisting of two images _image1_ and _image2_. We also specify a folder where the image is located.
 
 ```python
 image1 = "filename1.jpg"
@@ -165,7 +165,7 @@ calibration = IAM.Calibration(calibration_dict=calibration_dict)
 calibration_external_id = "Collection 2020-06-16"
 calibration_spec = IAM.CalibrationSpec(external_id=calibration_external_id,
                                        calibration=calibration)
-# Create the calibration using the inputApi client
+# Create the calibration using the Input API client
 created_calibration = client.create_calibration_data(calibration_spec=calibration_spec)
 
 # Create metadata
@@ -255,7 +255,7 @@ calibration = IAM.Calibration(calibration_dict=calibration_dict)
 calibration_external_id = "Collection 2020-06-16"
 calibration_spec = IAM.CalibrationSpec(external_id=calibration_external_id,
                                        calibration=calibration)
-# Create the calibration using the inputApi client
+# Create the calibration using the Input API client
 created_calibration = client.create_calibration_data(calibration_spec=calibration_spec)
 ```
 
@@ -263,7 +263,7 @@ Note that you can, and should, reuse the same calibration for multiple scenes if
 
 ## Dealing with errors
 
-When the client sends a http request to the inputApi and waits until it receives a response. If the response code is 2xx \(the status code for a successful call\) the client converts the received message into a python object which can be viewed or used. However if the inputApi responds with an error code \(4xx or 5xx\) the python client will raise an error. It's up to the user to decide if and how the want to handle this error.
+When the client sends a http request to the Input API and waits until it receives a response. If the response code is 2xx \(the status code for a successful call\) the client converts the received message into a python object which can be viewed or used. However if the Input API responds with an error code \(4xx or 5xx\) the python client will raise an error. It's up to the user to decide if and how the want to handle this error.
 
 
 # Changelog
