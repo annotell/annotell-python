@@ -186,7 +186,7 @@ class InputApiClient:
         if not dryrun:
             return IAM.CreateInputJobResponse.from_json(json_resp)
 
-    def get_inputs(self, project_id: int, invalidated: bool) -> List[IAM.Input]:
+    def get_inputs(self, project_id: int, invalidated: bool = False) -> List[IAM.Input]:
         """
         Gets inputs for project, with option to filter for invalidated inputs
 

@@ -62,7 +62,7 @@ def projects(project_id, get_requests, get_input_lists, get_invalidated_inputs):
     elif get_invalidated_inputs and project_id:
         headers = ["internal_id", "external_id", "input_type", "invalidated", "invalidated_reason"]
 
-        list_of_inputs = client.get_inputs(project_id=project_id)
+        list_of_inputs = client.get_inputs(project_id=project_id, invalidated=True)
         tab = _get_table(list_of_inputs, headers, "INPUTS")
         print(tab)
     elif project_id:
