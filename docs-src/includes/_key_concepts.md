@@ -1,5 +1,7 @@
 # Key Concepts
 
+![Annotell](images/annotell-domain.png)
+
 ## Project
 
 Project is the top-most concept when interfacing with the Annotell Platform. It is possible to have multiple ongoing projects, and they act as a container for other annotell resources.
@@ -58,11 +60,32 @@ The Annotell Platform has support for annotating different types of data togethe
 An **input** specifies how these different resources belong together using metadata about the scene and calibrations (how sensors relate to each other).
 Inputs can be created via Annotell's Input API, which has support for several different types of input types.
 
-| Type                   | Description                                                 |
-| ---------------------- | ----------------------------------------------------------- |
-| IMAGES                 | One or several images                                       |
-| VIDEO                  | Video in .mp4 format                                        |
-| POINTCLOUD_WITH_IMAGES | Single frame point cloud with one or several images         |
-| POINTCLOUD_WITH_VIDEO  | Sequence of frames with both (3D) pointcloud and (2D) video |
+| Type                        | Description                                                 |
+| --------------------------- | ----------------------------------------------------------- |
+| Images                      | One or several images                                       |
+| Video                       | Video in .mp4 format                                        |
+| 2D image and 3D point cloud | Single frame point cloud with one or several images         |
+| 2D video and 3D point cloud | Sequence of frames with both (3D) pointcloud and (2D) video |
 
 ## Annotation
+
+Inputs are annotated in requests, producing _annotations_. By default, annotations follow Annotell's judgement format.
+Based on client needs, custom export formats can be accommodated by Annotell Professional Services team.
+
+### Judgement Format
+
+The Annotell judgement format is closely linked to the Annotell task definition. The task definition determines what we are expected to save, where properties are stored and what datatype(s) the properties will be. The Annotell judgement format is saved as a JSON file and will be described according to the data types of JSON.
+
+```json
+{
+  "shapes": {}
+  "shapeProperties": {}
+  "properties": {}
+}
+```
+
+The Annotell judgement is an object with the following top keys:
+
+- shapes: contains information needed for drawing the shapes. Follows GeoJson standard for serialising geometric shapes, please see https://en.wikipedia.org/wiki/GeoJSON for more information.
+- shapeProperties: contains the property values for shapes in shapes.
+- properties: contains the property values for what we want to know about the input, the inputProperties of the task definition.

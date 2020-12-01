@@ -3,7 +3,7 @@
 ## Project
 
 In order to create inputs via the Input API, an Annotell project needs to exist.
-Projects are configured by the Annotell Professional Services team, during the Guideline Agreement Process (CAP) of a new client engagement.
+Projects are configured by the Annotell Professional Services team, during the Guideline Agreement Process (GAP) of a new client engagement.
 
 ### List Projects
 
