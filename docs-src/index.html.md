@@ -9,6 +9,7 @@ toc_footers:
 
 includes:
   - annotell_auth
+  - key_concepts
   - annotell_input_api
 
 search: true

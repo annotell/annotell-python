@@ -1,0 +1,780 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Annotell SDK</title>
+
+    <style media="screen">
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight .gh {
+  color: #999999;
+}
+.highlight .sr {
+  color: #f6aa11;
+}
+.highlight .go {
+  color: #888888;
+}
+.highlight .gp {
+  color: #555555;
+}
+.highlight .gs {
+}
+.highlight .gu {
+  color: #aaaaaa;
+}
+.highlight .nb {
+  color: #f6aa11;
+}
+.highlight .cm {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #75715e;
+}
+.highlight .c1 {
+  color: #75715e;
+}
+.highlight .cs {
+  color: #75715e;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cpf {
+  color: #75715e;
+}
+.highlight .err {
+  color: #960050;
+}
+.highlight .gr {
+  color: #960050;
+}
+.highlight .gt {
+  color: #960050;
+}
+.highlight .gd {
+  color: #49483e;
+}
+.highlight .gi {
+  color: #49483e;
+}
+.highlight .ge {
+  color: #49483e;
+}
+.highlight .kc {
+  color: #66d9ef;
+}
+.highlight .kd {
+  color: #66d9ef;
+}
+.highlight .kr {
+  color: #66d9ef;
+}
+.highlight .no {
+  color: #66d9ef;
+}
+.highlight .kt {
+  color: #66d9ef;
+}
+.highlight .mf {
+  color: #ae81ff;
+}
+.highlight .mh {
+  color: #ae81ff;
+}
+.highlight .il {
+  color: #ae81ff;
+}
+.highlight .mi {
+  color: #ae81ff;
+}
+.highlight .mo {
+  color: #ae81ff;
+}
+.highlight .m, .highlight .mb, .highlight .mx {
+  color: #ae81ff;
+}
+.highlight .sc {
+  color: #ae81ff;
+}
+.highlight .se {
+  color: #ae81ff;
+}
+.highlight .ss {
+  color: #ae81ff;
+}
+.highlight .sd {
+  color: #e6db74;
+}
+.highlight .s2 {
+  color: #e6db74;
+}
+.highlight .sb {
+  color: #e6db74;
+}
+.highlight .sh {
+  color: #e6db74;
+}
+.highlight .si {
+  color: #e6db74;
+}
+.highlight .sx {
+  color: #e6db74;
+}
+.highlight .s1 {
+  color: #e6db74;
+}
+.highlight .s, .highlight .sa, .highlight .dl {
+  color: #e6db74;
+}
+.highlight .na {
+  color: #a6e22e;
+}
+.highlight .nc {
+  color: #a6e22e;
+}
+.highlight .nd {
+  color: #a6e22e;
+}
+.highlight .ne {
+  color: #a6e22e;
+}
+.highlight .nf, .highlight .fm {
+  color: #a6e22e;
+}
+.highlight .vc {
+  color: #ffffff;
+}
+.highlight .nn {
+  color: #ffffff;
+}
+.highlight .ni {
+  color: #ffffff;
+}
+.highlight .bp {
+  color: #ffffff;
+}
+.highlight .vg {
+  color: #ffffff;
+}
+.highlight .vi {
+  color: #ffffff;
+}
+.highlight .nv, .highlight .vm {
+  color: #ffffff;
+}
+.highlight .w {
+  color: #ffffff;
+}
+.highlight {
+  color: #ffffff;
+}
+.highlight .n, .highlight .py, .highlight .nx {
+  color: #ffffff;
+}
+.highlight .nl {
+  color: #f92672;
+}
+.highlight .ow {
+  color: #f92672;
+}
+.highlight .nt {
+  color: #f92672;
+}
+.highlight .k, .highlight .kv {
+  color: #f92672;
+}
+.highlight .kn {
+  color: #f92672;
+}
+.highlight .kp {
+  color: #f92672;
+}
+.highlight .o {
+  color: #f92672;
+}
+    </style>
+    <style media="print">
+      * {
+        -webkit-transition:none!important;
+        transition:none!important;
+      }
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #586e75;
+}
+.highlight .err {
+  color: #002b36;
+  background-color: #dc322f;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #657b83;
+}
+.highlight .cp {
+  color: #b58900;
+}
+.highlight .nt {
+  color: #b58900;
+}
+.highlight .o, .highlight .ow {
+  color: #93a1a1;
+}
+.highlight .p, .highlight .pi {
+  color: #93a1a1;
+}
+.highlight .gi {
+  color: #859900;
+}
+.highlight .gd {
+  color: #dc322f;
+}
+.highlight .gh {
+  color: #268bd2;
+  background-color: #002b36;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #6c71c4;
+}
+.highlight .kc {
+  color: #cb4b16;
+}
+.highlight .kt {
+  color: #cb4b16;
+}
+.highlight .kd {
+  color: #cb4b16;
+}
+.highlight .s, .highlight .sa, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #859900;
+}
+.highlight .sr {
+  color: #2aa198;
+}
+.highlight .si {
+  color: #d33682;
+}
+.highlight .se {
+  color: #d33682;
+}
+.highlight .nn {
+  color: #b58900;
+}
+.highlight .nc {
+  color: #b58900;
+}
+.highlight .no {
+  color: #b58900;
+}
+.highlight .na {
+  color: #268bd2;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #859900;
+}
+.highlight .ss {
+  color: #859900;
+}
+    </style>
+    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
+      <script src="javascripts/all-e033bdd3.js"></script>
+
+    <script>
+      $(function() { setupCodeCopy(); });
+    </script>
+  </head>
+
+  <body class="index" data-languages="[&quot;python&quot;]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar-cad8cdcb.png" alt="" />
+      </span>
+    </a>
+    <div class="toc-wrapper">
+      <img src="images/logo-9542adfe.png" class="logo" alt="" />
+        <div class="lang-selector">
+              <a href="#" data-language-name="python">python</a>
+        </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <ul id="toc" class="toc-list-h1">
+          <li>
+            <a href="#annotell-sdk" class="toc-h1 toc-link" data-title="Annotell SDK">Annotell SDK</a>
+          </li>
+          <li>
+            <a href="#annotell-auth" class="toc-h1 toc-link" data-title="Annotell Auth">Annotell Auth</a>
+          </li>
+          <li>
+            <a href="#input-api" class="toc-h1 toc-link" data-title="Input API">Input API</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#project" class="toc-h2 toc-link" data-title="Project">Project</a>
+                  </li>
+                  <li>
+                    <a href="#batch" class="toc-h2 toc-link" data-title="Batch">Batch</a>
+                  </li>
+                  <li>
+                    <a href="#input" class="toc-h2 toc-link" data-title="Input">Input</a>
+                  </li>
+                  <li>
+                    <a href="#images" class="toc-h2 toc-link" data-title="Images">Images</a>
+                  </li>
+                  <li>
+                    <a href="#point-clouds" class="toc-h2 toc-link" data-title="Point Clouds">Point Clouds</a>
+                  </li>
+                  <li>
+                    <a href="#point-clouds-with-images" class="toc-h2 toc-link" data-title="Point Clouds with Images">Point Clouds with Images</a>
+                  </li>
+                  <li>
+                    <a href="#calibration" class="toc-h2 toc-link" data-title="Calibration">Calibration</a>
+                  </li>
+                  <li>
+                    <a href="#dealing-with-errors" class="toc-h2 toc-link" data-title="Dealing with errors">Dealing with errors</a>
+                  </li>
+              </ul>
+          </li>
+      </ul>
+        <ul class="toc-footer">
+            <li><a href='https://github.com/annotell/annotell-python'>Github Repository</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id='annotell-sdk'>Annotell SDK</h1>
+<p>Welcome to Annotell&#39;s APIs! You can use our APIs to with support ranging from input creation, downloading generated annotations or queryring statistics of annotations produced.
+The SDK consists of several Python packages available through pip. Code examples are available in the area to the right.</p>
+<h1 id='annotell-auth'>Annotell Auth</h1>
+<p>Authentication is handled by <a href="https://pypi.org/project/annotell-auth/">annotell-auth</a>, a Python 3 library providing foundations for Annotell Authentication on top of the requests library.</p>
+
+<p>Builds on the standard Oauth 2.0 Client Credentials flow. There are a few ways to provide auth credentials to our api clients. Annotell Python clients such as in  annotell-query or annotell-input-api accept an auth parameter that can be set explicitly or you can omit it and use environment variables.</p>
+
+<blockquote>
+<p>To create an authenticated input-api client, simply do this:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">from</span> <span class="nn">annotell.input_api.input_api_client</span> <span class="kn">import</span> <span class="n">InputApiClient</span>
+
+<span class="n">api_client</span> <span class="o">=</span> <span class="n">InputApiClient</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>This uses the credentials found in <code>ANNOTELL_CREDENTIALS</code> environment variable.
+Or override explicitly:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">from</span> <span class="nn">annotell.input_api.input_api_client</span> <span class="kn">import</span> <span class="n">InputApiClient</span>
+
+<span class="n">api_client</span> <span class="o">=</span> <span class="n">InputApiClient</span><span class="p">(</span><span class="n">auth</span><span class="o">=</span><span class="s">"~/.config/annotell/credentials.json"</span><span class="p">)</span>
+</code></pre></div>
+<p>There are a few ways to set your credentials in auth.</p>
+
+<ul>
+<li>Set the environment variable <code>ANNOTELL_CREDENTIALS</code> to point to your Annotell Credentials file. The credentials will contain the Client Id and Client Secret.</li>
+<li>Set to the credentials file path like <code>auth=&quot;~/.config/annotell/credentials.json&quot;</code></li>
+<li>Set environment variables <code>ANNOTELL_CLIENT_ID</code> and <code>ANNOTELL_CLIENT_SECRET</code></li>
+<li>Set to credentials tuple <code>auth=(client_id, client_secret)</code></li>
+</ul>
+
+<p>API clients such as the InputApiClient accept this auth parameter.
+Under the hood, they all use the AuthSession class which is implements a requests session with automatic token refresh.</p>
+<h1 id='input-api'>Input API</h1><h2 id='project'>Project</h2>
+<p>In order to create inputs via the Input API, an Annotell project needs to exist.
+Projects are configured by the Annotell Professional Services team, during the Guideline Agreement Process (CAP) of a new client engagement.</p>
+<h3 id='list-projects'>List Projects</h3><div class="highlight"><pre class="highlight python tab-python"><code><span class="n">projects</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">list_projects</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Or via <code>annoutil</code> CLI</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>annoutil projects
+</code></pre></div>
+<p>Returns all projects.</p>
+<h2 id='batch'>Batch</h2>
+<p>Input batches allow further grouping of inputs into smaller batches within a project. Specifying input batch during input creation is optional, and will otherwise default to the latest open batch.</p>
+
+<p>Ongoing projects can benefit from using batches in two ways</p>
+
+<ul>
+<li>Group inputs collected at the same time</li>
+<li>Perform guideline or task definition changes without the need for retroactive changes.</li>
+</ul>
+<h3 id='batch-status'>Batch Status</h3>
+<table><thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>pending</td>
+<td>Batch has been created but is still not fully configured by Annotell. Either during project setup or requested changes</td>
+</tr>
+<tr>
+<td>open</td>
+<td>Batch is open for new inputs</td>
+</tr>
+<tr>
+<td>ready</td>
+<td>Batch has been published and no longer open for new inputs.</td>
+</tr>
+<tr>
+<td>in-progress</td>
+<td>Annotell has started annotation of inputs within the batch.</td>
+</tr>
+<tr>
+<td>completed</td>
+<td>Annotations has been completed.</td>
+</tr>
+</tbody></table>
+<h3 id='listing-batches'>Listing Batches</h3><div class="highlight"><pre class="highlight python tab-python"><code><span class="n">projects</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">list_project_batches</span><span class="p">(</span><span class="s">"project_external_id"</span><span class="p">)</span>
+</code></pre></div>
+<blockquote>
+<p>Or via <code>annoutil</code> CLI</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>annoutil batches &lt;project-external-id&gt;
+</code></pre></div>
+<p>Returns all batches for the project</p>
+<h3 id='publish-batch'>Publish Batch</h3><div class="highlight"><pre class="highlight python tab-python"><code><span class="n">projects</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">publish_batch</span><span class="p">(</span><span class="s">"project_external_id"</span><span class="p">,</span> <span class="s">"batch_external_id"</span><span class="p">)</span>
+</code></pre></div>
+<p>Publishes the input batch. Published batches are not open for new inputs.</p>
+<h2 id='input'>Input</h2><h3 id='invalidate-inputs'>Invalidate Inputs</h3><div class="highlight"><pre class="highlight python tab-python"><code><span class="n">invalid_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s">"0edb8f59-a8ea-4c9b-aebb-a3caaa6f2ba3"</span><span class="p">,</span> <span class="s">"37d9dda4-3a29-4fcb-8a71-6bf16d5a9c36"</span><span class="p">]</span>
+<span class="n">reason</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">InvalidatedReasonInput</span><span class="p">.</span><span class="n">BAD_CONTENT</span>
+<span class="n">client</span><span class="p">.</span><span class="n">invalidate_inputs</span><span class="p">(</span><span class="n">invalid_ids</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+</code></pre></div>
+<p>If issues are detected upstream related to inputs created, it is possible to invalidate inputs.
+Invalidated inputs will not produce annotations and any completed annotations of the input will be invalidated.</p>
+
+<table><thead>
+<tr>
+<th>Reason</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>bad-content</td>
+<td>Input does not load, or has erroneous metadata such as invalid calibration</td>
+</tr>
+<tr>
+<td>duplicate</td>
+<td>If same input has been created several times</td>
+</tr>
+<tr>
+<td>incorrectly-created</td>
+<td>If the input was unintentionally created.</td>
+</tr>
+</tbody></table>
+<h3 id='list-invalidated-inputs'>List Invalidated Inputs</h3>
+<aside class="warning">
+List using project id and not external identifier
+</aside>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="n">project</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">client</span><span class="p">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">project_id</span><span class="o">=</span> <span class="n">project</span><span class="p">,</span> <span class="n">invalidated</span><span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+</code></pre></div>
+<p>If errors are detected by Annotell, inputs will be invalidated and a reason will be supplied. </p>
+<h2 id='images'>Images</h2><h3 id='single-image'>Single Image</h3>
+<blockquote>
+<p>We start out by creating a representation of our image.</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="n">image1</span> <span class="o">=</span> <span class="s">"filename1.jpg"</span>
+<span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">IAM</span><span class="p">.</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">image1</span><span class="p">)]</span>
+<span class="n">images_files</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">ImagesFiles</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+<span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">"/home/user_name/example_path"</span><span class="p">)</span>
+</code></pre></div>
+<blockquote>
+<p>Next we can upload the images to a project</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="c1"># Project
+</span><span class="n">project</span> <span class="o">=</span> <span class="s">"&lt;external_id&gt;"</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">upload_and_create_images_input_job</span><span class="p">(</span><span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+                                                     <span class="n">images_files</span><span class="o">=</span><span class="n">iam</span><span class="p">.</span><span class="n">ImagesFiles</span><span class="p">(</span><span class="n">images</span><span class="p">),</span>
+                                                     <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">)</span>
+</code></pre></div>
+<p>Images inputs can be created from python via the <em>upload_and_create_images_input_job</em> method.</p>
+
+<p>The representation consists of the image name (excluding the path to the image) and the source of the image. In this case, we want to create a scene consisting of one image <em>image1</em>. We also specify a folder where the image is located.</p>
+
+<aside class="notice">
+Setting dryrun parameter to true in the method call, will validate the input using the Input API but not create any inputs.
+</aside>
+<h3 id='image-with-source-specification'>Image with Source Specification</h3>
+<blockquote>
+<p>Scene with several images and custom source names</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="c1"># Create objects representing the images and the scene
+</span><span class="n">image1</span> <span class="o">=</span> <span class="s">"filename1.jpg"</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="s">"filename2.jpg"</span>
+<span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">IAM</span><span class="p">.</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">image1</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s">"CAM1"</span><span class="p">),</span>
+          <span class="n">IAM</span><span class="p">.</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">image2</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s">"CAM2"</span><span class="p">)]</span>
+<span class="n">images_files</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">ImagesFiles</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+<span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">"/home/user_name/example_path"</span><span class="p">)</span>
+
+<span class="c1"># Project
+</span><span class="n">project</span> <span class="o">=</span> <span class="s">"&lt;external_id&gt;"</span>
+
+<span class="c1"># Create Scene meta data
+</span><span class="n">source_spec</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">SourceSpecification</span><span class="p">(</span><span class="n">source_to_pretty_name</span><span class="o">=</span><span class="p">{</span><span class="s">"CAM1"</span><span class="p">:</span> <span class="s">"FC"</span><span class="p">,</span> <span class="s">"CAM2"</span><span class="p">:</span> <span class="s">"BC"</span><span class="p">},</span>
+                                      <span class="n">source_order</span><span class="o">=</span><span class="p">[</span><span class="s">"CAM1"</span><span class="p">,</span> <span class="s">"CAM2"</span><span class="p">])</span>
+<span class="n">images_metadata</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">SceneMetaData</span><span class="p">(</span><span class="n">external_id</span><span class="o">=</span><span class="s">"2020-06-16"</span><span class="p">,</span>
+                                    <span class="n">source_specification</span><span class="o">=</span><span class="n">source_spec</span><span class="p">)</span>
+<span class="c1"># Create Input
+</span><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">upload_and_create_images_input_job</span><span class="p">(</span><span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+                                                     <span class="n">images_files</span><span class="o">=</span><span class="n">iam</span><span class="p">.</span><span class="n">ImagesFiles</span><span class="p">(</span><span class="n">images</span><span class="p">),</span>
+                                                     <span class="n">metadata</span><span class="o">=</span><span class="n">images_metadata</span><span class="p">,</span>
+                                                     <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">)</span>
+</code></pre></div>
+<p>Optionally, we can also add <em><strong>SceneMetaData</strong></em> to the input, with the following properties.</p>
+
+<table><thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>external_id</td>
+<td>Id which can be used to track progress of annotations with.</td>
+</tr>
+<tr>
+<td>source_specification</td>
+<td>Additional information about sources, includes <code>source_to_pretty_name</code> and <code>source_order</code>. Defines which source that should be shown first, the source_order, or a mapping of source names to a prettier name version displayed in the UI.</td>
+</tr>
+</tbody></table>
+<h2 id='point-clouds'>Point Clouds</h2>
+<aside class="notice">
+Supported point cloud formats are .csv, .pcd or .npy
+</aside>
+<h2 id='point-clouds-with-images'>Point Clouds with Images</h2>
+<blockquote>
+<p>Create representation of images and point clouds + source specification images</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="n">image1</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">"filename_image1.jpg"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s">"RFC01"</span><span class="p">)</span>
+<span class="n">pc</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">PointCloud</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">"filename_pc.pcd"</span><span class="p">)</span>
+<span class="n">point_clouds_with_images</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">PointCloudsWithImages</span><span class="p">(</span><span class="n">images</span><span class="o">=</span><span class="p">[</span><span class="n">image1</span><span class="p">],</span>
+                                                     <span class="n">point_clouds</span><span class="o">=</span><span class="p">[</span><span class="n">pc</span><span class="p">])</span>
+<span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">"/home/user_name/example_path/"</span><span class="p">)</span>  <span class="c1"># Folder to where the data is
+</span></code></pre></div><h3 id='pointcloudswithimages'>PointCloudsWithImages</h3>
+<p>We start off by creating a representation of the images and the point cloud that make up the scene along with a SourceSpecification for the images.</p>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>images</td>
+<td>2D Images</td>
+</tr>
+<tr>
+<td>point_clouds</td>
+<td>LiDAR point clouds in any of the supported formats (.csv, .pcd or .npy)</td>
+</tr>
+</tbody></table>
+
+<aside class="warning">
+Currently there is only support for supplying a single point cloud
+</aside>
+<h3 id='scene-metadata'>Scene metadata</h3>
+<blockquote>
+<p>Add Scene metadata</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="n">scene_external_id</span> <span class="o">=</span> <span class="s">"Scene X collection 2020-06-16"</span>
+<span class="n">calibration_id</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">CalibratedSceneMetaData</span><span class="p">(</span><span class="n">external_id</span><span class="o">=</span><span class="n">scene_external_id</span><span class="p">,</span>
+                                       <span class="n">source_specification</span><span class="o">=</span><span class="n">source_specification</span><span class="p">,</span>
+                                       <span class="n">calibration_id</span><span class="o">=</span><span class="n">calibration_id</span><span class="p">)</span>
+</code></pre></div>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>external_id</td>
+<td>Id which can be used to track progress of annotations with.</td>
+</tr>
+<tr>
+<td>source_specification</td>
+<td>Additional information about sources, includes <code>source_to_pretty_name</code> and <code>source_order</code>. Defines which source that should be shown first, the source_order, or a mapping of source names to a prettier name version displayed in the UI.</td>
+</tr>
+<tr>
+<td>calibration_id</td>
+<td>Which calibration to use for the input.</td>
+</tr>
+</tbody></table>
+
+<p>See calibration section for more information on how to retrieve a calibration_id.</p>
+<h3 id='creating-the-input'>Creating the input</h3>
+<blockquote>
+<p>Create input</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="n">client</span><span class="p">.</span><span class="n">create_inputs_point_cloud_with_images</span><span class="p">(</span><span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+                                             <span class="n">point_clouds_with_images</span><span class="o">=</span><span class="n">point_clouds_with_images</span><span class="p">,</span>
+                                             <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                                             <span class="n">project</span><span class="o">=</span><span class="s">"my_project"</span><span class="p">)</span>
+</code></pre></div>
+<p>Now everything required is prepared in order to use <code>create_inputs_point_cloud_with_images</code>.</p>
+<h3 id='full-example-code'>Full example code</h3>
+<blockquote>
+<p>Full example for creating an input consisting of a point cloud and one images. Including creating a new calibration for the input.</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">annotell.input_api.input_api_model</span> <span class="k">as</span> <span class="n">IAM</span>
+<span class="kn">import</span> <span class="nn">annotell.input_api.model.calibration</span> <span class="k">as</span> <span class="n">Calibration</span>
+<span class="kn">import</span> <span class="nn">annotell.input_api.input_api_client</span> <span class="k">as</span> <span class="n">IAC</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">IAC</span><span class="p">.</span><span class="n">InputApiClient</span><span class="p">()</span>
+<span class="c1"># Create representation of images and point clouds + source specification images
+</span><span class="n">image1</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">"filename_image1.jpg"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s">"RFC01"</span><span class="p">)</span>
+<span class="n">pc</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">PointCloud</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">"filename_pc.pcd"</span><span class="p">)</span>
+<span class="n">point_clouds_with_images</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">PointCloudsWithImages</span><span class="p">(</span><span class="n">images</span><span class="o">=</span><span class="p">[</span><span class="n">image1</span><span class="p">],</span>
+                                                     <span class="n">point_clouds</span><span class="o">=</span><span class="p">[</span><span class="n">pc</span><span class="p">])</span>
+<span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">"/home/user_name/example_path/"</span><span class="p">)</span>  <span class="c1"># Folder to where the data is
+# Create lidar calibration
+</span><span class="n">lidar_position</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">Position</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">lidar_rotation</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">RotationQuaternion</span><span class="p">(</span><span class="n">w</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">lidar_calibration</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">LidarCalibrationExplicit</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">lidar_position</span><span class="p">,</span>
+                                                         <span class="n">rotation_quaternion</span><span class="o">=</span><span class="n">lidar_rotation</span><span class="p">)</span>
+<span class="c1"># Create a camera calibration
+</span><span class="n">rfc_01_camera_type</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">CameraType</span><span class="p">.</span><span class="n">PINHOLE</span>
+<span class="n">rfc_01_position</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">Position</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># similar to Lidar
+</span><span class="n">rfc_01_rotation</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">RotationQuaternion</span><span class="p">(</span><span class="n">w</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># similar to Lidar
+</span><span class="n">rfc_01_camera_matrix</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">CameraMatrix</span><span class="p">(</span><span class="n">fx</span><span class="o">=</span><span class="mi">3450</span><span class="p">,</span> <span class="n">fy</span><span class="o">=</span><span class="mi">3250</span><span class="p">,</span> <span class="n">cx</span><span class="o">=</span><span class="mi">622</span><span class="p">,</span> <span class="n">cy</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+<span class="n">rfc_01_distortion_coefficients</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">DistortionCoefficients</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">k2</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">k3</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">rfc_01_properties</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">CameraProperty</span><span class="p">(</span><span class="n">camera_type</span><span class="o">=</span><span class="n">rfc_01_camera_type</span><span class="p">)</span>
+<span class="n">camera_calibration_rfc_01</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">CameraCalibrationExplicit</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">rfc_01_position</span><span class="p">,</span>
+                                                                  <span class="n">rotation_quaternion</span><span class="o">=</span><span class="n">rfc_01_rotation</span><span class="p">,</span>
+                                                                  <span class="n">camera_matrix</span><span class="o">=</span><span class="n">rfc_01_camera_matrix</span><span class="p">,</span>
+                                                                  <span class="n">distortion_coefficients</span><span class="o">=</span><span class="n">rfc_01_distortion_coefficients</span><span class="p">,</span>
+                                                                  <span class="n">camera_properties</span><span class="o">=</span><span class="n">rfc_01_properties</span><span class="p">,</span>
+                                                                  <span class="n">image_height</span><span class="o">=</span><span class="mi">920</span><span class="p">,</span>
+                                                                  <span class="n">image_width</span><span class="o">=</span><span class="mi">1244</span><span class="p">)</span>
+
+<span class="c1"># Create calibration for the scene
+</span><span class="n">calibration_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">RFC01</span><span class="o">=</span><span class="n">camera_calibration_rfc_01</span><span class="p">,</span>
+                        <span class="n">lidar</span><span class="o">=</span><span class="n">lidar_calibration</span><span class="p">)</span>
+<span class="n">calibration</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">Calibration</span><span class="p">(</span><span class="n">calibration_dict</span><span class="o">=</span><span class="n">calibration_dict</span><span class="p">)</span>
+<span class="n">calibration_external_id</span> <span class="o">=</span> <span class="s">"Collection 2020-06-16"</span>
+<span class="n">calibration_spec</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">CalibrationSpec</span><span class="p">(</span><span class="n">external_id</span><span class="o">=</span><span class="n">calibration_external_id</span><span class="p">,</span>
+                                       <span class="n">calibration</span><span class="o">=</span><span class="n">calibration</span><span class="p">)</span>
+<span class="c1"># Create the calibration using the Input API client
+</span><span class="n">created_calibration</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">create_calibration_data</span><span class="p">(</span><span class="n">calibration_spec</span><span class="o">=</span><span class="n">calibration_spec</span><span class="p">)</span>
+
+<span class="c1"># Create metadata
+</span><span class="n">scene_external_id</span> <span class="o">=</span> <span class="s">"Scene X collection 2020-06-16"</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">CalibratedSceneMetaData</span><span class="p">(</span><span class="n">external_id</span><span class="o">=</span><span class="n">scene_external_id</span><span class="p">,</span>
+                                       <span class="n">calibration_id</span><span class="o">=</span><span class="n">created_calibration</span><span class="p">.</span><span class="nb">id</span><span class="p">)</span>
+
+<span class="c1"># Add input
+</span><span class="n">client</span><span class="p">.</span><span class="n">create_inputs_point_cloud_with_images</span><span class="p">(</span><span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+                                             <span class="n">point_clouds_with_images</span><span class="o">=</span><span class="n">point_clouds_with_images</span><span class="p">,</span>
+                                             <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                                             <span class="n">project</span><span class="o">=</span><span class="s">"my_project"</span><span class="p">)</span>
+</code></pre></div>
+<p>Putting this together, we first create a representation of the input and its metadata, create or reuse calibration and then uploads the input.</p>
+<h2 id='calibration'>Calibration</h2>
+<p>Inputs including both a 2D and 3D representation such as <strong>point cloud with images</strong> require a calibration relating the camera sensors with the lidar sensors in terms of location and rotation. The calibration file should also contain the required information for projecting 3D points into the image plane of the camera.</p>
+
+<p>A Calibration object consists of a set of key-value pairs where the key is the name of the source and the value is either a <em>LidarCalibrationExplicit</em> object or a <em>CameraCalibrationExplicit</em> object depending on the sensor.</p>
+<h3 id='listing-existing-calibrations'>Listing existing calibrations</h3>
+<blockquote>
+<p>Get calibrations matching an external identifier</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="n">client</span><span class="p">.</span><span class="n">get_calibration_data</span><span class="p">(</span><span class="n">external_id</span><span class="o">=</span><span class="s">"Collection 2020-06-16"</span><span class="p">)</span>
+</code></pre></div>
+<p>Previously created calibrations are available through either client or <code>annoutil calibration</code></p>
+<h3 id='creating-a-lidar-calibration'>Creating a lidar calibration</h3>
+<aside class="notice">
+Note that you can, and should, reuse the same calibration for multiple scenes if possible.
+</aside>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">annotell.input_api.model.calibration</span> <span class="k">as</span> <span class="n">Calibration</span>
+<span class="c1"># Create lidar calibration
+</span><span class="n">lidar_position</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">Position</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">lidar_rotation</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">RotationQuaternion</span><span class="p">(</span><span class="n">w</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">lidar_calibration</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">LidarCalibrationExplicit</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">lidar_position</span><span class="p">,</span>
+                                                         <span class="n">rotation_quaternion</span><span class="o">=</span><span class="n">lidar_rotation</span><span class="p">)</span>
+</code></pre></div>
+<p>A lidar calibration is represented as a <em>LidarCalibrationExplicit</em> object and consists of a position expressed with three coordinates and a rotation in the form of a <a href="https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation">Quaternion</a>. See the code example below for creating a basic <em>LidarCalibrationExplicit</em> object.</p>
+<h3 id='creating-a-camera-calibration'>Creating a camera calibration</h3><div class="highlight"><pre class="highlight python tab-python"><code><span class="n">rfc_01_camera_type</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">CameraType</span><span class="p">.</span><span class="n">PINHOLE</span>
+<span class="n">rfc_01_position</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">Position</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># similar to Lidar
+</span><span class="n">rfc_01_rotation</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">RotationQuaternion</span><span class="p">(</span><span class="n">w</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># similar to Lidar
+</span><span class="n">rfc_01_camera_matrix</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">CameraMatrix</span><span class="p">(</span><span class="n">fx</span><span class="o">=</span><span class="mi">3450</span><span class="p">,</span> <span class="n">fy</span><span class="o">=</span><span class="mi">3250</span><span class="p">,</span> <span class="n">cx</span><span class="o">=</span><span class="mi">622</span><span class="p">,</span> <span class="n">cy</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+<span class="n">rfc_01_distortion_coefficients</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">DistortionCoefficients</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">k2</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">k3</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">rfc_01_properties</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">CameraProperty</span><span class="p">(</span><span class="n">camera_type</span><span class="o">=</span><span class="n">rfc_01_camera_type</span><span class="p">)</span>
+<span class="n">camera_calibration_rfc_01</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">.</span><span class="n">CameraCalibrationExplicit</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">rfc_01_position</span><span class="p">,</span>
+                                                                  <span class="n">rotation_quaternion</span><span class="o">=</span><span class="n">rfc_01_rotation</span><span class="p">,</span>
+                                                                  <span class="n">camera_matrix</span><span class="o">=</span><span class="n">rfc_01_camera_matrix</span><span class="p">,</span>
+                                                                  <span class="n">distortion_coefficients</span><span class="o">=</span><span class="n">rfc_01_distortion_coefficients</span><span class="p">,</span>
+                                                                  <span class="n">camera_properties</span><span class="o">=</span><span class="n">rfc_01_properties</span><span class="p">,</span>
+                                                                  <span class="n">image_height</span><span class="o">=</span><span class="mi">920</span><span class="p">,</span>
+                                                                  <span class="n">image_width</span><span class="o">=</span><span class="mi">1244</span><span class="p">)</span>
+</code></pre></div>
+<p>A camera calibration is represented as a CameraCalibrationExplicit object. The Camera calibration format is based on <a href="https://docs.opencv.org/3.4/d4/d94/tutorial_camera_calibration.htm">OpenCVs</a> format and this <a href="http://www.robots.ox.ac.uk/~cmei/articles/single_viewpoint_calib_mei_07.pdf">paper</a>. The camera calibration consists of the following set of key-value pairs.</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left">Key</th>
+<th style="text-align: left">Value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">rotation_quaternion</td>
+<td style="text-align: left">A RotationQuaternion object</td>
+</tr>
+<tr>
+<td style="text-align: left">position</td>
+<td style="text-align: left">A Position object</td>
+</tr>
+<tr>
+<td style="text-align: left">camera_matrix</td>
+<td style="text-align: left">A CameraMatrix object</td>
+</tr>
+<tr>
+<td style="text-align: left">camera_properties</td>
+<td style="text-align: left">A CameraProperty object</td>
+</tr>
+<tr>
+<td style="text-align: left">distortion_coefficients</td>
+<td style="text-align: left">A DistortionCoefficients object. Please note that the coefficient <em>k3</em> should be equal to None if the camera type is <em>Kannala</em><strong>.</strong></td>
+</tr>
+<tr>
+<td style="text-align: left">image_height</td>
+<td style="text-align: left">Integer</td>
+</tr>
+<tr>
+<td style="text-align: left">image_width</td>
+<td style="text-align: left">Integer</td>
+</tr>
+<tr>
+<td style="text-align: left">undistortion_coefficients</td>
+<td style="text-align: left">(<strong>Optional)</strong> An UndistortionCoefficients object. This is only used for <em>Kannala</em> cameras.</td>
+</tr>
+</tbody></table>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="c1"># Create calibration for the scene
+</span><span class="n">calibration_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">RFC01</span><span class="o">=</span><span class="n">camera_calibration_rfc_01</span><span class="p">,</span>
+                        <span class="n">lidar</span><span class="o">=</span><span class="n">lidar_calibration</span><span class="p">)</span>
+<span class="n">calibration</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">Calibration</span><span class="p">(</span><span class="n">calibration_dict</span><span class="o">=</span><span class="n">calibration_dict</span><span class="p">)</span>
+<span class="n">calibration_external_id</span> <span class="o">=</span> <span class="s">"Collection 2020-06-16"</span>
+<span class="n">calibration_spec</span> <span class="o">=</span> <span class="n">IAM</span><span class="p">.</span><span class="n">CalibrationSpec</span><span class="p">(</span><span class="n">external_id</span><span class="o">=</span><span class="n">calibration_external_id</span><span class="p">,</span>
+                                       <span class="n">calibration</span><span class="o">=</span><span class="n">calibration</span><span class="p">)</span>
+<span class="c1"># Create the calibration using the Input API client
+</span><span class="n">created_calibration</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">create_calibration_data</span><span class="p">(</span><span class="n">calibration_spec</span><span class="o">=</span><span class="n">calibration_spec</span><span class="p">)</span>
+</code></pre></div>
+<p>We tie the calibration together by creating a dictionary mapping the source name to the corresponding calibration. We then create a <em>Calibration</em> object and a <em>CalibrationSpecification</em> object which we then use to create a calibration in the Annotell platform. The external id can be used for querying for the calibration file and also for relating the calibration in our system to how the client refers to it.</p>
+<h2 id='dealing-with-errors'>Dealing with errors</h2>
+<p>When the client sends a http request to the Input API and waits until it receives a response. If the response code is 2xx (the status code for a successful call) the client converts the received message into a python object which can be viewed or used. However if the Input API responds with an error code (4xx or 5xx) the python client will raise an error. It&#39;s up to the user to decide if and how the want to handle this error.</p>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+                <a href="#" data-language-name="python">python</a>
+          </div>
+      </div>
+    </div>
+  </body>
+</html>
