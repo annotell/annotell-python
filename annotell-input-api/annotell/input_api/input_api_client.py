@@ -343,7 +343,7 @@ class InputApiClient:
         into potree after upload (server side). Supported fileformats for pointcloud files are
         currently .csv & .pcd (more information about formatting can be found in the readme.md).
         The job is successful once it converts the pointcloud file into potree, at which time an
-        input of type 'point_cloud_with_image' is created for the designated `project` `batch` or `input_list_id`.
+        input of type 'point_cloud' is created for the designated `project` `batch` or `input_list_id`.
         If the input_job fails (cannot perform conversion) the input is not added. To see if
         conversion was successful please see the method `get_input_jobs_status`.
         """
