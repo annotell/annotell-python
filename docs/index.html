@@ -312,6 +312,26 @@
             <a href="#annotell-auth" class="toc-h1 toc-link" data-title="Annotell Auth">Annotell Auth</a>
           </li>
           <li>
+            <a href="#key-concepts" class="toc-h1 toc-link" data-title="Key Concepts">Key Concepts</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#project" class="toc-h2 toc-link" data-title="Project">Project</a>
+                  </li>
+                  <li>
+                    <a href="#batch" class="toc-h2 toc-link" data-title="Batch">Batch</a>
+                  </li>
+                  <li>
+                    <a href="#request" class="toc-h2 toc-link" data-title="Request">Request</a>
+                  </li>
+                  <li>
+                    <a href="#input" class="toc-h2 toc-link" data-title="Input">Input</a>
+                  </li>
+                  <li>
+                    <a href="#annotation" class="toc-h2 toc-link" data-title="Annotation">Annotation</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
             <a href="#input-api" class="toc-h1 toc-link" data-title="Input API">Input API</a>
               <ul class="toc-list-h2">
                   <li>
@@ -382,7 +402,101 @@ Or override explicitly:</p>
 
 <p>API clients such as the InputApiClient accept this auth parameter.
 Under the hood, they all use the AuthSession class which is implements a requests session with automatic token refresh.</p>
-<h1 id='input-api'>Input API</h1><h2 id='project'>Project</h2>
+<h1 id='key-concepts'>Key Concepts</h1><h2 id='project'>Project</h2>
+<p>Project is the top-most concept when interfacing with the Annotell Platform. It is possible to have multiple ongoing projects, and they act as a container for other annotell resources.
+Project setup is performed by the Annotell Professional Services team during the Guideline Agreement Process (GAP) of a new client engagement.</p>
+
+<p>To use projects within the Annotell APIs, they can be identified using either a numeric annotell ID or by an external identifier which can be specified.</p>
+
+<aside class="notice">
+Work in progress: To harmonize the APIs, annotell project IDs will be phased out in favour of external identifiers.
+</aside>
+<h2 id='batch'>Batch</h2>
+<p>Input batches allow grouping of inputs into smaller batches within a project. By default, every project has at least one input batch.</p>
+
+<p>Ongoing projects can benefit from using batches in two ways</p>
+
+<ul>
+<li>Group inputs collected at the same time</li>
+<li>Perform guideline or task definition changes without the need for retroactive changes.</li>
+</ul>
+<h3 id='batch-status'>Batch Status</h3>
+<table><thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>pending</td>
+<td>Batch has been created but is still not fully configured by Annotell. Either during project setup or requested changes</td>
+</tr>
+<tr>
+<td>open</td>
+<td>Batch is open for new inputs</td>
+</tr>
+<tr>
+<td>ready</td>
+<td>Batch has been published and no longer open for new inputs.</td>
+</tr>
+<tr>
+<td>in-progress</td>
+<td>Annotell has started annotation of inputs within the batch.</td>
+</tr>
+<tr>
+<td>completed</td>
+<td>Annotations has been completed.</td>
+</tr>
+</tbody></table>
+<h2 id='request'>Request</h2>
+<p>During GAP, projects are divided into different annotation types. E.g. a project of 2D images can be divided into lane annotation and object detection. Within Annotell this is represented as a <strong>request</strong>.
+A Request can be viewed as a drawing tool - we divide big and complex projects into several independent annotation types.
+This makes it possible to:</p>
+
+<ul>
+<li>Reduce the mental strain on annotators</li>
+<li>Higher bandwidth - more annotators can work on the same data in parallel</li>
+<li>Build simple user interfaces</li>
+</ul>
+<h3 id='guideline'>Guideline</h3>
+<p>In order for us to produce annotations we need to know what and how to annotate. This type of information is found in something that&#39;s called a Guideline. A guideline contains information on what to mark (e.g. vehicles and pedestrians) as well as how (e.g. bounding box). A guideline also includes information about how to interpret the data, i.e. what does it mean that a vehicle is &quot;heavily occluded&quot;?</p>
+<h3 id='task-definition'>Task Definition</h3>
+<p>TaskDefinition - Describes what we’re annotating. How many objects? Bounding box, semantic segmentation or lines/splines? What are the properties? Used by the Annotell App to construct the drawing tool.</p>
+<h2 id='input'>Input</h2>
+<p>The Annotell Platform has support for annotating different types of data together, e.g:</p>
+
+<ul>
+<li>Two (or more) images of the same scene from different cameras</li>
+<li>Images (2D) + Lidar (3D)</li>
+</ul>
+
+<p>An <strong>input</strong> specifies how these different resources belong together using metadata about the scene and calibrations (how sensors relate to each other).
+Inputs can be created via Annotell&#39;s Input API, which has support for several different types of input types.</p>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>IMAGES</td>
+<td>One or several images</td>
+</tr>
+<tr>
+<td>VIDEO</td>
+<td>Video in .mp4 format</td>
+</tr>
+<tr>
+<td>POINTCLOUD_WITH_IMAGES</td>
+<td>Single frame point cloud with one or several images</td>
+</tr>
+<tr>
+<td>POINTCLOUD_WITH_VIDEO</td>
+<td>Sequence of frames with both (3D) pointcloud and (2D) video</td>
+</tr>
+</tbody></table>
+<h2 id='annotation'>Annotation</h2><h1 id='input-api'>Input API</h1><h2 id='project'>Project</h2>
 <p>In order to create inputs via the Input API, an Annotell project needs to exist.
 Projects are configured by the Annotell Professional Services team, during the Guideline Agreement Process (CAP) of a new client engagement.</p>
 <h3 id='list-projects'>List Projects</h3><div class="highlight"><pre class="highlight python tab-python"><code><span class="n">projects</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">list_projects</span><span class="p">()</span>
