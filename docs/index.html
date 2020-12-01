@@ -499,7 +499,7 @@ Inputs can be created via Annotell&#39;s Input API, which has support for severa
 </tr>
 </tbody></table>
 <h2 id='annotation'>Annotation</h2>
-<p>Inputs are annotated in requests, producting <em>annotations</em>. By default, annotations follow Annotell&#39;s judgement format.
+<p>Inputs are annotated in requests, producing <em>annotations</em>. By default, annotations follow Annotell&#39;s judgement format.
 Based on client needs, custom export formats can be accommodated by Annotell Professional Services team.</p>
 <h3 id='judgement-format'>Judgement Format</h3>
 <p>The Annotell judgement format is closely linked to the Annotell task definition. The task definition determines what we are expected to save, where properties are stored and what datatype(s) the properties will be. The Annotell judgement format is saved as a JSON file and will be described according to the data types of JSON.</p>
@@ -509,13 +509,16 @@ Based on client needs, custom export formats can be accommodated by Annotell Pro
   </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div>
-<p>The Annotell judgement is an object with the following top keys:
-- shapes: contains information needed for drawing the shapes. Follows GeoJson standard for serialising geometric shapes, please see https://en.wikipedia.org/wiki/GeoJSON for more information.
-- shapeProperties: contains the property values for shapes in shapes.
-- properties: contains the property values for what we want to know about the input, the inputProperties of the task definition.</p>
+<p>The Annotell judgement is an object with the following top keys:</p>
+
+<ul>
+<li>shapes: contains information needed for drawing the shapes. Follows GeoJson standard for serialising geometric shapes, please see https://en.wikipedia.org/wiki/GeoJSON for more information.</li>
+<li>shapeProperties: contains the property values for shapes in shapes.</li>
+<li>properties: contains the property values for what we want to know about the input, the inputProperties of the task definition.</li>
+</ul>
 <h1 id='input-api'>Input API</h1><h2 id='project'>Project</h2>
 <p>In order to create inputs via the Input API, an Annotell project needs to exist.
-Projects are configured by the Annotell Professional Services team, during the Guideline Agreement Process (CAP) of a new client engagement.</p>
+Projects are configured by the Annotell Professional Services team, during the Guideline Agreement Process (GAP) of a new client engagement.</p>
 <h3 id='list-projects'>List Projects</h3><div class="highlight"><pre class="highlight python tab-python"><code><span class="n">projects</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">list_projects</span><span class="p">()</span>
 </code></pre></div>
 <blockquote>
