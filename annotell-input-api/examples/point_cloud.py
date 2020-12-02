@@ -6,7 +6,7 @@ print("Creating Point Cloud Input...")
 
 
 # Creating Point Cloud Object
-# Support for .csv, .pcd or .npy
+# Support for .csv, .pcd or .las
 pointcloud_file = "filename1.csv"
 pointclouds = IAM.PointCloudFiles([IAM.PointCloud(filename=pointcloud_file)])
 folder = Path("/home/user_name/example_path")

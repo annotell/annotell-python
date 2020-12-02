@@ -86,7 +86,7 @@ class PointCloudsWithImages(RequestCall):
                     pointClouds=[pc.to_dict() for pc in self.point_clouds])
 
 class PointCloudFiles(RequestCall):
-    def __init__(self, point_clouds: List[Image]):
+    def __init__(self, point_clouds: List[PointCloud]):
         self.point_clouds = point_clouds
 
     def to_dict(self) -> dict:
