@@ -162,7 +162,7 @@ Optionally, we can also add _**SceneMetaData**_ to the input, with the following
 ## Point Clouds
 
 <aside class="notice">
-Supported point cloud formats are .csv, .pcd or .npy
+Supported point cloud formats are .csv, .pcd or .las
 </aside>
 
 ## Point Clouds with Images
