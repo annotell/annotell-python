@@ -184,7 +184,7 @@ We start off by creating a representation of the images and the point cloud that
 | Parameter    | Description                                                             |
 | ------------ | ----------------------------------------------------------------------- |
 | images       | 2D Images                                                               |
-| point_clouds | LiDAR point clouds in any of the supported formats (.csv, .pcd or .npy) |
+| point_clouds | LiDAR point clouds in any of the supported formats (.csv, .pcd or .las) |
 
 <aside class="warning">
 Currently there is only support for supplying a single point cloud
