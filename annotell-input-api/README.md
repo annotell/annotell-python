@@ -41,7 +41,7 @@ images_files = IAM.ImagesFiles(images)
 folder = Path("/home/user_name/example_path")
 ```
 
-**We also need to create a** _**SceneMetaData**_ **object.** The only required field the external id string which the client can use to identify the input. We can also add a _**SourceSpecification**_ object which defines which source that should be shown first, the _source_order_, or a mapping of source names to a prettier name version displayed in the UI.
+**We also need to create a** _**SceneMetaData**_ **object.** The only required field is the external id string which the client can use to identify the input. We can also add a _**SourceSpecification**_ object which defines which source that should be shown first, the _source_order_, or a mapping of source names to a prettier name version displayed in the UI.
 
 ```python
 source_spec = IAM.SourceSpecification(source_to_pretty_name={"CAM1": "FC", "CAM2": "BC"},
