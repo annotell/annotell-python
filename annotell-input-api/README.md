@@ -270,6 +270,10 @@ When the client sends a http request to the Input API and waits until it receive
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.11] - 2020-12-07
+### Removed
+- Remove SLAM-related methods
+
 ## [0.3.10] - 2020-12-01
 ### Added
 - Minor fix in annoutil

@@ -376,29 +376,6 @@ class InputApiClient:
             log.info(f"Creating inputs for files with job_id={create_input_response.internal_id}")
             return create_input_response
 
-    def create_slam_input_job(self, slam_files: IAM.SlamFiles,
-                              metadata: IAM.SlamMetaData,
-                              project: Optional[str] = None,
-                              batch: Optional[str] = None,
-                              input_list_id: Optional[int] = None,
-                              dryrun=False) -> Optional[IAM.CreateInputJobResponse]:
-        """
-        Creates a slam input job, then sends a message to inputEngine which will request for a SLAM job to be
-        started.
-
-        :param slam_files: class containing files necessary for SLAM.
-        :param metadata: class containing metadata necessary for SLAM.
-        :param project: project to add input to
-        :param batch: batch, defaults to latest open batch
-        :param input_list_id: input list to add input to (alternative to project-batch)
-        :param dryrun: If True the files/metadata will be validated but no input job will be created.
-        :returns CreateInputJobResponse: Class containing id of the created input job, or None if dryrun.
-        """
-
-        slam_json = dict(files=slam_files.to_dict(), metadata=metadata.to_dict(), inputListId=input_list_id)
-
-        return self._post_input_request('slam', slam_json, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
-
     def upload_and_create_images_input_job(self, folder: Path,
                                            images_files: IAM.ImagesFiles,
                                            metadata: IAM.SceneMetaData = IAM.SceneMetaData(external_id=str(uuid())),
@@ -471,40 +448,6 @@ class InputApiClient:
                                      internalId=internal_id)
 
         return self._post_input_request('images', create_input_job_json, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
-
-    def update_completed_slam_input_job(self, pointcloud_uri: str,
-                                        trajectory: IAM.Trajectory,
-                                        job_id: str) -> None:
-        """
-        Updates an input job with data about the created SLAM, then sends a message to inputEngine which
-        will create an input. The method will throw an error if the operation was unsuccessful.
-
-        :param pointcloud_uri: URI pointing to a SLAM:ed pointcloud in either s3 or gs cloud storage.
-        :param trajectory: class containing the trajectory of the SLAM:ed pointcloud.
-        :param job_id: UUID for the input job.
-        :returns None
-        """
-        url = f"{self.host}/v1/inputs/progress"
-        update_json = dict(files=dict(pointClouds=pointcloud_uri),
-                           metadata=dict(trajectory=trajectory.to_dict()),
-                           jobId=job_id)
-        resp = self.session.post(url, json=update_json, headers=self.headers)
-        self._raise_on_error(resp).json()
-
-    def update_failed_slam_input_job(self, job_id: str, message: str) -> None:
-        """
-        Updates an input job with an error message, then sends a message to inputEngine which will
-        notify the responsible party about the failed input job. The method will throw an error if
-        the operation was unsuccessful.
-
-        :param job_id: UUID for the input job.
-        :param message: String with the error message.
-        :returns None
-        """
-        url = f"{self.host}/v1/inputs/progress"
-        update_json = dict(jobId=job_id, message=message)
-        resp = self.session.post(url, json=update_json, headers=self.headers)
-        self._raise_on_error(resp).json()
 
     def get_internal_ids_for_external_ids(self, external_ids: List[str]) -> Dict[str, List[str]]:
         """
