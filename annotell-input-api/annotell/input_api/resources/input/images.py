@@ -11,13 +11,13 @@ log = logging.getLogger(__name__)
 
 
 class ImageResource(CreateableInputAPIResource):
-    def upload_and_create_images_input_job(self, folder: Path,
-                                           images_files: IAM.ImagesFiles,
-                                           metadata: IAM.SceneMetaData = IAM.SceneMetaData(external_id=str(uuid())),
-                                           project: Optional[str] = None,
-                                           batch: Optional[str] = None,
-                                           input_list_id: Optional[int] = None,
-                                           dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
+    def create(self, folder: Path,
+               images_files: IAM.ImagesFiles,
+               metadata: IAM.SceneMetaData = IAM.SceneMetaData(external_id=str(uuid())),
+               project: Optional[str] = None,
+               batch: Optional[str] = None,
+               input_list_id: Optional[int] = None,
+               dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Verifies the images and metadata given and then uploads images to Google Cloud Storage and
         creates an input job.
@@ -50,7 +50,7 @@ class ImageResource(CreateableInputAPIResource):
         assert set(filenames) == set(files_in_response)
 
         if not dryrun:
-            self.client._upload_files(folder, upload_url_resp.files_to_url)
+            self.file_resource_client.upload_files(folder, upload_url_resp.files_to_url)
             input_job_created_message = self._create_images_input_job(images_files=images_files,
                                                                       metadata=metadata,
                                                                       internal_id=internal_id,

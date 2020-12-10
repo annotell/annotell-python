@@ -9,7 +9,8 @@ from annotell.input_api.resources.abstract import CreateableInputAPIResource
 
 log = logging.getLogger(__name__)
 
-class PointCloudAndImagesResource(CreateableInputAPIResource):
+
+class PointCloudWithImagesResource(CreateableInputAPIResource):
     def _create_inputs_point_cloud_with_images(self, point_clouds_with_images: IAM.PointCloudsWithImages,
                                                internal_id: str,
                                                metadata: IAM.CalibratedSceneMetaData,
@@ -26,13 +27,13 @@ class PointCloudAndImagesResource(CreateableInputAPIResource):
 
         return self._post_input_request('pointclouds-with-images', js, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
 
-    def create_inputs_point_cloud_with_images(self, folder: Path,
-                                              point_clouds_with_images: IAM.PointCloudsWithImages,
-                                              metadata: IAM.CalibratedSceneMetaData,
-                                              project: Optional[str] = None,
-                                              batch: Optional[str] = None,
-                                              input_list_id: Optional[int] = None,
-                                              dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
+    def create(self, folder: Path,
+               point_clouds_with_images: IAM.PointCloudsWithImages,
+               metadata: IAM.CalibratedSceneMetaData,
+               project: Optional[str] = None,
+               batch: Optional[str] = None,
+               input_list_id: Optional[int] = None,
+               dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Upload files and create an input of type 'point_cloud_with_image'.
 
@@ -86,4 +87,3 @@ class PointCloudAndImagesResource(CreateableInputAPIResource):
 
             log.info(f"Creating inputs for files with job_id={create_input_response.internal_id}")
             return create_input_response
-    

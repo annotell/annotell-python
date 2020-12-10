@@ -12,7 +12,7 @@ from annotell.input_api.resources.input.data import DataResource
 from annotell.input_api.resources.annotation.annotation import AnnotationResource
 
 from annotell.input_api.resources.input.point_cloud import PointCloudResource
-from annotell.input_api.resources.input.point_cloud_images import PointCloudAndImagesResource
+from annotell.input_api.resources.input.point_cloud_images import PointCloudWithImagesResource
 from annotell.input_api.resources.input.images import ImageResource
 
 DEFAULT_HOST = "https://input.annotell.com"
@@ -50,5 +50,5 @@ class InputApiClient:
         self.request = RequestResource(client)
 
         self.PointCloud = PointCloudResource(client, file_client)
-        self.PointCloudAndImages = PointCloudAndImagesResource(client, file_client)
+        self.PointCloudWithImages = PointCloudWithImagesResource(client, file_client)
         self.Images = ImageResource(client, file_client)

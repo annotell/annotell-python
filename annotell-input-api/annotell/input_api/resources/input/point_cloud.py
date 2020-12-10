@@ -9,14 +9,15 @@ from annotell.input_api.resources.abstract import CreateableInputAPIResource
 
 log = logging.getLogger(__name__)
 
+
 class PointCloudResource(CreateableInputAPIResource):
     def _create_inputs_point_clouds(self, point_clouds: IAM.PointCloudFiles,
-                                               internal_id: str,
-                                               metadata: IAM.SceneMetaData,
-                                               project: Optional[str],
-                                               batch: Optional[str],
-                                               input_list_id: Optional[int],
-                                               dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
+                                    internal_id: str,
+                                    metadata: IAM.SceneMetaData,
+                                    project: Optional[str],
+                                    batch: Optional[str],
+                                    input_list_id: Optional[int],
+                                    dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """Create point clouds"""
 
         js = dict(
@@ -26,13 +27,13 @@ class PointCloudResource(CreateableInputAPIResource):
 
         return self._post_input_request('pointclouds', js, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
 
-    def create_inputs_point_clouds(self, folder: Path,
-                                   point_clouds: IAM.PointCloudFiles,
-                                   metadata: IAM.SceneMetaData = IAM.SceneMetaData(external_id=str(uuid())),
-                                   project: Optional[str] = None,
-                                   batch: Optional[str] = None,
-                                   input_list_id: Optional[int] = None,
-                                   dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
+    def create(self, folder: Path,
+               point_clouds: IAM.PointCloudFiles,
+               metadata: IAM.SceneMetaData = IAM.SceneMetaData(external_id=str(uuid())),
+               project: Optional[str] = None,
+               batch: Optional[str] = None,
+               input_list_id: Optional[int] = None,
+               dryrun: bool = False) -> Optional[IAM.CreateInputJobResponse]:
         """
         Upload files and create an input of type 'point_cloud'.
 
@@ -80,5 +81,5 @@ class PointCloudResource(CreateableInputAPIResource):
                                                                      input_list_id=input_list_id,
                                                                      )
 
-            log.info(f"Creating inputs for files with job_id={create_input_response.internal_id}")
+            log.info(f"Created inputs for files with job_id={create_input_response.internal_id}")
             return create_input_response
