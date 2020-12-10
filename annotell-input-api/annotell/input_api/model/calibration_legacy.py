@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional
 
 from .abstract.abstract_models import SensorCalibration
-from .calibration import CameraProperty
+from annotell.input_api.model.calibration_explicit import CameraProperty
 from .enums import CameraType
 
 log = logging.getLogger(__name__)

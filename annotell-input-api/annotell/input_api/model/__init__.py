@@ -14,5 +14,6 @@ from annotell.input_api.model.project import Project
 from annotell.input_api.model.removed_input import RemovedInputsResponse
 from annotell.input_api.model.request import Request
 from annotell.input_api.model.upload_url import UploadUrlsResponse
+from annotell.input_api.model.calibration import *
 from annotell.input_api.model.v0 import *
 from annotell.input_api.model.v1 import *

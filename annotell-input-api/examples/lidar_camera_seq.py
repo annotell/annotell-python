@@ -1,10 +1,9 @@
-import annotell.input_api.model as IAM
-import annotell.input_api.model.calibration as Calibration
+from __future__ import absolute_import
+
 import annotell.input_api.input_api_client as IAC
+import annotell.input_api.model as IAM
 
-from .calibration import create_calibration_spec
-
-from pathlib import Path
+from calibration import create_calibration_spec
 
 print("Creating Lidar and Camera Sequence Input...")
 

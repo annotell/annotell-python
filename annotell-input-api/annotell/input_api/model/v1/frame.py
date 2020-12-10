@@ -16,6 +16,6 @@ class Frame:
     def to_dict(self) -> dict:
         return dict(frameId=self.frame_id,
                     relativeTimestamp=self.relative_timestamp,
-                    lidarFrames=self.lidar_frames,
-                    imageFrames=self.image_frames,
-                    videoFrames=self.video_frames)
+                    lidarFrames=[frame.to_dict() for frame in self.lidar_frames] if self.lidar_frames is not None else None,
+                    imageFrames=[frame.to_dict() for frame in self.image_frames] if self.image_frames is not None else None,
+                    videoFrames=[frame.to_dict() for frame in self.video_frames] if self.video_frames is not None else None)

@@ -20,7 +20,7 @@ class LidarsAndCamerasSequence:
     # pre_annotation: Optional[DataId]
 
     def to_dict(self) -> dict:
-        return dict(frames=self.frames,
+        return dict(frames=[frame.to_dict() for frame in self.frames],
                     sensorSpecification=self.sensor_specification,
                     externalId=self.external_id,
                     internalId=self.internal_id,

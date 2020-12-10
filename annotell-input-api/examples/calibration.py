@@ -6,8 +6,8 @@ from annotell.input_api.input_api_client import InputApiClient
 
 
 def create_calibration_spec(external_id, lidar_sources: List[str], camera_sources: List[str]):
-
     # Create lidar calibration
+
     def unity_lidar_calibration():
         lidar_position = Calibration.Position(x=0.0, y=0.0, z=0.0)
         lidar_rotation = Calibration.RotationQuaternion(w=1.0, x=0.0, y=0.0, z=0.0)

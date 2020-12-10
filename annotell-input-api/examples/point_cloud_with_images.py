@@ -1,10 +1,12 @@
-import annotell.input_api.input_api_model as IAM
-import annotell.input_api.model.calibration as Calibration
-import annotell.input_api.input_api_client as IAC
-
-from .calibration import create_calibration_spec
+from __future__ import absolute_import
 
 from pathlib import Path
+
+import annotell.input_api.input_api_client as IAC
+import annotell.input_api.model as IAM
+import annotell.input_api.model.calibration as Calibration
+
+from calibration import create_calibration_spec
 
 print("Creating Point Cloud Input...")
 
@@ -18,7 +20,7 @@ folder = Path("/home/user_name/example_path/")  # Folder to where the data is
 
 # Create calibration
 calibration_spec = create_calibration_spec("Collection 2020-06-16", ["lidar"], ["RFC01"])
-created_calibration = client.create_calibration_data(calibration_spec)
+created_calibration = client.calibration.create_calibration_data(calibration_spec)
 
 # Create metadata
 scene_external_id = "Scene X collection 2020-06-16"
@@ -28,8 +30,8 @@ metadata = IAM.CalibratedSceneMetaData(external_id=scene_external_id,
 # Project - Available via `client.list_projects()`
 project = "<project-identifier>"
 
-# Add input                                       
-client.create_inputs_point_cloud_with_images(folder=folder,
-                                             point_clouds_with_images=point_clouds_with_images,
-                                             metadata=metadata,
-                                             project=project)
+# Add input
+client.PointCloudWithImages.create(folder=folder,
+                                   point_clouds_with_images=point_clouds_with_images,
+                                   metadata=metadata,
+                                   project=project)
