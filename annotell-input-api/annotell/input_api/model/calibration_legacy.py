@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-from .abstract_models import SensorCalibration
+from .abstract.abstract_models import SensorCalibration
 from .calibration import CameraProperty
 from .enums import CameraType
 

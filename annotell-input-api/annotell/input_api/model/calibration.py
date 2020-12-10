@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
-from .abstract_models import RequestCall, SensorCalibration
+from .abstract.abstract_models import RequestCall, SensorCalibration
 from .enums import CameraType
 
 

@@ -1,0 +1,2 @@
+from annotell.input_api.resources.abstract.creatable_input_api_resource import CreateableInputAPIResource
+from annotell.input_api.resources.abstract.input_api_resource import InputAPIResource
