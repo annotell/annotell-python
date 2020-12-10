@@ -1,6 +1,7 @@
 from typing import List
 from annotell.input_api.model.abstract.abstract_models import RequestCall
 
+
 class FilesToUpload(RequestCall):
     """
     Used when retrieving upload urls from input api

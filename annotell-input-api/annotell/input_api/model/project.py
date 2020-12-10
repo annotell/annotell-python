@@ -4,7 +4,6 @@ from annotell.input_api.model.abstract.abstract_models import Response
 from annotell.input_api.util import ts_to_dt
 
 
-
 class Project(Response):
     def __init__(self, id: int, created: datetime, title: str, description: str,
                  deadline: Optional[str], status: str, external_id: str):
