@@ -1,11 +1,11 @@
 """Client for communicating with the Annotell platform."""
 import logging
 import random
+import time
 from pathlib import Path
-from typing import Mapping, Dict, BinaryIO
+from typing import Mapping, Dict, BinaryIO, Optional
 
 import requests
-import time
 
 from annotell.input_api.util import get_content_type
 
@@ -34,7 +34,7 @@ class FileResourceClient:
         :return: int: The time to wait before retrying upload
         """
         max_wait_time = pow(2, upload_attempt - 1)
-        wait_time = random.random()*max_wait_time
+        wait_time = random.random() * max_wait_time
         wait_time = wait_time if wait_time < self.MAX_RETRY_WAIT_TIME else self.MAX_RETRY_WAIT_TIME
         return wait_time
 

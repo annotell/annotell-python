@@ -1,8 +1,5 @@
-from pathlib import Path
-from typing import Optional
-from uuid import uuid4 as uuid
-
 import logging
+from typing import Optional
 
 from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import CreateableInputAPIResource
@@ -38,10 +35,10 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
         """
 
         self.post_input_request('lidar-camera-seq', lidars_and_cameras_sequence.to_dict(),
-                                 project=project,
-                                 batch=batch,
-                                 input_list_id=input_list_id,
-                                 dryrun=True)
+                                project=project,
+                                batch=batch,
+                                input_list_id=input_list_id,
+                                dryrun=True)
 
         if dryrun:
             return

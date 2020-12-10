@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import List, Optional, Set
 
-from annotell.input_api.model.v1.sensor_specification import SensorSpecification
 from annotell.input_api.model.v1.frame import Frame
+from annotell.input_api.model.v1.sensor_specification import SensorSpecification
+
 
 @dataclass
 class LidarsAndCamerasSequence:
@@ -15,6 +16,7 @@ class LidarsAndCamerasSequence:
     """
     Unix timestamp for start of sequence
     """
+
     # pre_annotation: Optional[DataId]
 
     def to_dict(self) -> dict:

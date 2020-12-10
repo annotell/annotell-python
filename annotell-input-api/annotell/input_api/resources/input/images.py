@@ -1,8 +1,7 @@
+import logging
 from pathlib import Path
 from typing import Optional
 from uuid import uuid4 as uuid
-
-import logging
 
 from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import CreateableInputAPIResource
@@ -83,4 +82,5 @@ class ImageResource(CreateableInputAPIResource):
                                      metadata=metadata.to_dict(),
                                      internalId=internal_id)
 
-        return self.post_input_request('images', create_input_job_json, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
+        return self.post_input_request('images', create_input_job_json, project=project, batch=batch,
+                                       input_list_id=input_list_id, dryrun=dryrun)

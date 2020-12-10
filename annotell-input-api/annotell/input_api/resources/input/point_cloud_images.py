@@ -1,8 +1,6 @@
+import logging
 from pathlib import Path
 from typing import Optional
-from uuid import uuid4 as uuid
-
-import logging
 
 from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import CreateableInputAPIResource
@@ -25,7 +23,8 @@ class PointCloudWithImagesResource(CreateableInputAPIResource):
             internalId=internal_id,
             metadata=metadata.to_dict())
 
-        return self.post_input_request('pointclouds-with-images', js, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
+        return self.post_input_request('pointclouds-with-images', js, project=project, batch=batch,
+                                       input_list_id=input_list_id, dryrun=dryrun)
 
     def create(self, folder: Path,
                point_clouds_with_images: IAM.PointCloudsWithImages,

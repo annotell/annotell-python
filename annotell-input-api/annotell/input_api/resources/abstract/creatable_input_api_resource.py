@@ -9,6 +9,7 @@ from annotell.input_api.model import (CreateInputJobResponse, FilesToUpload,
 class CreateableInputAPIResource(FileResourceClient):
 
     def __init__(self, client: HttpClient, file_resource_client: FileResourceClient):
+        super().__init__()
         self.client = client
         self.file_resource_client = file_resource_client
 

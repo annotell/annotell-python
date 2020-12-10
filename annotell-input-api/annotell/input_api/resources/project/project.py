@@ -21,8 +21,7 @@ class ProjectResource(InputAPIResource):
         })
 
         return [IAM.Request.from_json(js) for js in json_resp]
-    
-    
+
     def list_projects(self) -> List[IAM.Project]:
         """
         Returns all projects connected to the users organization.

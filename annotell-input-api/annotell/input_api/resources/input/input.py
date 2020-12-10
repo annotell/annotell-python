@@ -1,6 +1,5 @@
-from typing import List, Optional, Dict
-
 import logging
+from typing import List, Optional, Dict
 
 from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import InputAPIResource

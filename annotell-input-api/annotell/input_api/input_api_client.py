@@ -1,20 +1,20 @@
 """Client for communicating with the Annotell platform."""
 import logging
-from annotell.auth.authsession import FaultTolerantAuthRequestSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 
-from annotell.input_api.http_client import HttpClient
+from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST
+
 from annotell.input_api.file_resource_client import FileResourceClient
-from annotell.input_api.resources.calibration.calibration import CalibrationResource
-from annotell.input_api.resources.project.project import ProjectResource
-from annotell.input_api.resources.project.request import RequestResource
-from annotell.input_api.resources.input.input import InputResource
-from annotell.input_api.resources.input.data import DataResource
+from annotell.input_api.http_client import HttpClient
 from annotell.input_api.resources.annotation.annotation import AnnotationResource
-
+from annotell.input_api.resources.calibration.calibration import CalibrationResource
+from annotell.input_api.resources.input.data import DataResource
+from annotell.input_api.resources.input.images import ImageResource
+from annotell.input_api.resources.input.input import InputResource
+from annotell.input_api.resources.input.lidar_camera_sequence import LidarAndImageSequenceResource
 from annotell.input_api.resources.input.point_cloud import PointCloudResource
 from annotell.input_api.resources.input.point_cloud_images import PointCloudWithImagesResource
-from annotell.input_api.resources.input.images import ImageResource
-from annotell.input_api.resources.input.lidar_camera_sequence import LidarAndImageSequenceResource
+from annotell.input_api.resources.project.project import ProjectResource
+from annotell.input_api.resources.project.request import RequestResource
 
 DEFAULT_HOST = "https://input.annotell.com"
 

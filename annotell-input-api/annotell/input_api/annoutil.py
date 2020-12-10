@@ -1,4 +1,3 @@
-from tabulate import tabulate
 import click
 from tabulate import tabulate
 
@@ -55,7 +54,8 @@ def projects(project_id, get_requests, get_input_lists, get_invalidated_inputs):
         tab = _get_table(list_of_input_lists, headers, "INPUTLISTS")
         print(tab)
     elif get_requests and project_id:
-        headers = ["id", "created", "project_id", "title", "description", "input_list_id", "input_batch_id", "external_id"]
+        headers = ["id", "created", "project_id", "title", "description", "input_list_id", "input_batch_id",
+                   "external_id"]
         list_of_requests = client.project.get_requests_for_project_id(project_id=project_id)
         tab = _get_table(list_of_requests, headers, "REQUESTS")
         print(tab)
@@ -205,7 +205,7 @@ def input_lists(input_list_id, get_requests):
 def input_batch(project):
     print()
     if project:
-        headers = ["external_id", "title",  "status", "created", "updated"]
+        headers = ["external_id", "title", "status", "created", "updated"]
         list_of_batches = client.project.list_project_batches(project)
         tab = _get_table(list_of_batches, headers, "BATCHES")
         print(tab)

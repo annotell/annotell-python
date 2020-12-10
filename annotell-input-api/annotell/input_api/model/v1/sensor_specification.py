@@ -1,8 +1,6 @@
-
 from typing import Optional, List, Dict
-from datetime import datetime
+
 from annotell.input_api.model.abstract.abstract_models import RequestCall
-from annotell.input_api.util import ts_to_dt
 
 
 class SensorSpecification(RequestCall):

@@ -1,15 +1,10 @@
 """Client for communicating with the Annotell platform."""
 import logging
-import random
-import time
-from collections.abc import Mapping
-from pathlib import Path
-from typing import BinaryIO, Dict, List, Mapping, Optional, Union
-from uuid import uuid4 as uuid
 
 import requests
 from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST
 from annotell.auth.authsession import FaultTolerantAuthRequestSession
+
 from annotell.input_api.util import filter_none
 
 DEFAULT_HOST = "https://input.annotell.com"
@@ -59,8 +54,7 @@ class HttpClient:
         try:
             resp.raise_for_status()
         except requests.HTTPError as exception:
-            if (exception.response is not None and exception.response.status_code == 400):
-                message = ""
+            if exception.response is not None and exception.response.status_code == 400:
                 try:
                     message = exception.response.json()["message"]
                 except ValueError:
@@ -73,7 +67,7 @@ class HttpClient:
     @staticmethod
     def _unwrap_enveloped_json(js: dict) -> dict:
         if isinstance(js, list):
-            return js    
+            return js
         elif js is not None and js.get(ENVELOPED_JSON_TAG) is not None:
             return js[ENVELOPED_JSON_TAG]
         return js

@@ -3,6 +3,7 @@ from typing import List, Dict
 from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import InputAPIResource
 
+
 # TODO: Remove Request resource, not part of Input Domain..
 
 

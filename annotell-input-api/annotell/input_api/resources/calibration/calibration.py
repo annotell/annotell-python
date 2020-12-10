@@ -1,12 +1,12 @@
 """Client for communicating with the Annotell platform."""
 import logging
-
 from typing import List, Optional, Union
+
 from annotell.input_api import model as IAM
-from annotell.input_api.http_client import HttpClient
 from annotell.input_api.resources.abstract import InputAPIResource
 
 log = logging.getLogger(__name__)
+
 
 class CalibrationResource(InputAPIResource):
 
