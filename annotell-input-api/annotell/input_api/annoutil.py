@@ -1,9 +1,8 @@
-from typing import Optional, List
 from tabulate import tabulate
-from .input_api_client import InputApiClient
-
 import click
+from tabulate import tabulate
 
+from .input_api_client import InputApiClient
 
 client = InputApiClient(auth=None)
 

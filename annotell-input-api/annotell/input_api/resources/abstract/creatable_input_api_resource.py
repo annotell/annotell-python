@@ -4,6 +4,7 @@ from annotell.input_api.http_client import HttpClient
 from annotell.input_api.file_resource_client import FileResourceClient
 from annotell.input_api.model import CreateInputJobResponse, FilesToUpload, UploadUrlsResponse
 
+
 class CreateableInputAPIResource(FileResourceClient):
 
     def __init__(self, client: HttpClient, file_resource_client: FileResourceClient):
@@ -17,7 +18,7 @@ class CreateableInputAPIResource(FileResourceClient):
                             input_list_id: Optional[int],
                             dryrun: bool = False):
 
-        if (input_list_id is not None):
+        if input_list_id is not None:
             input_request['inputListId'] = input_list_id
 
         request_url = self._resolve_request_url(resource_path, project, batch)
@@ -47,4 +48,3 @@ class CreateableInputAPIResource(FileResourceClient):
         """Get upload urls to cloud storage"""
         json_resp = self.client.get("v1/inputs/upload-urls", json=files_to_upload.to_dict())
         return UploadUrlsResponse.from_json(json_resp)
-        

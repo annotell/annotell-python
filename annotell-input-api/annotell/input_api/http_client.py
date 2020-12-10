@@ -1,12 +1,7 @@
 """Client for communicating with the Annotell platform."""
 import logging
-import random
-from pathlib import Path
-from typing import List, Mapping, Optional, Union, Dict, BinaryIO
-from uuid import uuid4 as uuid
 
 import requests
-import time
 from annotell.auth.authsession import FaultTolerantAuthRequestSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 
 DEFAULT_HOST = "https://input.annotell.com"

@@ -1,4 +1,4 @@
-from typing import List, Mapping, Optional, Dict
+from typing import List, Optional, Dict
 
 import logging
 
@@ -6,6 +6,7 @@ from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import InputAPIResource
 
 log = logging.getLogger(__name__)
+
 
 class InputResource(InputAPIResource):
     """
