@@ -3,6 +3,7 @@ from datetime import datetime
 from annotell.input_api.model.abstract.abstract_models import Response
 from annotell.input_api.util import ts_to_dt
 
+
 class InputJob(Response):
     def __init__(self, id: int, internal_id: str, external_id: str, filename: str,
                  status: str, added: datetime, error_message: Optional[str]):

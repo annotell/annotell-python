@@ -1,8 +1,6 @@
 from typing import Optional
-from datetime import datetime
 from annotell.input_api.model.abstract.abstract_models import Response
 from annotell.input_api.model.enums import InvalidatedReasonInput
-from annotell.input_api.util import ts_to_dt
 
 
 class Input(Response):

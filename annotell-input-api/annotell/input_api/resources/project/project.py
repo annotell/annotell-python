@@ -1,4 +1,4 @@
-from typing import List, Mapping
+from typing import List
 
 from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import InputAPIResource

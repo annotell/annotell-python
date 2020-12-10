@@ -2,6 +2,7 @@ from datetime import datetime
 from annotell.input_api.model.abstract.abstract_models import Response
 from annotell.input_api.util import ts_to_dt
 
+
 class InputList(Response):
     def __init__(self, id: int, project_id: int, name: str, created: datetime):
         self.id = id

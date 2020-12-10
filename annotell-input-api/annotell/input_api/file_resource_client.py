@@ -2,15 +2,12 @@
 import logging
 import random
 from pathlib import Path
-from typing import List, Mapping, Optional, Union, Dict, BinaryIO
-from uuid import uuid4 as uuid
+from typing import Mapping, Dict, BinaryIO
 
 import requests
 import time
-from annotell.auth.authsession import FaultTolerantAuthRequestSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
 
 from annotell.input_api.util import get_content_type
-from annotell.input_api import model as IAM
 
 log = logging.getLogger(__name__)
 

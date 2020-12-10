@@ -29,8 +29,7 @@ class CalibrationResource(InputAPIResource):
             "externalId": external_id
         })
 
-
-        if (id is None and external_id is None):
+        if id is None and external_id is None:
             return [IAM.CalibrationNoContent.from_json(js) for js in json_resp]
         else:
             return [IAM.CalibrationWithContent.from_json(js) for js in json_resp]

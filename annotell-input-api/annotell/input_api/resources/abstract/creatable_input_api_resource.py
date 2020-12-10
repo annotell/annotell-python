@@ -1,8 +1,9 @@
 from typing import Optional
 
-from annotell.input_api.http_client import HttpClient
 from annotell.input_api.file_resource_client import FileResourceClient
-from annotell.input_api.model import CreateInputJobResponse, FilesToUpload, UploadUrlsResponse
+from annotell.input_api.http_client import HttpClient
+from annotell.input_api.model import (CreateInputJobResponse, FilesToUpload,
+                                      UploadUrlsResponse)
 
 
 class CreateableInputAPIResource(FileResourceClient):
@@ -21,7 +22,7 @@ class CreateableInputAPIResource(FileResourceClient):
         Send input to Input API. if not dryrun is true, only validation is performed
         Otherwise, returns `CreateInputJobResponse`
         """
-        if (input_list_id is not None):
+        if input_list_id is not None:
             input_request['inputListId'] = input_list_id
 
         request_url = self._resolve_request_url(resource_path, project, batch)

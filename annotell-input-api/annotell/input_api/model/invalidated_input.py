@@ -1,5 +1,4 @@
 from typing import List
-from datetime import datetime
 from annotell.input_api.model.abstract.abstract_models import Response
 
 

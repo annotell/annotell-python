@@ -3,6 +3,7 @@ from typing import List, Optional, Union, Dict
 from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import InputAPIResource
 
+
 class AnnotationResource(InputAPIResource):
     def download_annotations(self, internal_ids: List[str], request_id: Optional[int] = None
                              ) -> Dict[str, Union[Dict[int, IAM.ExportAnnotation], IAM.ExportAnnotation]]:
