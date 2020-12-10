@@ -15,7 +15,7 @@ class InvalidatedReasonInput(str, Enum):
 
 
 class InputBatchStatus(str, Enum):
-    CREATED = 'created'
+    PENDING = 'pending'
     OPEN = 'open'
     READY = 'ready'
     INPROGESS = 'in-progress'

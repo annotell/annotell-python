@@ -14,6 +14,7 @@ from annotell.input_api.resources.annotation.annotation import AnnotationResourc
 from annotell.input_api.resources.input.point_cloud import PointCloudResource
 from annotell.input_api.resources.input.point_cloud_images import PointCloudWithImagesResource
 from annotell.input_api.resources.input.images import ImageResource
+from annotell.input_api.resources.input.lidar_camera_sequence import LidarAndImageSequenceResource
 
 DEFAULT_HOST = "https://input.annotell.com"
 
@@ -52,3 +53,5 @@ class InputApiClient:
         self.PointCloud = PointCloudResource(client, file_client)
         self.PointCloudWithImages = PointCloudWithImagesResource(client, file_client)
         self.Images = ImageResource(client, file_client)
+
+        self.LidarAndImageSequence = LidarAndImageSequenceResource(client, file_client)

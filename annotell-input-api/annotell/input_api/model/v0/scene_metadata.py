@@ -1,7 +1,7 @@
 
 from typing import List, Optional
 from annotell.input_api.model.abstract.abstract_models import RequestCall
-from annotell.input_api.model.v1.source_specification import SourceSpecification
+from annotell.input_api.model.v0.source_specification import SourceSpecification
 
 
 class SceneMetaData(RequestCall):

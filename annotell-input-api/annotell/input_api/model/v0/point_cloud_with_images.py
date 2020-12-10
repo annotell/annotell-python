@@ -1,7 +1,7 @@
 from typing import List
 from annotell.input_api.model.abstract.abstract_models import RequestCall
-from annotell.input_api.model.v1.image import Image
-from annotell.input_api.model.v1.point_cloud import PointCloud
+from annotell.input_api.model.v0.image import Image
+from annotell.input_api.model.v0.point_cloud import PointCloud
 
 
 class PointCloudsWithImages(RequestCall):

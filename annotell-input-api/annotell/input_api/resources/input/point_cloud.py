@@ -25,7 +25,7 @@ class PointCloudResource(CreateableInputAPIResource):
             internalId=internal_id,
             metadata=metadata.to_dict())
 
-        return self._post_input_request('pointclouds', js, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
+        return self.post_input_request('pointclouds', js, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
 
     def create(self, folder: Path,
                point_clouds: IAM.PointCloudFiles,
@@ -58,7 +58,7 @@ class PointCloudResource(CreateableInputAPIResource):
 
         files_on_disk = [pc.filename for pc in point_clouds.point_clouds]
 
-        upload_urls_response = self._get_upload_urls(IAM.FilesToUpload(files_on_disk))
+        upload_urls_response = self.get_upload_urls(IAM.FilesToUpload(files_on_disk))
 
         files_in_response = list(upload_urls_response.files_to_url.keys())
         assert set(files_on_disk) == set(files_in_response)
@@ -71,7 +71,7 @@ class PointCloudResource(CreateableInputAPIResource):
                                          input_list_id=input_list_id,
                                          dryrun=True)
         if not dryrun:
-            self.file_resource_client.upload_files(folder, upload_urls_response.files_to_url)
+            self.file_resource_client.upload_files(folder=folder, url_map=upload_urls_response.files_to_url)
 
             create_input_response = self._create_inputs_point_clouds(point_clouds,
                                                                      upload_urls_response.internal_id,

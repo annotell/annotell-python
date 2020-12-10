@@ -16,7 +16,7 @@ class InputBatch(Response):
 
     @staticmethod
     def from_json(js: dict):
-        return InputBatch(int(js["id"]), int(js["projectId"]), js["externalId"], js["title"], js["status"],
+        return InputBatch(int(js["id"]), int(js["projectId"]), js["externalId"], js["title"], InputBatchStatus(js["status"]),
                           ts_to_dt(js["created"]), ts_to_dt(js["created"]))
 
     def __repr__(self):

@@ -25,7 +25,7 @@ class PointCloudWithImagesResource(CreateableInputAPIResource):
             internalId=internal_id,
             metadata=metadata.to_dict())
 
-        return self._post_input_request('pointclouds-with-images', js, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
+        return self.post_input_request('pointclouds-with-images', js, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
 
     def create(self, folder: Path,
                point_clouds_with_images: IAM.PointCloudsWithImages,
@@ -59,7 +59,7 @@ class PointCloudWithImagesResource(CreateableInputAPIResource):
         files_on_disk = [image.filename for image in point_clouds_with_images.images] + \
                         [pc.filename for pc in point_clouds_with_images.point_clouds]
 
-        upload_urls_response = self._get_upload_urls(IAM.FilesToUpload(files_on_disk))
+        upload_urls_response = self.get_upload_urls(IAM.FilesToUpload(files_on_disk))
 
         files_in_response = list(upload_urls_response.files_to_url.keys())
         assert set(files_on_disk) == set(files_in_response)
@@ -75,7 +75,7 @@ class PointCloudWithImagesResource(CreateableInputAPIResource):
                                                     input_list_id=input_list_id,
                                                     dryrun=True)
         if not dryrun:
-            self.file_resource_client.upload_files(folder, upload_urls_response.files_to_url)
+            self.file_resource_client.upload_files(folder=folder, url_map=upload_urls_response.files_to_url)
 
             create_input_response = self._create_inputs_point_cloud_with_images(point_clouds_with_images,
                                                                                 upload_urls_response.internal_id,

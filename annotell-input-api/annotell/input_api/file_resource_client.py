@@ -66,10 +66,15 @@ class FileResourceClient:
         except Exception as e:
             raise e
 
-    def upload_files(self, folder: Path, url_map: Mapping[str, str]) -> None:
-        """Upload all files to cloud storage"""
+    def upload_files(self, url_map: Mapping[str, str], folder: Optional[Path] = None) -> None:
+        """
+        Upload all files to cloud storage
+
+        :param url_map: map between filename and GCS signed URL
+        :param folder: Optional base path, will join folder and each filename in map if provided
+        """
         for (filename, upload_url) in url_map.items():
-            file_path = folder.joinpath(filename).expanduser()
+            file_path = folder.joinpath(filename).expanduser() if folder else Path(filename).expanduser()
             with file_path.open('rb') as file:
                 content_type = get_content_type(filename)
                 headers = {"Content-Type": content_type}

@@ -1,14 +1,24 @@
 """Utility functions for Input API """
 
-from datetime import datetime
 import mimetypes
+from collections.abc import Mapping
+from datetime import datetime
+
 import dateutil.parser
+
 
 def ts_to_dt(date_string: str) -> datetime:
     """
     Parse string datetime into datetime
     """
     return dateutil.parser.parse(date_string)
+
+
+def filter_none(js: dict) -> dict:
+    if isinstance(js, Mapping):
+        return {k: filter_none(v) for k, v in js.items() if v is not None}
+    else:
+        return js
 
 
 def get_content_type(filename: str) -> str:

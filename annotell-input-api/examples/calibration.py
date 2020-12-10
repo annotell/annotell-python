@@ -1,6 +1,6 @@
 from typing import List
 
-import annotell.input_api.input_api_model as IAM
+import annotell.input_api.model as IAM
 import annotell.input_api.model.calibration as Calibration
 from annotell.input_api.input_api_client import InputApiClient
 
@@ -50,4 +50,4 @@ if __name__ == "__main__":
     calibration = create_calibration_spec("2020-06-16", ["lidar"], ["RFC01"])
 
     # Create the calibration using the Input API client
-    created_calibration = client.create_calibration_data(calibration_spec=calibration)
+    created_calibration = client.calibration.create_calibration_data(calibration_spec=calibration)

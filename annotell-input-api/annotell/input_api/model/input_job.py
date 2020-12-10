@@ -17,7 +17,7 @@ class InputJob(Response):
     @staticmethod
     def from_json(js: dict):
         return InputJob(int(js["id"]), js["jobId"], js["externalId"], js["filename"],
-                        bool(js["status"]), ts_to_dt(js["added"]), js.get("errorMessage"))
+                        js["status"], ts_to_dt(js["added"]), js.get("errorMessage"))
 
     def __repr__(self):
         return f"<InputJob(" + \

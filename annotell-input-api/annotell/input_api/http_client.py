@@ -1,13 +1,16 @@
 """Client for communicating with the Annotell platform."""
 import logging
 import random
+import time
+from collections.abc import Mapping
 from pathlib import Path
-from typing import List, Mapping, Optional, Union, Dict, BinaryIO
+from typing import BinaryIO, Dict, List, Mapping, Optional, Union
 from uuid import uuid4 as uuid
 
 import requests
-import time
-from annotell.auth.authsession import FaultTolerantAuthRequestSession, DEFAULT_HOST as DEFAULT_AUTH_HOST
+from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST
+from annotell.auth.authsession import FaultTolerantAuthRequestSession
+from annotell.input_api.util import filter_none
 
 DEFAULT_HOST = "https://input.annotell.com"
 
@@ -69,31 +72,33 @@ class HttpClient:
 
     @staticmethod
     def _unwrap_enveloped_json(js: dict) -> dict:
-        if js.get(ENVELOPED_JSON_TAG) is not None:
+        if isinstance(js, list):
+            return js    
+        elif js is not None and js.get(ENVELOPED_JSON_TAG) is not None:
             return js[ENVELOPED_JSON_TAG]
         return js
 
-    def get(self, endpoint, **kwargs) -> requests.Response:
-        r"""Sends a GET request. Returns :class:`Response` object.
+    def get(self, endpoint, **kwargs) -> dict:
+        r"""Sends a GET request. Returns :class:`dict` object.
 
         :param endpoint: endpoint to be appended to `client.host`.
         :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
+        :rtype: dict
         """
 
         kwargs.setdefault("headers", self.headers)
         resp = self.session.get(f"{self.host}/{endpoint}", **kwargs)
         return self._unwrap_enveloped_json(self._raise_on_error(resp).json())
 
-    def post(self, endpoint, data=None, json=None, dryrun=False, **kwargs) -> requests.Response:
-        r"""Sends a POST request. Returns :class:`Response` object.
+    def post(self, endpoint, data=None, json=None, dryrun=False, **kwargs) -> dict:
+        r"""Sends a POST request. Returns :class:`dict` object.
 
         :param endpoint: endpoint to be appended to `client.host`.
         :param data: (optional) Dictionary, list of tuples, bytes, or file-like
             object to send in the body of the :class:`Request`.
         :param json: (optional) json to send in the body of the :class:`Request`.
         :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
+        :rtype: dict
         """
 
         if dryrun:
@@ -101,19 +106,19 @@ class HttpClient:
         else:
             headers = {**self.headers}
         kwargs.setdefault("headers", headers)
-        
-        resp = self.session.post(f"{self.host}/{endpoint}", data, json, **kwargs)
+
+        resp = self.session.post(f"{self.host}/{endpoint}", data, filter_none(json), **kwargs)
         return self._unwrap_enveloped_json(self._raise_on_error(resp).json())
 
-    def put(self, endpoint, data, **kwargs) -> requests.Response:
-        r"""Sends a PUT request. Returns :class:`Response` object.
+    def put(self, endpoint, data, **kwargs) -> dict:
+        r"""Sends a PUT request. Returns :class:`dict` object.
 
         :param endpoint: endpoint to be appended to `client.host`.
         :param data: (optional) Dictionary, list of tuples, bytes, or file-like
             object to send in the body of the :class:`Request`.
         :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
+        :rtype: dict
         """
         kwargs.setdefault("headers", self.headers)
-        resp = self.session.put(f"{self.host}/{endpoint}", data, **kwargs)
+        resp = self.session.put(f"{self.host}/{endpoint}", filter_none(data), **kwargs)
         return self._unwrap_enveloped_json(self._raise_on_error(resp).json())

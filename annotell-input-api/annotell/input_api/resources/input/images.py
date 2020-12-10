@@ -35,7 +35,7 @@ class ImageResource(CreateableInputAPIResource):
             image.set_images_dimensions(folder)
 
         filenames = [image.filename for image in images_files.images]
-        upload_url_resp = self._get_upload_urls(IAM.FilesToUpload(filenames))
+        upload_url_resp = self.get_upload_urls(IAM.FilesToUpload(filenames))
 
         internal_id = upload_url_resp.internal_id
         self._create_images_input_job(images_files=images_files,
@@ -50,7 +50,7 @@ class ImageResource(CreateableInputAPIResource):
         assert set(filenames) == set(files_in_response)
 
         if not dryrun:
-            self.file_resource_client.upload_files(folder, upload_url_resp.files_to_url)
+            self.file_resource_client.upload_files(folder=folder, url_map=upload_url_resp.files_to_url)
             input_job_created_message = self._create_images_input_job(images_files=images_files,
                                                                       metadata=metadata,
                                                                       internal_id=internal_id,
@@ -83,4 +83,4 @@ class ImageResource(CreateableInputAPIResource):
                                      metadata=metadata.to_dict(),
                                      internalId=internal_id)
 
-        return self._post_input_request('images', create_input_job_json, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)
+        return self.post_input_request('images', create_input_job_json, project=project, batch=batch, input_list_id=input_list_id, dryrun=dryrun)

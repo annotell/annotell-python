@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 
-camera_source_default = "CAM"
+lidar_source_default = "lidar"
 
 
 @dataclass
-class ImageFrame:
+class LidarFrame:
     filename: str
     resource_id: str
-    sensor_name: str = camera_source_default
+    sensor_name: str = lidar_source_default
 
     def to_dict(self) -> dict:
         return dict(filename=self.filename,
