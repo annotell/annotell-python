@@ -2,9 +2,33 @@ import logging
 from typing import Optional
 
 from annotell.input_api import model as IAM
+from annotell.input_api.util import get_resource_id
 from annotell.input_api.resources.abstract import CreateableInputAPIResource
 
+log = logging.getLogger(__name__)
+
+
 class LidarAndImageSequenceResource(CreateableInputAPIResource):
+
+    @staticmethod
+    def _set_resource_id(lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence,
+                         upload_urls_response: IAM.UploadUrlsResponse):
+
+        resources = lidars_and_cameras_sequence.get_local_resources()
+        for resource in resources:
+            if resource.resource_id is None:
+                resource.resource_id = get_resource_id(upload_urls_response.files_to_url[resource.filename])
+
+    def _get_files_to_upload(self, lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence) -> IAM.UploadUrlsResponse:
+        resources = lidars_and_cameras_sequence.get_local_resources()
+        files_to_upload = list(map(lambda res: res.filename, resources))
+        upload_urls_response = self.get_upload_urls(IAM.FilesToUpload(files_to_upload))
+
+        files_in_response = list(upload_urls_response.files_to_url.keys())
+        assert set(files_to_upload) == set(files_in_response)
+
+        return upload_urls_response
+
     def create(self,
                lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence,
                project: Optional[str] = None,
@@ -31,10 +55,10 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
         conversion was successful please see the method `get_input_jobs_status`.
         """
 
-        # We need to get a job-id for the input
-        files_on_disk = lidars_and_cameras_sequence.get_local_resources()
-        upload_urls_response = self.get_upload_urls(IAM.FilesToUpload(files_on_disk))
+        upload_urls_response = self._get_files_to_upload(lidars_and_cameras_sequence)
+        self._set_resource_id(lidars_and_cameras_sequence, upload_urls_response)
 
+        # We need to set job-id from the response
         payload = lidars_and_cameras_sequence.to_dict()
         payload['internalId'] = upload_urls_response.internal_id
 
@@ -46,9 +70,6 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
 
         if dryrun:
             return
-
-        files_in_response = list(upload_urls_response.files_to_url.keys())
-        assert set(files_on_disk) == set(files_in_response)
 
         # for image in point_clouds_with_images.images:
         #     image.set_images_dimensions(folder)

@@ -29,7 +29,7 @@ class CreateableInputAPIResource(FileResourceClient):
         if input_list_id is not None:
             input_request['inputListId'] = input_list_id
         
-        print("POST:ing to %s input %s", resource_path, input_request)
+        log.debug("POST:ing to %s input %s", resource_path, input_request)
 
         request_url = self._resolve_request_url(resource_path, project, batch)
         json_resp = self.client.post(request_url, json=input_request)

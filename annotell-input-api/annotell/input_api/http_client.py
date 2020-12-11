@@ -4,8 +4,9 @@ import logging
 import requests
 from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST
 from annotell.auth.authsession import FaultTolerantAuthRequestSession
-
 from annotell.input_api.util import filter_none
+
+from . import __version__
 
 DEFAULT_HOST = "https://input.annotell.com"
 
@@ -36,7 +37,8 @@ class HttpClient:
         self._auth_req_session = FaultTolerantAuthRequestSession(host=auth_host, auth=auth)
         self.headers = {
             "Accept-Encoding": "gzip",
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "User-Agent": "annotell-input-api/%s" % __version__
         }
         self.dryrun_header = {"X-Dryrun": ""}
 
