@@ -3,11 +3,14 @@
 import mimetypes
 from collections.abc import Mapping
 from datetime import datetime
+from pathlib import Path
+from PIL import Image as PILImage
 
 import dateutil.parser
 from urllib3.util import Url, parse_url
 
 GCS_SCHEME = "gs"
+
 
 def ts_to_dt(date_string: str) -> datetime:
     """
@@ -33,7 +36,15 @@ def get_content_type(filename: str) -> str:
 
     return content_type
 
+
 def get_resource_id(signed_url: str) -> str:
     url = parse_url(signed_url)
     resource_id = Url(scheme=GCS_SCHEME, path=url.path)
-    return str(resource_id)
+    return str(resource_id).replace("///", "//")
+
+
+def get_image_dimensions(image_path: str) -> dict:
+    fi = Path(image_path).expanduser()
+    with PILImage.open(fi) as im:
+        width, height = im.size
+        return {"width": width, "height": height}

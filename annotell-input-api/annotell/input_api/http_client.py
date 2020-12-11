@@ -6,7 +6,7 @@ from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST
 from annotell.auth.authsession import FaultTolerantAuthRequestSession
 from annotell.input_api.util import filter_none
 
-from . import __version__
+from annotell.input_api import __version__
 
 DEFAULT_HOST = "https://input.annotell.com"
 

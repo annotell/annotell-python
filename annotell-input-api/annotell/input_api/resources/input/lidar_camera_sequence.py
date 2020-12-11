@@ -2,13 +2,15 @@ import logging
 from typing import Optional
 
 from annotell.input_api import model as IAM
-from annotell.input_api.util import get_resource_id
+from annotell.input_api.util import get_resource_id, get_image_dimensions
 from annotell.input_api.resources.abstract import CreateableInputAPIResource
 
 log = logging.getLogger(__name__)
 
 
 class LidarAndImageSequenceResource(CreateableInputAPIResource):
+
+    path = 'lidars-and-cameras-sequence'
 
     @staticmethod
     def _set_resource_id(lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence,
@@ -18,6 +20,18 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
         for resource in resources:
             if resource.resource_id is None:
                 resource.resource_id = get_resource_id(upload_urls_response.files_to_url[resource.filename])
+
+    @staticmethod
+    def _set_sensor_settings(lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence):
+
+        first_frame = lidars_and_cameras_sequence.frames[0]
+        sensor_settings = {
+            image_frame.sensor_name: get_image_dimensions(image_frame.filename) for image_frame in first_frame.image_frames
+        }
+        if lidars_and_cameras_sequence.sensor_specification is None:
+            lidars_and_cameras_sequence.sensor_specification = IAM.SensorSpecification(sensor_settings=sensor_settings)
+        elif lidars_and_cameras_sequence.sensor_specification.sensor_settings is None:
+            lidars_and_cameras_sequence.sensor_specification.sensor_settings = sensor_settings
 
     def _get_files_to_upload(self, lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence) -> IAM.UploadUrlsResponse:
         resources = lidars_and_cameras_sequence.get_local_resources()
@@ -57,12 +71,13 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
 
         upload_urls_response = self._get_files_to_upload(lidars_and_cameras_sequence)
         self._set_resource_id(lidars_and_cameras_sequence, upload_urls_response)
+        self._set_sensor_settings(lidars_and_cameras_sequence)
 
         # We need to set job-id from the response
         payload = lidars_and_cameras_sequence.to_dict()
         payload['internalId'] = upload_urls_response.internal_id
 
-        self.post_input_request('lidar-camera-seq', payload,
+        self.post_input_request(self.path, payload,
                                 project=project,
                                 batch=batch,
                                 input_list_id=input_list_id,
@@ -71,13 +86,10 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
         if dryrun:
             return
 
-        # for image in point_clouds_with_images.images:
-        #     image.set_images_dimensions(folder)
-
         self.file_resource_client.upload_files(upload_urls_response.files_to_url)
 
         create_input_response = self.post_input_request(
-            'lidar-camera-seq',
+            self.path,
             payload,
             project=project,
             batch=batch,

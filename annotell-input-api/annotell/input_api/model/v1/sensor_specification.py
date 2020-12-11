@@ -1,20 +1,24 @@
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Mapping
+from dataclasses import dataclass
 
-from annotell.input_api.model.abstract.abstract_models import RequestCall
+from annotell.input_api.util import filter_none
 
 
-class SensorSpecification(RequestCall):
-    def __init__(self, source_to_pretty_name: Optional[Dict[str, str]] = None,
-                 source_order: Optional[List[str]] = None):
+@dataclass
+class CameraSettings:
+    width: int
+    height: int
 
-        self.source_to_pretty_name = source_to_pretty_name
-        self.source_order = source_order
+
+@dataclass
+class SensorSpecification:
+    sensor_to_pretty_name: Optional[Dict[str, str]] = None
+    sensor_order: Optional[List[str]] = None
+    sensor_settings: Optional[Mapping[str, CameraSettings]] = None
 
     def to_dict(self):
-        as_dict = {}
-        if self.source_to_pretty_name is not None:
-            as_dict['sourceToPrettyName'] = self.source_to_pretty_name
-        if self.source_order is not None:
-            as_dict['sourceOrder'] = self.source_order
-
-        return as_dict
+        return filter_none({
+            "sensorToPrettyName": self.sensor_to_pretty_name,
+            "sensorOrder": self.sensor_order,
+            "sensorSettings": self.sensor_settings
+        })

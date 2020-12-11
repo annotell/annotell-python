@@ -20,7 +20,7 @@ class LidarsAndCamerasSequence:
 
     def to_dict(self) -> dict:
         return dict(frames=[frame.to_dict() for frame in self.frames],
-                    sensorSpecification=self.sensor_specification,
+                    sensorSpecification=self.sensor_specification.to_dict(),
                     externalId=self.external_id,
                     startTs=self.start_ts,
                     # preAnnotation = self.preAnnotation,
