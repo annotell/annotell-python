@@ -17,18 +17,17 @@ lidar_and_camera_seq = IAM.LidarsAndCamerasSequence(
     external_id="input1",
     frames=[
         IAM.Frame("1", 0, lidar_frames=[
-            IAM.LidarFrame("lidar_RFL01.pcd", "lidar.pcd", "RFL01"),
-            IAM.LidarFrame("lidar_RFL02.pcd", "lidar.pcd", "RFL02"),
-            IAM.LidarFrame("lidar_RFL03.pcd", "lidar.pcd", "RFL03")
+            IAM.LidarFrame("lidar_RFL01.pcd", sensor_name= "RFL01"),
+            IAM.LidarFrame("lidar_RFL02.pcd", sensor_name= "RFL02"),
+            IAM.LidarFrame("lidar_RFL03.pcd", sensor_name= "RFL03")
         ],
             image_frames=[
-            IAM.ImageFrame("lidar_RFC01.png", "lidar.png", "RFC01"),
-            IAM.ImageFrame("lidar_RFC02.png", "lidar.png", "RFC02"),
-            IAM.ImageFrame("lidar_RFC03.png", "lidar.png", "RFC03")
+            IAM.ImageFrame("lidar_RFC01.png", sensor_name= "RFC01"),
+            IAM.ImageFrame("lidar_RFC02.png", sensor_name= "RFC02"),
+            IAM.ImageFrame("lidar_RFC03.png", sensor_name= "RFC03")
         ]),
     ],
     calibration_id=created_calibration.id,
-    internal_id="123"
 )
 
 

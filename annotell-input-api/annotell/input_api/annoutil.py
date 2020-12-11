@@ -82,8 +82,7 @@ def projects(project_id, get_requests, get_input_lists, get_invalidated_inputs):
 @click.argument("internal_ids", nargs=-1, required=True)
 @click.option("--get-export-status", is_flag=True)
 @click.option("--get-upload-status", is_flag=True)
-@click.option("--get-datas", is_flag=True)
-def inputs(internal_ids, get_export_status, get_upload_status, get_datas):
+def inputs(internal_ids, get_export_status, get_upload_status):
     print()
     if internal_ids and get_export_status:
         status_dict = client.annotation.get_input_status(list(internal_ids))
@@ -99,40 +98,18 @@ def inputs(internal_ids, get_export_status, get_upload_status, get_datas):
         headers = ["id", "internal_id", "external_id", "filename", "status", "added", "error_message"]
         tab = _get_table(list_of_jobs, headers, "UPLOAD STATUS FOR INPUTS")
         print(tab)
-    elif internal_ids and get_datas:
-        dict_of_datas = client.data.get_datas_for_inputs_by_internal_ids(internal_ids)
-        headers = ["input", "datas"]
-        padded_body = []
-        for (input_obj, datas) in dict_of_datas.items():
-            padded_body.append([input_obj, datas[0]])
-            for data in datas[1:]:
-                padded_body.append(["", data])
-        tab = _tabulate(padded_body, headers, "DATAS IN INPUTS")
-        print(tab)
 
 
 @click.command(name="inputs-externalid")
 @click.argument("external_ids", nargs=-1, required=True)
 @click.option("--get-upload-status", is_flag=True)
-@click.option("--get-datas", is_flag=True)
-def inputs_externalid(external_ids, get_upload_status, get_datas):
+def inputs_externalid(external_ids, get_upload_status):
     print()
     if external_ids and get_upload_status:
         headers = ["id", "internal_id", "external_id", "filename", "status", "added", "error_message"]
         list_of_jobs = client.input.get_input_jobs_status(external_ids=list(external_ids))
         tab = _get_table(list_of_jobs, headers, title="UPLOAD STATUS FOR INPUTS")
         print(tab)
-    elif external_ids and get_datas:
-        dict_of_datas = client.data.get_datas_for_inputs_by_external_ids(external_ids)
-        headers = ["input", "datas"]
-        padded_body = []
-        for (input_obj, datas) in dict_of_datas.items():
-            padded_body.append([input_obj, datas[0]])
-            for data in datas[1:]:
-                padded_body.append(["", data])
-        tab = _tabulate(padded_body, headers, "DATAS IN INPUTS")
-        print(tab)
-
     else:
         to_internal_dict = client.input.get_internal_ids_for_external_ids(list(external_ids))
         body = []

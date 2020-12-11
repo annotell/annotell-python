@@ -10,7 +10,6 @@ class LidarsAndCamerasSequence:
     external_id: str
     frames: List[Frame]
     calibration_id: int
-    internal_id: str
     start_ts: Optional[int] = None
     sensor_specification: Optional[SensorSpecification] = None
     """
@@ -23,15 +22,15 @@ class LidarsAndCamerasSequence:
         return dict(frames=[frame.to_dict() for frame in self.frames],
                     sensorSpecification=self.sensor_specification,
                     externalId=self.external_id,
-                    internalId=self.internal_id,
                     startTs=self.start_ts,
                     # preAnnotation = self.preAnnotation,
                     calibrationId=self.calibration_id)
 
-    def resources(self) -> Set[str]:
+    def get_local_resources(self) -> Set[str]:
         resources = []
         for frame in self.frames:
             for resource in (frame.lidar_frames + frame.image_frames + frame.video_frames):
-                resources.append(resource.filename)
+                if resource.resource_id is None:
+                    resources.append(resource.filename)
 
-        return set(resources)
+        return list(set(resources))

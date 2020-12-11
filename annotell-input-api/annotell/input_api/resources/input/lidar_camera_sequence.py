@@ -4,9 +4,6 @@ from typing import Optional
 from annotell.input_api import model as IAM
 from annotell.input_api.resources.abstract import CreateableInputAPIResource
 
-log = logging.getLogger(__name__)
-
-
 class LidarAndImageSequenceResource(CreateableInputAPIResource):
     def create(self,
                lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence,
@@ -34,7 +31,14 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
         conversion was successful please see the method `get_input_jobs_status`.
         """
 
-        self.post_input_request('lidar-camera-seq', lidars_and_cameras_sequence.to_dict(),
+        # We need to get a job-id for the input
+        files_on_disk = lidars_and_cameras_sequence.get_local_resources()
+        upload_urls_response = self.get_upload_urls(IAM.FilesToUpload(files_on_disk))
+
+        payload = lidars_and_cameras_sequence.to_dict()
+        payload['internalId'] = upload_urls_response.internal_id
+
+        self.post_input_request('lidar-camera-seq', payload,
                                 project=project,
                                 batch=batch,
                                 input_list_id=input_list_id,
@@ -42,9 +46,6 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
 
         if dryrun:
             return
-
-        files_on_disk = lidars_and_cameras_sequence.resources()
-        upload_urls_response = self.get_upload_urls(IAM.FilesToUpload(files_on_disk))
 
         files_in_response = list(upload_urls_response.files_to_url.keys())
         assert set(files_on_disk) == set(files_in_response)
@@ -56,7 +57,7 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
 
         create_input_response = self.post_input_request(
             'lidar-camera-seq',
-            lidars_and_cameras_sequence.to_dict(),
+            payload,
             project=project,
             batch=batch,
             input_list_id=input_list_id,

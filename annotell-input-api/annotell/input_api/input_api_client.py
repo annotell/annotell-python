@@ -7,7 +7,6 @@ from annotell.input_api.file_resource_client import FileResourceClient
 from annotell.input_api.http_client import HttpClient
 from annotell.input_api.resources.annotation.annotation import AnnotationResource
 from annotell.input_api.resources.calibration.calibration import CalibrationResource
-from annotell.input_api.resources.input.data import DataResource
 from annotell.input_api.resources.input.images import ImageResource
 from annotell.input_api.resources.input.input import InputResource
 from annotell.input_api.resources.input.lidar_camera_sequence import LidarAndImageSequenceResource
@@ -50,7 +49,6 @@ class InputApiClient:
         self.calibration = CalibrationResource(client)
         self.project = ProjectResource(client)
         self.annotation = AnnotationResource(client)
-        self.data = DataResource(client)
         self.input = InputResource(client)
         self.request = RequestResource(client)
 
