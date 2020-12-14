@@ -2,7 +2,7 @@ module.exports = {
   title: "Annotell",
   tagline: "API Documentation of Annotell Platform APIs",
   url: "https://annotell.com",
-  baseUrl: "/",
+  baseUrl: "/annotell-python/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
