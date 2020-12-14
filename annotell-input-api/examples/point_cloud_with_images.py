@@ -4,7 +4,6 @@ from pathlib import Path
 
 import annotell.input_api.input_api_client as IAC
 import annotell.input_api.model as IAM
-import annotell.input_api.model.calibration as Calibration
 
 from calibration import create_calibration_spec
 

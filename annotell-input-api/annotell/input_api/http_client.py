@@ -2,27 +2,23 @@
 import logging
 
 import requests
-from annotell.auth.authsession import DEFAULT_HOST as DEFAULT_AUTH_HOST
 from annotell.auth.authsession import FaultTolerantAuthRequestSession
 from annotell.input_api.util import filter_none
 
 from annotell.input_api import __version__
 
-DEFAULT_HOST = "https://input.annotell.com"
-
 log = logging.getLogger(__name__)
 
-RETRYABLE_STATUS_CODES = [408, 429, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 598, 599]
 ENVELOPED_JSON_TAG = "data"
 
 
 class HttpClient:
     """Http Client dealing with auth and communication with API."""
 
-    def __init__(self, *,
-                 auth=None,
-                 host: str = DEFAULT_HOST,
-                 auth_host: str = DEFAULT_AUTH_HOST,
+    def __init__(self,
+                 auth,
+                 host: str,
+                 auth_host: str,
                  client_organization_id: int = None):
         """
         :param auth: auth credentials, see https://github.com/annotell/annotell-python/tree/master/annotell-auth

@@ -1,4 +1,3 @@
-from annotell.apiclients.input_api_client import create_input_api_client
 from annotell.input_api.input_api_client import InputApiClient
 from annotell.input_api import model as IAM
 from pathlib import Path
@@ -16,8 +15,7 @@ folder = Path("/home/user_name/example_path")
 project = "0edb8f59-a8ea-4c9b-aebb-a3caaa6f2ba3"
 
 # Instantiating Input API Client
-# client = InputApiClient()
-client = create_input_api_client(env="development")
+client = InputApiClient()
 
 client.point_cloud.create(folder=folder,
                           point_clouds=pointclouds,
