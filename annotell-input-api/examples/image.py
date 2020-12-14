@@ -18,7 +18,7 @@ project = "<project-identifier>"
 # Instantiating Input API Client
 client = InputApiClient()
 
-client.Images.create(folder=folder,
+client.images.create(folder=folder,
                      images_files=images_files,
                      project=project,
                      dryrun=True)  # Dry run will not generate inputs
