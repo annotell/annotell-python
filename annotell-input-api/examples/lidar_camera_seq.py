@@ -20,14 +20,17 @@ created_calibration = client.calibration.create_calibration_data(calibration_spe
 lidar_and_camera_seq = IAM.LidarsAndCamerasSequence(
     external_id="input1",
     frames=[
-        IAM.Frame("1", 0, lidar_frames=[
-            IAM.LidarFrame("~/Downloads/lidar_RFL01.pcd", sensor_name="RFL01"),
-        ],
+        IAM.Frame(
+            frame_id="1",
+            relative_timestamp=0,
+            lidar_frames=[
+                IAM.LidarFrame("~/Downloads/lidar_RFL01.pcd", sensor_name="RFL01"),
+            ],
             image_frames=[
-            IAM.ImageFrame("~/Downloads/img_RFC01.jpg", sensor_name="RFC01"),
-            IAM.ImageFrame("~/Downloads/img_RFC01.jpg", sensor_name="RFC02"),
-            IAM.ImageFrame("~/Downloads/img_RFC01.jpg", sensor_name="RFC03")
-        ]),
+                IAM.ImageFrame("~/Downloads/img_RFC01.jpg", sensor_name="RFC01"),
+                IAM.ImageFrame("~/Downloads/img_RFC01.jpg", sensor_name="RFC02"),
+                IAM.ImageFrame("~/Downloads/img_RFC01.jpg", sensor_name="RFC03")
+            ]),
     ],
     calibration_id=created_calibration.id,
 )
