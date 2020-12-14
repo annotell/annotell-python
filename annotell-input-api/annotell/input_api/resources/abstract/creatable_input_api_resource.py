@@ -32,7 +32,7 @@ class CreateableInputAPIResource(FileResourceClient):
         log.debug("POST:ing to %s input %s", resource_path, input_request)
 
         request_url = self._resolve_request_url(resource_path, project, batch)
-        json_resp = self.client.post(request_url, json=input_request)
+        json_resp = self.client.post(request_url, json=input_request, dryrun=dryrun)
         if not dryrun:
             return CreateInputJobResponse.from_json(json_resp)
 
