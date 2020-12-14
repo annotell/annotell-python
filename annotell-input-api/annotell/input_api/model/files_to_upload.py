@@ -1,14 +1,13 @@
+from dataclasses import dataclass
 from typing import List
-from annotell.input_api.model.abstract.abstract_models import RequestCall
 
-
-class FilesToUpload(RequestCall):
+@dataclass
+class FilesToUpload:
     """
     Used when retrieving upload urls from input api
     """
 
-    def __init__(self, files: List[str]):
-        self.files = files
-
+    files_to_upload: List[str]
+    
     def to_dict(self):
-        return dict(filesToUpload=self.files)
+        return dict(filesToUpload=self.files_to_upload)
