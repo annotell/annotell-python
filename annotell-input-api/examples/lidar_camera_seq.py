@@ -41,6 +41,6 @@ project = "<project-identifier>"
 
 
 # Add input
-client.LidarAndImageSequence.create(lidar_and_camera_seq,
-                                    project=project,
-                                    dryrun=True)
+client.lidar_and_image_sequence.create(lidar_and_camera_seq,
+                                       project=project,
+                                       dryrun=True)

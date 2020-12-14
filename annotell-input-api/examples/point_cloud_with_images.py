@@ -31,7 +31,7 @@ metadata = IAM.CalibratedSceneMetaData(external_id=scene_external_id,
 project = "<project-identifier>"
 
 # Add input
-client.PointCloudWithImages.create(folder=folder,
-                                   point_clouds_with_images=point_clouds_with_images,
-                                   metadata=metadata,
-                                   project=project)
+client.point_cloud_with_images.create(folder=folder,
+                                      point_clouds_with_images=point_clouds_with_images,
+                                      metadata=metadata,
+                                      project=project)
