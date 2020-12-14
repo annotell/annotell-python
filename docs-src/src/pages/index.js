@@ -49,7 +49,7 @@ function Home() {
     <Layout title={`${siteConfig.title} SDK`} description="Annotell API Docs">
       <header
         className={clsx("hero hero--primary", styles.heroBanner)}
-        style={{ backgroundImage: useBaseUrl("img/background.png") }}
+        style={{ backgroundImage: `url(${useBaseUrl("img/background.png")})` }}
       >
         <div className="container">
           <h1 className="hero__title">{siteConfig.title}</h1>

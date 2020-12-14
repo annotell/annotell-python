@@ -6,7 +6,7 @@ module.exports = {
       "input-api/project",
       {"Inputs": [
         "input-api/input",
-        "input-api/inputs/image",
+        "input-api/inputs/images",
         "input-api/inputs/point_cloud"
       ]},
       "input-api/calibration",
