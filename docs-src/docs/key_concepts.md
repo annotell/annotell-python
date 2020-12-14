@@ -1,6 +1,10 @@
-# Key Concepts
+---
+title: Key Concepts
+description: Annotell Platform Concepts
+slug: /
+---
 
-![Annotell](images/annotell-domain.png)
+![Annotell](/img/annotell-domain.png)
 
 ## Project
 
@@ -76,6 +80,14 @@ Based on client needs, custom export formats can be accommodated by Annotell Pro
 
 The Annotell judgement format is closely linked to the Annotell task definition. The task definition determines what we are expected to save, where properties are stored and what datatype(s) the properties will be. The Annotell judgement format is saved as a JSON file and will be described according to the data types of JSON.
 
+The Annotell judgement is an object with the following top keys:
+
+| Property        | Description                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| shapes          | contains information needed for drawing the shapes. Follows GeoJson standard for serialising geometric shapes, please see [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) for more information. |
+| shapeProperties | contains the property values for shapes in shapes.                                                                                                                                    |
+| properties      | contains the property values for what we want to know about the input, the inputProperties of the task definition.                                                                    |
+
 ```json
 {
   "shapes": {}
@@ -83,9 +95,3 @@ The Annotell judgement format is closely linked to the Annotell task definition.
   "properties": {}
 }
 ```
-
-The Annotell judgement is an object with the following top keys:
-
-- shapes: contains information needed for drawing the shapes. Follows GeoJson standard for serialising geometric shapes, please see https://en.wikipedia.org/wiki/GeoJSON for more information.
-- shapeProperties: contains the property values for shapes in shapes.
-- properties: contains the property values for what we want to know about the input, the inputProperties of the task definition.

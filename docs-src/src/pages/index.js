@@ -12,8 +12,7 @@ const features = [
     imageUrl: 'https://www.annotell.com/images/uploads/laptop-annotation.png',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Create inputs using our Input API, allowing you to add 2D inputs as well as 2D and 3D LiDAR sequence inputs.
       </>
     ),
   },
@@ -22,8 +21,7 @@ const features = [
     imageUrl: 'https://www.annotell.com/images/uploads/laptop-data_browsing.png',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Track progress of annotations and download annotations via our APIs
       </>
     ),
   },
@@ -68,7 +66,7 @@ function Home() {
         </div>
       </header>
       <main>
-        {features && features.length > 0 && (
+        {/* {features && features.length > 0 && (
           <section className={styles.features}>
             <div className="container">
               <div className="row">
@@ -78,7 +76,7 @@ function Home() {
               </div>
             </div>
           </section>
-        )}
+        )} */}
       </main>
     </Layout>
   );

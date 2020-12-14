@@ -13,6 +13,7 @@ module.exports = {
       logo: {
         alt: "Annotell Logo",
         src: "img/annotell-logo.svg",
+        srcDark: "img/annotell-logo-white.svg",
       },
       items: [
         {
@@ -37,7 +38,7 @@ module.exports = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/annotell/annotell-python/edit/gh-pages/annotell-sdk/",
+            "https://github.com/annotell/annotell-python/edit/gh-pages/docs-src/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
