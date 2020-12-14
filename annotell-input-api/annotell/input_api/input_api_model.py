@@ -361,7 +361,7 @@ class InputBatch(Response):
     @staticmethod
     def from_json(js: dict):
         return InputBatch(int(js["id"]), int(js["projectId"]), js["externalId"], js["title"], js["status"],
-                          ts_to_dt(js["created"]), ts_to_dt(js["created"]))
+                          ts_to_dt(js["created"]), ts_to_dt(js["updated"]))
 
     def __repr__(self):
         return f"<InputBatch(" + \
@@ -523,8 +523,8 @@ class Input(Response):
             js.get("internalId"),
             js.get("externalId"),
             js["inputType"],
-            js["invalidated"],
-            js["invalidatedReason"]
+            js.get("invalidated"),
+            js.get("invalidatedReason")
         )
 
     def __repr__(self):
