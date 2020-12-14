@@ -11,6 +11,8 @@ Supported point cloud formats are `.csv`, `.pcd` or `.las`
 Create representation of images and point clouds + source specification images
 
 ```python
+import annotell.input_api.model as IAM
+
 image1 = IAM.Image(filename="filename_image1.jpg", source="RFC01")
 pc = IAM.PointCloud(filename="filename_pc.pcd")
 point_clouds_with_images = IAM.PointCloudsWithImages(images=[image1],
@@ -39,7 +41,6 @@ Add Scene metadata
 scene_external_id = "Scene X collection 2020-06-16"
 calibration_id = 100
 metadata = IAM.CalibratedSceneMetaData(external_id=scene_external_id,
-                                       source_specification=source_specification,
                                        calibration_id=calibration_id)
 ```
 
@@ -53,7 +54,7 @@ See calibration section for more information on how to retrieve a calibration_id
 
 ### Creating the input
 
-> Create input
+Now everything required is prepared in order to use `create_inputs_point_cloud_with_images`.
 
 ```python
 client.create_inputs_point_cloud_with_images(folder=folder,
@@ -62,7 +63,6 @@ client.create_inputs_point_cloud_with_images(folder=folder,
                                              project="my_project")
 ```
 
-Now everything required is prepared in order to use `create_inputs_point_cloud_with_images`.
 
 ### Full example code
 

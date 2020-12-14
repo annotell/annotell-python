@@ -10,6 +10,8 @@ The representation consists of the image name \(excluding the path to the image\
 We start out by creating a representation of our image.
 
 ```python
+import annotell.input_api.model as IAM
+
 image1 = "filename1.jpg"
 images = [IAM.Image(filename=image1)]
 images_files = IAM.ImagesFiles(images)
@@ -22,9 +24,9 @@ Next we can upload the images to a project
 # Project
 project = "<external_id>"
 
-response = client.upload_and_create_images_input_job(
+response = client.images.create(
     folder=folder,
-    images_files=iam.ImagesFiles(images),
+    images_files=IAM.ImagesFiles(images),
     project=project)
 ```
 
@@ -63,8 +65,8 @@ source_spec = IAM.SourceSpecification(source_to_pretty_name={"CAM1": "FC", "CAM2
 images_metadata = IAM.SceneMetaData(external_id="2020-06-16",
                                     source_specification=source_spec)
 # Create Input
-response = client.upload_and_create_images_input_job(folder=folder,
-                                                     images_files=iam.ImagesFiles(images),
-                                                     metadata=images_metadata,
-                                                     project=project)
+response = client.images.create(folder=folder,
+                                images_files=images_files,
+                                metadata=images_metadata,
+                                project=project)
 ```

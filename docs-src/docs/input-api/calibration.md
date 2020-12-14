@@ -81,12 +81,12 @@ cam_kannala_camera_calibration = Calibration.CameraCalibrationExplicit(position=
 
 At this point we have specified all of the necessary parameters for all of our sensors. The final step is to tie them all together by creating a dictionary mapping the source name to the corresponding calibration. We then create a Calibration object and a CalibrationSpecification object which we then use to create a calibration in the Annotell platform. The external id can be used for querying for the calibration file. 
 
-<aside class="notice">
+:::tip reuse calibration
 Note that you can, and should, reuse the same calibration for multiple scenes if possible.
-</aside>
+:::
 
 ```python
-import annotell.input_api.input_api_model as IAM
+import annotell.input_api.model as IAM
 
 # Create calibration for the scene
 calibration_dict = dict(CAM_PINHOLE=cam_pinhole_camera_calibration,
@@ -101,7 +101,7 @@ calibration_spec = IAM.CalibrationSpec(external_id=calibration_external_id,
 # Create the calibration using the Input API client
 import annotell.input_api.input_api_client as IAC
 client = IAC.InputApiClient()
-created_calibration = client.create_calibration_data(calibration_spec=calibration_spec)
+created_calibration = client.calibration.create_calibration_data(calibration_spec=calibration_spec)
 ```
 
 ### Listing existing calibrations
@@ -109,7 +109,7 @@ created_calibration = client.create_calibration_data(calibration_spec=calibratio
 As a final step we can fetch the calibration via the external id. This can either be done via the client, or via the CLI annoutil tool. 
 
 ```python
-client.get_calibration_data(external_id="Collection 2020-06-16")
+client.calibration.get_calibration_data(external_id="Collection 2020-06-16")
 ```
 
 ```bash

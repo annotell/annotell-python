@@ -10,7 +10,7 @@ Projects are configured by the Annotell Professional Services team, during the G
 ### List Projects
 
 ```python
-projects = client.list_projects()
+projects = client.project.list_projects()
 ```
 
 > Or via `annoutil` CLI
@@ -43,7 +43,7 @@ Ongoing projects can benefit from using batches in two ways
 ### Listing Batches
 
 ```python
-projects = client.list_project_batches("project_external_id")
+projects = client.project.list_project_batches("project_external_id")
 ```
 
 > Or via `annoutil` CLI
@@ -57,7 +57,7 @@ Returns all batches for the project
 ### Publish Batch
 
 ```python
-projects = client.publish_batch("project_external_id", "batch_external_id")
+projects = client.project.publish_batch("project_external_id", "batch_external_id")
 ```
 
 Publishes the input batch. Published batches are not open for new inputs.
