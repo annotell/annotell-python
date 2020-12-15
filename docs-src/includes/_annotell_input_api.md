@@ -1,5 +1,11 @@
 # Input API
 
+## Note: Version `0.x.x` and `1.x.x` - Differences & Transition
+
+The transition over to version `1.0.0` of the Input API brings with it some major changes with respect to how the domain model is represented. In addition to making it easier to interact with the Annotell platform, these changes also allow for new types of data to be uploaded, most importantly sequences of different types of data (cameras, lidars, cameras and lidars). During the transition period the old version `0.x.x` way of uploading certain types of data will still be allowed in order to make the transition process smoother. Version `1.0.0-alpha` will be used for the transition release. Once version `1.0.0` is released, the old `0.x.x` versions will be fully deprecated.
+
+Documentation referring to version `0.x.x` will include `(v0)` in the title, whereas documentation referring to version `1.x.x` will include `(v1)` in the title. Functionality in `1.x.x` not yet implemented during the transition period will include the 🚧-icon.
+
 ## Project
 
 In order to create inputs via the Input API, an Annotell project needs to exist.
@@ -60,7 +66,7 @@ projects = client.publish_batch("project_external_id", "batch_external_id")
 
 Publishes the input batch. Published batches are not open for new inputs.
 
-## Input
+## Input (version 0)
 
 ### Invalidate Inputs
 
