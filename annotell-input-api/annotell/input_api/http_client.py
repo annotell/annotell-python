@@ -40,7 +40,7 @@ class HttpClient:
 
         if client_organization_id is not None:
             self.headers["X-Organization-Id"] = str(client_organization_id)
-            log.info(f"WARNING: You will now act as if you are part of organization: {client_organization_id}. "
+            log.warn(f"WARNING: You will now act as if you are part of organization: {client_organization_id}. "
                      f"This will not work unless you are an Annotell user.")
 
     @property

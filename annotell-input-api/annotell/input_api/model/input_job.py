@@ -6,7 +6,6 @@ from annotell.input_api.util import ts_to_dt
 
 @dataclass
 class InputJob:
-    id: int
     internal_id: str
     external_id: str
     filename: str
@@ -16,7 +15,7 @@ class InputJob:
 
     @staticmethod
     def from_json(js: dict):
-        return InputJob(int(js["id"]), js["jobId"], js["externalId"], js["filename"],
+        return InputJob(js["jobId"], js["externalId"], js["filename"],
                         js["status"], ts_to_dt(js["added"]), js.get("errorMessage"))
 
 
