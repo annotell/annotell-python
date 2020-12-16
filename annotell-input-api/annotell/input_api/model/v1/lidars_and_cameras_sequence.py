@@ -10,17 +10,12 @@ class LidarsAndCamerasSequence:
     external_id: str
     frames: List[Frame]
     calibration_id: int
-    start_ts: Optional[int] = None
     sensor_specification: Optional[SensorSpecification] = None
-    """
-    Unix timestamp for start of sequence
-    """
 
     def to_dict(self) -> dict:
         return dict(frames=[frame.to_dict() for frame in self.frames],
                     sensorSpecification=self.sensor_specification.to_dict(),
                     externalId=self.external_id,
-                    startTs=self.start_ts,
                     calibrationId=self.calibration_id)
 
     def get_local_resources(self) -> List[Union[LidarFrame, VideoFrame, ImageFrame]]:
