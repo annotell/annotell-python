@@ -5,7 +5,7 @@ title: General
 ## Creating Inputs
 
 :::note
-For detailed information about different input modalities, check [images](inputs/images.md) or [point clouds](inputs/point_cloud.md).
+For detailed information about different input modalities, check [images](inputs/images), [point cloud with images](inputs/point_cloud_with_images) or [LidarsAndCamerasSeq](inputs/lidars_and_cameras_seq).
 :::
 
 In order to create inputs, they need to be associated with a [project](project) and an [input batch](project#batch). Consider the following project setup:
@@ -30,6 +30,7 @@ There are 3 ways in order to create inputs
 - Adding inputs to specified batchfor a project
 - Adding inputs to an input list (deprecated)
 
+The following examples all use an input of type `IMAGES`, however the interface applies to all input types.
 ### Adding inputs to latest open batch for a project
 
 ```python
