@@ -16,14 +16,11 @@ class LidarsAndCamerasSequence:
     Unix timestamp for start of sequence
     """
 
-    # pre_annotation: Optional[DataId]
-
     def to_dict(self) -> dict:
         return dict(frames=[frame.to_dict() for frame in self.frames],
                     sensorSpecification=self.sensor_specification.to_dict(),
                     externalId=self.external_id,
                     startTs=self.start_ts,
-                    # preAnnotation = self.preAnnotation,
                     calibrationId=self.calibration_id)
 
     def get_local_resources(self) -> List[Union[LidarFrame, VideoFrame, ImageFrame]]:
