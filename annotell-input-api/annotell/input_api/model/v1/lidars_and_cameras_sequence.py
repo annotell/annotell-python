@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from annotell.input_api.model.v1.frame import Frame, ImageFrame, LidarFrame, VideoFrame
+from annotell.input_api.model.v1.frame import Frame, ImageFrame, PointCloudFrame, VideoFrame
 from annotell.input_api.model.v1.sensor_specification import SensorSpecification
 
 
@@ -18,10 +18,10 @@ class LidarsAndCamerasSequence:
                     externalId=self.external_id,
                     calibrationId=self.calibration_id)
 
-    def get_local_resources(self) -> List[Union[LidarFrame, VideoFrame, ImageFrame]]:
+    def get_local_resources(self) -> List[Union[PointCloudFrame, VideoFrame, ImageFrame]]:
         resources = []
         for frame in self.frames:
-            for resource in (frame.lidar_frames + frame.image_frames + frame.video_frames):
+            for resource in (frame.point_cloud_frames + frame.image_frames + frame.video_frames):
                 if resource.resource_id is None:
                     resources.append(resource)
 

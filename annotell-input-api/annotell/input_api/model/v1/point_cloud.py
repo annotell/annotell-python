@@ -7,7 +7,7 @@ lidar_sensor_default = "lidar"
 
 
 @dataclass
-class LidarFrame:
+class PointCloudFrame:
     filename: str
     resource_id: Optional[str] = None
     sensor_name: str = lidar_sensor_default
