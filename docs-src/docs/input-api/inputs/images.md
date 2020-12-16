@@ -1,16 +1,23 @@
 ---
-title: Images
+title: Images (v0)
 ---
 
-### Single Image
-Images inputs can be created from python via the _upload_and_create_images_input_job_ method.
+:::note Supported image formats
+Supported image formats are `.png` or `.jpg`
+:::
 
-The representation consists of the image name \(excluding the path to the image\) and the source of the image. In this case, we want to create a scene consisting of one image _image1_. We also specify a folder where the image is located.
+An `Images` input consists of 1-8 different images. A common scenario might be that you have a data collection vehicle which has a front facing camera, as well as cameras facing the right and left side of the car. Often the cameras will have overlapping viewpoints, which means that the same object can be seen in several of the cameras. By including all of the cameras in the same input, it's possible to annotate each camera image while also making sure that objects don't get duplicate object ids.
 
-We start out by creating a representation of our image.
+:::note
+Note that the `Images` input is single frame, i.e. if you have a _sequence_ of camera images that you want to annotate together, then you need to use the input type `CamerasSeq`.
+:::
+
+## Single Image Example
+The first step is to produce an `Image` object. The parameters are the image name \(excluding the path to the image\) and the source of the image (i.e. camera name). In this case, we want to create a scene consisting of one image _image1_ and well go with the default source name of `"CAM"`. Next, we create a list of all our `Image` objects and create an `ImageFiles` object. Additionally, we need to include the path to where the image is located.
 
 ```python
 import annotell.input_api.model as IAM
+from pathlib import Path
 
 image1 = "filename1.jpg"
 images = [IAM.Image(filename=image1)]
@@ -24,28 +31,30 @@ Next we can upload the images to a project
 # Project
 project = "<external_id>"
 
+import annotell.input_api.input_api_client as IAC
+client = IAC.InputApiClient()
+
 response = client.images.create(
     folder=folder,
     images_files=IAM.ImagesFiles(images),
     project=project)
 ```
 
+If we were to use several images the process would be the same, except that we would have included more `Image` objects in the `ImageFiles` object. However, when using several images we *must* specify a unique source for each image, which means that we can't use the default `"CAM"` value. 
 
 :::tip Use dryrun to validate input
 Setting `dryrun` parameter to true in the method call, will validate the input using the Input API but not create any inputs.
 :::
+## Adding metadata to the input
+Different types of metadata can be added to the input. For `Images` inputs, this amounts to specifying the `external_id` of the input as well as the `source_specification`:
 
-### Image with Source Specification
-
-In a Scene with several images, it is possible to specify custom source names, and in which order they should appear.
-
-we do this by adding _**SceneMetaData**_ to the input, with the following properties.
 
 | Property             | Description                                                                                                                                                                                                                                |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | external_id          | Id which can be used to track progress of annotations with.                                                                                                                                                                                |
 | source_specification | Additional information about sources, includes `source_to_pretty_name` and `source_order`. Defines which source that should be shown first, the source_order, or a mapping of source names to a prettier name version displayed in the UI. |
 
+If not supplied, a default metadata will be used where the `external_id` is a randomly generated UUID.
 
 ```python
 # Create objects representing the images and the scene
