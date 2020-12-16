@@ -23,15 +23,19 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
 
     @staticmethod
     def _set_sensor_settings(lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence):
+        def _create_camera_settings(width_height_dict: dict):
+            return IAM.CameraSettings(width_height_dict['width'], width_height_dict['height'])
 
-        first_frame = lidars_and_cameras_sequence.frames[0]
-        sensor_settings = {
-            image_frame.sensor_name: get_image_dimensions(image_frame.filename) for image_frame in first_frame.image_frames
-        }
+        def _create_sensor_settings():
+            first_frame = lidars_and_cameras_sequence.frames[0]
+            return {
+                image_frame.sensor_name: _create_camera_settings(get_image_dimensions(image_frame.filename)) for image_frame in first_frame.image_frames
+            }
+            
         if lidars_and_cameras_sequence.sensor_specification is None:
-            lidars_and_cameras_sequence.sensor_specification = IAM.SensorSpecification(sensor_settings=sensor_settings)
+            lidars_and_cameras_sequence.sensor_specification = IAM.SensorSpecification(sensor_settings=_create_sensor_settings())
         elif lidars_and_cameras_sequence.sensor_specification.sensor_settings is None:
-            lidars_and_cameras_sequence.sensor_specification.sensor_settings = sensor_settings
+            lidars_and_cameras_sequence.sensor_specification.sensor_settings = _create_sensor_settings()
 
     def _get_files_to_upload(self, lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence) -> IAM.UploadUrlsResponse:
         resources = lidars_and_cameras_sequence.get_local_resources()

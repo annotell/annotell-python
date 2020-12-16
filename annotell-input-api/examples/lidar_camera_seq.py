@@ -14,7 +14,7 @@ client = IAC.InputApiClient()
 
 
 # Create calibration
-calibration_spec = create_calibration_spec("Collection 2020-06-16", ["RFL01"], ["RFC01", "RFC02", "RFC03"])
+calibration_spec = create_calibration_spec("Collection 2020-06-16", ["lidar"], ["RFC01", "RFC02", "RFC03"])
 created_calibration = client.calibration.create_calibration_data(calibration_spec)
 
 lidar_and_camera_seq = IAM.LidarsAndCamerasSequence(
@@ -24,7 +24,7 @@ lidar_and_camera_seq = IAM.LidarsAndCamerasSequence(
             frame_id="1",
             relative_timestamp=0,
             lidar_frames=[
-                IAM.LidarFrame("~/Downloads/lidar_RFL01.pcd", sensor_name="RFL01"),
+                IAM.LidarFrame("~/Downloads/lidar_RFL01.pcd", sensor_name="lidar"),
             ],
             image_frames=[
                 IAM.ImageFrame("~/Downloads/img_RFC01.jpg", sensor_name="RFC01"),

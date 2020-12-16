@@ -8,6 +8,12 @@ from annotell.input_api.util import filter_none
 class CameraSettings:
     width: int
     height: int
+    
+    def to_dict(self):
+        return filter_none({
+            "width": self.width,
+            "height": self.height
+        })
 
 
 @dataclass
@@ -20,5 +26,5 @@ class SensorSpecification:
         return filter_none({
             "sensorToPrettyName": self.sensor_to_pretty_name,
             "sensorOrder": self.sensor_order,
-            "sensorSettings": self.sensor_settings
+            "sensorSettings": { key: camera_setting.to_dict() for (key, camera_setting) in self.sensor_settings.items() } if self.sensor_settings else None
         })
