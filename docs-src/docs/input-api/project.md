@@ -13,7 +13,7 @@ Projects are configured by the Annotell Professional Services team, during the G
 projects = client.project.list_projects()
 ```
 
-> Or via `annoutil` CLI
+Or via `annoutil` CLI
 
 ```shell
 annoutil projects
@@ -46,7 +46,7 @@ Ongoing projects can benefit from using batches in two ways
 projects = client.project.list_project_batches("project_external_id")
 ```
 
-> Or via `annoutil` CLI
+Or via `annoutil` CLI
 
 ```shell
 annoutil batches <project-external-id>
