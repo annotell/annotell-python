@@ -1,6 +1,7 @@
 from typing import Optional
 from dataclasses import dataclass
 from annotell.input_api.util import filter_none
+from pathlib import Path
 
 camera_sensor_default = "CAM"
 
@@ -15,5 +16,6 @@ class VideoFrame:
     def to_dict(self) -> dict:
         return filter_none({
             "videoTimestamp": self.video_timestamp,
-            "sensorName": self.sensor_name
+            "sensorName": self.sensor_name,
+            "resourceId": self.resource_id or Path(self.filename).name
         })

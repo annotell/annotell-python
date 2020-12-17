@@ -23,8 +23,8 @@ lidar_and_camera_seq = IAM.LidarsAndCamerasSequence(
         IAM.Frame(
             frame_id="1",
             relative_timestamp=0,
-            lidar_frames=[
-                IAM.LidarFrame("~/Downloads/lidar_RFL01.pcd", sensor_name="lidar"),
+            point_cloud_frames=[
+                IAM.PointCloudFrame("~/Downloads/lidar_RFL01.pcd", sensor_name="lidar"),
             ],
             image_frames=[
                 IAM.ImageFrame("~/Downloads/img_RFC01.jpg", sensor_name="RFC01"),

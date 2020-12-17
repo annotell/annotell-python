@@ -1,5 +1,7 @@
-from typing import Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
+
 from annotell.input_api.util import filter_none
 
 camera_sensor_default = "CAM"
@@ -14,6 +16,6 @@ class ImageFrame:
     def to_dict(self) -> dict:
         return filter_none({
             "filename": self.filename,
-            "resourceId": self.resource_id,
+            "resourceId": self.resource_id or Path(self.filename).name,
             "sensorName": self.sensor_name
         })
