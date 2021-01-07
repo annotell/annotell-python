@@ -9,6 +9,8 @@ from annotell.input_api.resources.annotation.annotation import AnnotationResourc
 from annotell.input_api.resources.calibration.calibration import CalibrationResource
 from annotell.input_api.resources.input.images import ImageResource
 from annotell.input_api.resources.input.input import InputResource
+from annotell.input_api.resources.input.cameras import CameraResource
+from annotell.input_api.resources.input.camera_sequence import CameraSequenceResource
 from annotell.input_api.resources.input.lidar_camera_sequence import LidarAndImageSequenceResource
 from annotell.input_api.resources.input.point_cloud import PointCloudResource
 from annotell.input_api.resources.input.point_cloud_images import PointCloudWithImagesResource
@@ -57,3 +59,5 @@ class InputApiClient:
         self.images = ImageResource(client, file_client)
 
         self.lidar_and_image_sequence = LidarAndImageSequenceResource(client, file_client)
+        self.cameras_sequence = CameraSequenceResource(client, file_client)
+        self.cameras = CameraResource(client, file_client)

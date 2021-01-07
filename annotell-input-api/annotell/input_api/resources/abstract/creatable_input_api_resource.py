@@ -4,10 +4,11 @@ import logging
 
 from annotell.input_api.file_resource_client import FileResourceClient
 from annotell.input_api.http_client import HttpClient
-from annotell.input_api.model import (CreateInputJobResponse, FilesToUpload,
-                                      UploadUrlsResponse)
+from annotell.input_api.model import (CameraSettings, CreateInputJobResponse, FilesToUpload,
+                                      UploadUrlsResponse, SceneInput, SensorSpecification)
+from annotell.input_api.util import get_resource_id, get_image_dimensions
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("annotell.input_api")
 
 class CreateableInputAPIResource(FileResourceClient):
 
@@ -15,6 +16,78 @@ class CreateableInputAPIResource(FileResourceClient):
         super().__init__()
         self.client = client
         self.file_resource_client = file_resource_client
+
+    @staticmethod
+    def _set_resource_id(scene_input: SceneInput,
+                         upload_urls_response: UploadUrlsResponse):
+
+        resources = scene_input.get_local_resources()
+        for resource in resources:
+            if resource.resource_id is None:
+                resource.resource_id = get_resource_id(upload_urls_response.files_to_url[resource.filename])
+
+    @staticmethod
+    def _set_sensor_settings(scene_input: SceneInput):
+        def _create_camera_settings(width_height_dict: dict):
+            return CameraSettings(width_height_dict['width'], width_height_dict['height'])
+
+        def _create_sensor_settings():
+            first_frame = scene_input.frames[0]
+            return {
+                image_frame.sensor_name: _create_camera_settings(get_image_dimensions(image_frame.filename)) for image_frame in first_frame.image_frames
+            }
+            
+        if scene_input.sensor_specification is None:
+            scene_input.sensor_specification = SensorSpecification(sensor_settings=_create_sensor_settings())
+        elif scene_input.sensor_specification.sensor_settings is None:
+            scene_input.sensor_specification.sensor_settings = _create_sensor_settings()
+
+    def _get_files_to_upload(self, scene_input: SceneInput) -> UploadUrlsResponse:
+        resources = scene_input.get_local_resources()
+        files_to_upload = list(map(lambda res: res.filename, resources))
+        upload_urls_response = self.get_upload_urls(FilesToUpload(files_to_upload))
+
+        files_in_response = list(upload_urls_response.files_to_url.keys())
+        assert set(files_to_upload) == set(files_in_response)
+
+        return upload_urls_response
+
+    def _create(self,
+               scene_input: SceneInput,
+               project: Optional[str] = None,
+               batch: Optional[str] = None,
+               input_list_id: Optional[int] = None,
+               dryrun: bool = False):
+        upload_urls_response = self._get_files_to_upload(scene_input)
+        self._set_resource_id(scene_input, upload_urls_response)
+        self._set_sensor_settings(scene_input)
+
+        # We need to set job-id from the response
+        payload = scene_input.to_dict()
+        payload['internalId'] = upload_urls_response.internal_id
+
+        self.post_input_request(scene_input.path(), payload,
+                                project=project,
+                                batch=batch,
+                                input_list_id=input_list_id,
+                                dryrun=True)
+
+        if dryrun:
+            return
+
+        self.file_resource_client.upload_files(upload_urls_response.files_to_url)
+
+        create_input_response = self.post_input_request(
+            scene_input.path(),
+            payload,
+            project=project,
+            batch=batch,
+            input_list_id=input_list_id,
+            dryrun=False
+        )
+
+        log.info(f"Created inputs for files with job_id={create_input_response.internal_id}")
+        return create_input_response
 
     def post_input_request(self, resource_path: str,
                            input_request: dict,
