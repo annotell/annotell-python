@@ -19,6 +19,7 @@ module.exports = {
       ]},
       "input-api/calibration",
       "input-api/error_handling",
+      "input-api/FAQ",
     ],
   },
 };

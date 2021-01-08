@@ -8,6 +8,10 @@ title: General
 For detailed information about different input modalities, check [images](inputs/images), [point cloud with images](inputs/point_cloud_with_images) or [LidarsAndCamerasSeq](inputs/lidars_and_cameras_seq).
 :::
 
+:::tip Annotell Users
+As an Annotell user, it is possible to specify `client_organization_id` to `InputApiClient` constructor to create inputs on behalf of a client organization
+:::
+
 In order to create inputs, they need to be associated with a [project](project) and an [input batch](project#batch). Consider the following project setup:
 
 ```
