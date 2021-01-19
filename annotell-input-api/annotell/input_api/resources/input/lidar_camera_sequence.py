@@ -13,15 +13,6 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
     path = 'lidars-and-cameras-sequence'
 
     @staticmethod
-    def _set_resource_id(lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence,
-                         upload_urls_response: IAM.UploadUrlsResponse):
-
-        resources = lidars_and_cameras_sequence.get_local_resources()
-        for resource in resources:
-            if resource.resource_id is None:
-                resource.resource_id = get_resource_id(upload_urls_response.files_to_url[resource.filename])
-
-    @staticmethod
     def _set_sensor_settings(lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence):
         def _create_camera_settings(width_height_dict: dict):
             return IAM.CameraSettings(width_height_dict['width'], width_height_dict['height'])
@@ -36,16 +27,6 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
             lidars_and_cameras_sequence.sensor_specification = IAM.SensorSpecification(sensor_settings=_create_sensor_settings())
         elif lidars_and_cameras_sequence.sensor_specification.sensor_settings is None:
             lidars_and_cameras_sequence.sensor_specification.sensor_settings = _create_sensor_settings()
-
-    def _get_files_to_upload(self, lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence) -> IAM.UploadUrlsResponse:
-        resources = lidars_and_cameras_sequence.get_local_resources()
-        files_to_upload = list(map(lambda res: res.filename, resources))
-        upload_urls_response = self.get_upload_urls(IAM.FilesToUpload(files_to_upload))
-
-        files_in_response = list(upload_urls_response.files_to_url.keys())
-        assert set(files_to_upload) == set(files_in_response)
-
-        return upload_urls_response
 
     def create(self,
                lidars_and_cameras_sequence: IAM.LidarsAndCamerasSequence,
@@ -73,33 +54,19 @@ class LidarAndImageSequenceResource(CreateableInputAPIResource):
         conversion was successful please see the method `get_input_jobs_status`.
         """
 
-        upload_urls_response = self._get_files_to_upload(lidars_and_cameras_sequence)
-        self._set_resource_id(lidars_and_cameras_sequence, upload_urls_response)
         self._set_sensor_settings(lidars_and_cameras_sequence)
 
         # We need to set job-id from the response
         payload = lidars_and_cameras_sequence.to_dict()
-        payload['internalId'] = upload_urls_response.internal_id
 
-        self.post_input_request(self.path, payload,
+        response = self.post_input_request(self.path, payload,
                                 project=project,
                                 batch=batch,
                                 input_list_id=input_list_id,
-                                dryrun=True)
+                                dryrun=dryrun)
 
         if dryrun:
             return
 
-        self.file_resource_client.upload_files(upload_urls_response.files_to_url)
-
-        create_input_response = self.post_input_request(
-            self.path,
-            payload,
-            project=project,
-            batch=batch,
-            input_list_id=input_list_id,
-            dryrun=False
-        )
-
-        log.info(f"Created inputs for files with job_id={create_input_response.internal_id}")
-        return create_input_response
+        log.info(f"Created inputs for files with job_id={response.internal_id}")
+        return response

@@ -16,6 +16,6 @@ class ImageFrame:
     def to_dict(self) -> dict:
         return filter_none({
             "filename": self.filename,
-            "resourceId": self.resource_id or Path(self.filename).name,
+            "resourceId": self.resource_id or str(Path(self.filename).expanduser()),
             "sensorName": self.sensor_name
         })

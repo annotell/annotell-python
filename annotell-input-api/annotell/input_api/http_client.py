@@ -82,7 +82,7 @@ class HttpClient:
         resp = self.session.get(f"{self.host}/{endpoint}", **kwargs)
         return self._unwrap_enveloped_json(self._raise_on_error(resp).json())
 
-    def post(self, endpoint, data=None, json=None, dryrun=False, **kwargs) -> dict:
+    def post(self, endpoint, data=None, json=None, dryrun=False, discard_response=False, **kwargs) -> dict:
         r"""Sends a POST request. Returns :class:`dict` object.
 
         :param endpoint: endpoint to be appended to `client.host`.
@@ -100,7 +100,10 @@ class HttpClient:
         kwargs.setdefault("headers", headers)
 
         resp = self.session.post(f"{self.host}/{endpoint}", data, filter_none(json), **kwargs)
-        return self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        if discard_response:
+            return
+        else:
+            return self._unwrap_enveloped_json(self._raise_on_error(resp).json())
 
     def put(self, endpoint, data, **kwargs) -> dict:
         r"""Sends a PUT request. Returns :class:`dict` object.
