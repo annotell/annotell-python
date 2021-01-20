@@ -1,7 +1,7 @@
 KPI_MANAGER_VERSION = '/v1'
 KPI_MANAGER_HOST = 'https://kpi.annotell.com'
 GOOGLE_CLOUD_DATAPROC = 'GOOGLE_CLOUD_DATAPROC'
-GOOGLE_KPI_BUCKET = 'gs://annotell-kpi-manager/'
+GOOGLE_KPI_BUCKET = 'gs://annotell-kpi-research/'
 LOCALHOST = 'localhost'
 AMAZON_SPARK_EMR = 'AMAZON_SPARK_EMR'
 AMAZON_KPI_BUCKET = 's3://magna-elec-adas-kpi-dev/'
