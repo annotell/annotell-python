@@ -85,6 +85,7 @@ class PointCloudsWithImages(RequestCall):
         return dict(images=[image.to_dict() for image in self.images],
                     pointClouds=[pc.to_dict() for pc in self.point_clouds])
 
+
 class PointCloudFiles(RequestCall):
     def __init__(self, point_clouds: List[PointCloud]):
         self.point_clouds = point_clouds
@@ -531,9 +532,9 @@ class Input(Response):
         return f"<Input(" + \
             f"internal_id={self.internal_id}, " + \
             f"external_id={self.external_id}, " + \
-            f"external_id={self.input_type}, " + \
-            f"external_id={self.invalidated}, " + \
-            f"input_type={self.invalidated_reason})>"
+            f"input_type={self.input_type}, " + \
+            f"invalidated={self.invalidated}, " + \
+            f"invalidated_reason={self.invalidated_reason})>"
 
 
 class InvalidatedInputsResponse(Response):
