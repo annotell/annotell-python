@@ -3,9 +3,17 @@ from tabulate import tabulate
 from .input_api_client import InputApiClient
 
 import click
+import os
 
+env = os.getenv("ANNOTELL_CLIENT_ORGANIZATION_ID", None)
+if env:
+    org_id = int(env)
+    print("<" * 25,  f" Acting on behalf of organization {org_id}", 25 * ">")
+else:
+    org_id = None
 
-client = InputApiClient(auth=None)
+client = InputApiClient(auth=None, client_organization_id=org_id)
+
 
 def _tabulate(body, headers, title=None):
     tab = tabulate(
@@ -43,38 +51,25 @@ def cli():
 
 
 @click.command()
-@click.argument('project_id', nargs=1, default=None, required=False, type=int)
-@click.option('--get-requests', is_flag=True)
-@click.option('--get-input-lists', is_flag=True)
-@click.option('--get-invalidated-inputs', is_flag=True)
-def projects(project_id, get_requests, get_input_lists, get_invalidated_inputs):
+@click.argument('project_external_id', nargs=1, default=None, required=False, type=str)
+@click.option('--get-batches', is_flag=True)
+def projects(project_external_id, get_batches):
     print()
-    if get_input_lists and project_id:
-        list_of_input_lists = client.list_input_lists(project_id)
-        headers = ["id", "project_id", "name", "created"]
-        tab = _get_table(list_of_input_lists, headers, "INPUTLISTS")
+    if project_external_id and get_batches:
+        list_of_input_batches = client.get_project_batches(project_external_id)
+        headers = ["external_id", "title", "status", "created", "updated"]
+        tab = _get_table(list_of_input_batches, headers, "BATCHES")
         print(tab)
-    elif get_requests and project_id:
-        headers = ["id", "created", "project_id", "title", "description", "input_list_id", "input_batch_id", "external_id"]
-        list_of_requests = client.get_requests_for_project_id(project_id=project_id)
-        tab = _get_table(list_of_requests, headers, "REQUESTS")
-        print(tab)
-    elif get_invalidated_inputs and project_id:
-        headers = ["internal_id", "external_id", "input_type", "invalidated", "invalidated_reason"]
-
-        list_of_inputs = client.get_inputs(project_id=project_id, invalidated=True)
-        tab = _get_table(list_of_inputs, headers, "INPUTS")
-        print(tab)
-    elif project_id:
-        list_of_projects = client.list_projects()
-        target_project = [p for p in list_of_projects if p.id == project_id]
-        headers = ["id", "created", "title", "description", "deadline", "status", "external_id"]
+    elif project_external_id:
+        list_of_projects = client.get_projects()
+        target_project = [p for p in list_of_projects if p.external_id == project_external_id]
+        headers = ["created", "title", "description", "deadline", "status", "external_id"]
         tab = _get_table(target_project, headers, "PROJECTS")
         print(tab)
     else:
-        list_of_projects = client.list_projects()
-        headers = ["id", "created", "title", "description", "deadline", "status", "external_id"]
-        tab = _get_table(list_of_projects, headers, "PROJECTS")
+        list_of_projects = client.get_projects()
+        headers = ["created", "title", "description", "deadline", "status", "external_id"]
+        tab = _get_table(target_project, headers, "PROJECTS")
         print(tab)
 
 
@@ -108,7 +103,8 @@ def inputs(internal_ids, view, get_export_status, get_upload_status, get_input_l
         print(tab)
     elif internal_ids and get_upload_status:
         list_of_jobs = client.get_input_jobs_status(internal_ids=list(internal_ids))
-        headers = ["id", "internal_id", "external_id", "filename", "status", "added", "error_message"]
+        headers = ["id", "internal_id", "external_id",
+                   "filename", "status", "added", "error_message"]
         tab = _get_table(list_of_jobs, headers, "UPLOAD STATUS FOR INPUTS")
         print(tab)
 
@@ -138,7 +134,8 @@ def inputs(internal_ids, view, get_export_status, get_upload_status, get_input_l
 def inputs_externalid(external_ids, get_upload_status, get_datas):
     print()
     if external_ids and get_upload_status:
-        headers = ["id", "internal_id", "external_id", "filename", "status", "added", "error_message"]
+        headers = ["id", "internal_id", "external_id",
+                   "filename", "status", "added", "error_message"]
         list_of_jobs = client.get_input_jobs_status(external_ids=list(external_ids))
         tab = _get_table(list_of_jobs, headers, title="UPLOAD STATUS FOR INPUTS")
         print(tab)
@@ -198,7 +195,8 @@ def calibration_externalid(external_id):
 @click.argument('request_ids', nargs=-1)
 @click.command()
 def requests(request_ids):
-    headers = ["id", "created", "project_id", "title", "description", "input_list_id", "input_batch_id", "external_id"]
+    headers = ["id", "created", "project_id", "title", "description",
+               "input_list_id", "input_batch_id", "external_id"]
     request_ids_list = [int(rid) for rid in request_ids]
     dict_of_requests = client.get_requests_for_request_ids(
         request_ids=request_ids_list
@@ -218,6 +216,7 @@ def input_lists(input_list_id, get_requests):
         list_of_requests = client.get_requests_for_input_lists(input_list_id)
         tab = _get_table(list_of_requests, headers, "REQUESTS")
         print(tab)
+
 
 @click.command(name="batches")
 @click.argument('project', nargs=1, type=str, default=None, required=False)

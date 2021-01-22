@@ -20,3 +20,13 @@ class InputBatchStatus(str, Enum):
     READY = 'ready'
     INPROGESS = 'in-progress'
     COMPLETED = 'completed'
+
+
+class InputStatus(str, Enum):
+    PROCESSING = "processing"
+    CREATED = "created"
+    FAILED = "failed"
+    INVALIDATED_BROKEN_INPUT = "invalidated:broken-input"
+    INVALIDATED_SLAM_RECORRECTION = "invalidated:slam-rerun"
+    INVALIDATED_DUPLICATE = "invalidated:duplicate"
+    INVALIDATED_INCORRECTLY_CREATED = "invalidated:incorrectly-created"

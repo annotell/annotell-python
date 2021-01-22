@@ -5,22 +5,46 @@ Python 3 library providing access to Annotell Input API
 To install with pip run `pip install annotell-input-api`
 
 # Documentation
+
 All available documentation for the Annotell Input API Client can be found here:
 https://annotell.github.io/annotell-python/docs/
 
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
-## [0.3.12] - 2021-01-13
+## [0.3.13] - 20201-01-22
+
 ### Changed
+
+- Renamed method `upload_and_create_images_input_job` to `create_inputs_images`.
+- Renamed method `list_projects` to `get_projects`.
+- Renamed method `list_project_batches` to `get_project_batches`.
+- Changed behaviour of method `download_annotations`. The previously optional argumnet `request_id` has been removed. Additionally, the return
+  signature is changed to return a list of annotations for each input, instead of a dict as before.
+- Behaviour of `get_inputs` has changed. It now receives `project` (identifier, not numerical id anymore), as well as two optional parameters `batch` and `include_invalidated`. Returns all inputs belonging to the project, with the option of filtering on batch and whether or not including invalidated inputs. The returned list of classes had additional fields describing which batch each input belongs to, as well as their status (`created`, `processing`, `failed`, `invalidated`).
+- Changed name of argument `input_ids` to `input_internal_ids` for method `invalidate_inputs`.
+
+### Removed
+
+- Methods `count_inputs_for_external_ids`, `mend_input_data`, `remove_inputs_from_input_list`, `list_input_lists`, `publish_batch`, `get_requests_for_request_ids`, `get_requests_for_input_lists`, `get_input_status`, `get_input_jobs_status`, `get_requests_for_project_id`, `get_datas_for_inputs_by_internal_ids` and `get_datas_for_inputs_by_external_ids` have all been removed.
+
+## [0.3.12] - 2021-01-13
+
+### Changed
+
 - Removed getting started documentation from README.md and instead link to new docs.
 
 ## [0.3.11] - 2020-12-14
+
 ### Changed
+
 - Deserialization bugfix in models for `InputBatch` and `InputBatch`.
 
 ## [0.3.10] - 2020-12-01
+
 ### Added
+
 - Minor fix in annoutil
 
 ## [0.3.9] - 2020-11-26
