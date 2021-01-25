@@ -15,7 +15,7 @@ class ProjectResource(InputAPIResource):
 
         :return List: List containing all projects connected to the user
         """
-        json_resp = self.client.get("v1/inputs/project")
+        json_resp = self.client.get("v1/projects")
         return [IAM.Project.from_json(js) for js in json_resp]
 
     def get_project_batches(self, project: str) -> List[IAM.Project]:
@@ -24,7 +24,7 @@ class ProjectResource(InputAPIResource):
 
         :return List: List containing all batches
         """
-        json_resp = self.client.get(f"v1/inputs/project/{project}/batch")
+        json_resp = self.client.get(f"v1/projects/{project}/batches")
         return [IAM.InputBatch.from_json(js) for js in json_resp]
 
     def publish_batch(self, project: str, batch: str) -> IAM.InputBatch:
@@ -34,5 +34,5 @@ class ProjectResource(InputAPIResource):
 
         :return InputBatch: Updated input batch
         """
-        json_resp = self.client.post(f"v1/inputs/project/{project}/batch/{batch}/publish")
+        json_resp = self.client.post(f"v1/inputs/project/{project}/batches/{batch}/publish")
         return IAM.InputBatch.from_json(json_resp)

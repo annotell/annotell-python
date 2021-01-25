@@ -35,7 +35,7 @@ class InputResource(InputAPIResource):
         resp_json = self.client.post("v1/inputs/invalidate", json=invalidated_json)
         return IAM.InvalidatedInputsResponse.from_json(resp_json)
 
-    def get_inputs(self, project: str, batch: str, invalidated: bool = False, external_id: Optional[str] = None) -> List[IAM.Input]:
+    def get_inputs(self, project: str, batch: Optional[str] = None, invalidated: bool = False, external_id: Optional[str] = None) -> List[IAM.Input]:
         """
         Gets inputs for project, with option to filter for invalidated inputs
 
