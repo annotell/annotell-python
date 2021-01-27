@@ -5,6 +5,7 @@ from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 from PIL import Image as PILImage
+from typing import List, Dict
 
 import dateutil.parser
 from urllib3.util import Url, parse_url
@@ -48,3 +49,16 @@ def get_image_dimensions(image_path: str) -> dict:
     with PILImage.open(fi) as im:
         width, height = im.size
         return {"width": width, "height": height}
+
+def get_view_links(internal_ids: List[str]) -> Dict[str, str]:
+        """
+        For each given internal id returns an URL where the input can be viewed in the web app.
+
+        :param internal_ids: List with internal ids
+        :return Dict: Dictionary mapping each internal id with an URL to view the input.
+        """
+        view_dict = dict()
+        for internal_id in internal_ids:
+            view_dict[internal_id] = f"https://app.annotell.com/input-view/{internal_id}"
+
+        return view_dict

@@ -34,5 +34,5 @@ class ProjectResource(InputAPIResource):
 
         :return InputBatch: Updated input batch
         """
-        json_resp = self.client.post(f"v1/inputs/project/{project}/batches/{batch}/publish")
+        json_resp = self.client.post(f"v1/projects/{project}/batches/{batch}/publish")
         return IAM.InputBatch.from_json(json_resp)
