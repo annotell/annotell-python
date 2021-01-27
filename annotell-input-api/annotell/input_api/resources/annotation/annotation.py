@@ -5,7 +5,7 @@ from annotell.input_api.resources.abstract import InputAPIResource
 
 
 class AnnotationResource(InputAPIResource):
-    def download_annotations(self, internal_ids: List[str]
+    def get_annotations(self, internal_ids: List[str]
                              ) -> Dict[str, List[IAM.ExportAnnotation]]:
         """
         Returns the export ready annotations, either
@@ -17,7 +17,7 @@ class AnnotationResource(InputAPIResource):
         :return Dict: A dictionary containing the ready annotations
         """
         js = internal_ids
-        json_resp = self.client.get("v1/inputs/export", json=js)
+        json_resp = self.client.get("v1/annotations", json=js)
 
         annotations = dict()
         for k, v in json_resp.items():
