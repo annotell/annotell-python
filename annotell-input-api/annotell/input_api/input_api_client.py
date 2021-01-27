@@ -5,6 +5,7 @@ import random
 from pathlib import Path
 from typing import List, Mapping, Optional, Union, Dict, BinaryIO
 from uuid import uuid4 as uuid
+from annotell.input_api.util import filter_none
 
 import requests
 import time
@@ -543,7 +544,9 @@ class InputApiClient:
         self._raise_on_error(resp).json()
 
     def get_inputs(self,
-                   project: str, batch: Optional[str] = None,
+                   project: str,
+                   batch: Optional[str] = None,
+                   external_ids: Optional[List[str]] = None,
                    include_invalidated: bool = False) -> List[IAM.Input]:
         """
         Gets inputs for project, with option to include invalidated inputs in the list
@@ -556,29 +559,21 @@ class InputApiClient:
         """
 
         url = f"{self.host}/v1/inputs"
-        resp = self.session.get(url, params={
+        external_ids_query_string = ",".join(external_ids) if external_ids is not None else None
+        params = {
             "project": project,
             "batch": batch,
+            "externalIds": external_ids_query_string,
             "invalidated": include_invalidated
-        }, headers=self.headers)
+        }
+
+        resp = self.session.get(url, params=filter_none(params), headers=self.headers)
         json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
         return [IAM.Input.from_json(js) for js in json_resp]
 
-    def get_internal_ids_for_external_ids(self, external_ids: List[str]) -> Dict[str, List[str]]:
-        """
-        For each external id returns a list of internal ids, connected to the external id.
-
-        :param external_ids: List of external ids
-        :return Dict: Dictionary mapping each external id to a list of internal ids
-        """
-        url = f"{self.host}/v1/inputs/"
-        js = external_ids
-        resp = self.session.get(url, json=js, headers=self.headers)
-        return self._raise_on_error(resp).json()
-
-    def invalidate_inputs(
-            self, input_internal_ids: List[str], invalidated_reason: IAM.InvalidatedReasonInput
-    ) -> IAM.InvalidatedInputsResponse:
+    def invalidate_inputs(self,
+                          input_internal_ids: List[str],
+                          invalidated_reason: IAM.InvalidatedReasonInput) -> IAM.InvalidatedInputsResponse:
         """
         Invalidates inputs, and removes them from all input lists
 

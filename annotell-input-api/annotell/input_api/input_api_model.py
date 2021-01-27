@@ -543,8 +543,8 @@ class Input(Response):
             f"internal_id={self.internal_id}, " + \
             f"external_id={self.external_id}, " + \
             f"input_type={self.input_type}, " + \
-            f"invalidated={self.invalidated}, " + \
-            f"invalidated_reason={self.invalidated_reason})>"
+            f"batch={self.batch}, " + \
+            f"status={self.status})>"
 
 
 class InvalidatedInputsResponse(Response):
