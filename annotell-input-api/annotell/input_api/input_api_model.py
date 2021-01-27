@@ -305,7 +305,7 @@ class CalibrationNoContent(Response):
         )
 
     def __repr__(self):
-        return f"<CalibrationWithContent(" + \
+        return f"<CalibrationNoContent(" + \
             f"id={self.id}, " + \
             f"external_id={self.external_id}, " + \
             f"created={self.created})>"
@@ -368,7 +368,6 @@ class InputBatch(Response):
 
     def __repr__(self):
         return f"<InputBatch(" + \
-            f"project_id={self.project_id}, " + \
             f"external_id={self.external_id}, " + \
             f"title={self.title}, " + \
             f"status={self.status}, " + \

@@ -593,9 +593,9 @@ class InputApiClient:
 
         :return List: List containing all projects connected to the user
         """
-        url = f"{self.host}/v1/inputs/project"
+        url = f"{self.host}/v1/projects"
         resp = self.session.get(url, headers=self.headers)
-        json_resp = self._raise_on_error(resp).json()
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
         return [IAM.Project.from_json(js) for js in json_resp]
 
     def get_project_batches(self, project: str) -> List[IAM.InputBatch]:
@@ -605,14 +605,14 @@ class InputApiClient:
         :param project: Project identifier
         :return List: List containing all batches
         """
-        url = f"{self.host}/v1/inputs/project/{project}/batch"
+        url = f"{self.host}/v1/projects/{project}/batches"
         resp = self.session.get(url, headers=self.headers)
-        json_resp = self._raise_on_error(resp).json()
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
         return [IAM.InputBatch.from_json(js) for js in json_resp]
 
     def get_calibration_data(
         self, id: Optional[int] = None, external_id: Optional[str] = None
-    ) -> Union[List[IAM.CalibrationNoContent], List[IAM.CalibrationWithContent]]:
+    ) -> List[Union[IAM.CalibrationNoContent, IAM.CalibrationWithContent]]:
         """
         Queries the Input API for either:
         * A list containing a specific calibration (of only the id is given)
@@ -625,7 +625,7 @@ class InputApiClient:
         :return List: A list of CalibrationNoContent if an id or external id was given, or a
         list of CalibrationWithContent otherwise.
         """
-        base_url = f"{self.host}/v1/inputs/calibration-data"
+        base_url = f"{self.host}/v1/calibrations"
         if id:
             url = base_url + f"?id={id}"
         elif external_id:
@@ -635,9 +635,11 @@ class InputApiClient:
 
         resp = self.session.get(url, headers=self.headers)
 
-        json_resp = self._raise_on_error(resp).json()
+        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
         if base_url == url:
             return [IAM.CalibrationNoContent.from_json(js) for js in json_resp]
+        elif id is not None:
+            return [IAM.CalibrationWithContent.from_json(json_resp)]
         else:
             return [IAM.CalibrationWithContent.from_json(js) for js in json_resp]
 
