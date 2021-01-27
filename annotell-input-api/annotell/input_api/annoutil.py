@@ -15,7 +15,7 @@ if env:
 else:
     org_id = None
 
-client = InputApiClient(auth=None, client_organization_id=3)
+client = InputApiClient(auth=None, client_organization_id=org_id)
 
 
 def _tabulate(body, headers, title=None):
