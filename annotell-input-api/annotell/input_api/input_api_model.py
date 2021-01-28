@@ -1,10 +1,10 @@
 """API MODEL."""
-from typing import List, Mapping, Dict, Optional, Union
+from typing import List, Mapping, Dict, Optional, Union, Any
 from datetime import datetime
 import dateutil.parser
 
 from .model.abstract_models import RequestCall, Response
-from .model.enums import InputBatchStatus, InvalidatedReasonInput
+from .model.enums import InputBatchStatus, InvalidatedReasonInput, InputStatus
 # To preserve old import statements
 from .model.enums import CameraType
 from .model.calibration import CameraProperty
@@ -135,7 +135,9 @@ class SourceSpecification(RequestCall):
 
 
 class SceneMetaData(RequestCall):
-    def __init__(self, external_id: str, source_specification: Optional[SourceSpecification] = None):
+    def __init__(
+        self, external_id: str, source_specification: Optional[SourceSpecification] = None
+    ):
         self.external_id = external_id
         self.source_specification = source_specification
 
@@ -178,7 +180,7 @@ class TimeSpecification(RequestCall):
 
     def to_dict(self) -> dict:
 
-        as_dict = dict(timeCalibration=self.time_calibration.to_dict())
+        as_dict: Dict[Any, Any] = dict(timeCalibration=self.time_calibration.to_dict())
 
         if self.start_ts:
             as_dict["startTs"] = self.start_ts
@@ -211,7 +213,7 @@ class SlamMetaData(CalibratedSceneMetaData):
                  sequence_id: int,
                  sub_sequence_id: int,
                  settings: Optional[dict] = None):
-        super().__init__(external_id, source_specification, calibration_id)
+        super().__init__(external_id, calibration_id, source_specification)
         self.vehicle_data = vehicle_data
         self.dynamic_objects = dynamic_objects
         self.trajectory = trajectory
@@ -263,7 +265,8 @@ class FilesToUpload(RequestCall):
 
 
 class PoseTransform(RequestCall):
-    def __init__(self, timestamp: int, utc_timestamp: float, position: List[float], rotation_quaternion: List[float]):
+    def __init__(self, timestamp: int, utc_timestamp: float, position: List[float],
+                 rotation_quaternion: List[float]):
         self.timestamp = timestamp
         self.utc_timestamp = utc_timestamp
         self.position = position
@@ -302,7 +305,7 @@ class CalibrationNoContent(Response):
         )
 
     def __repr__(self):
-        return f"<CalibrationWithContent(" + \
+        return f"<CalibrationNoContent(" + \
             f"id={self.id}, " + \
             f"external_id={self.external_id}, " + \
             f"created={self.created})>"
@@ -350,9 +353,8 @@ class InputList(Response):
 
 
 class InputBatch(Response):
-    def __init__(self, id: int, project_id: int, external_id: str, title: str, status: InputBatchStatus,  created: datetime, updated: datetime):
-        self.id = id
-        self.project_id = project_id
+    def __init__(self, external_id: str, title: str, status: InputBatchStatus,
+                 created: datetime, updated: datetime):
         self.external_id = external_id
         self.title = title
         self.status = status
@@ -361,13 +363,11 @@ class InputBatch(Response):
 
     @staticmethod
     def from_json(js: dict):
-        return InputBatch(int(js["id"]), int(js["projectId"]), js["externalId"], js["title"], js["status"],
+        return InputBatch(js["externalId"], js["title"], js["status"],
                           ts_to_dt(js["created"]), ts_to_dt(js["updated"]))
 
     def __repr__(self):
         return f"<InputBatch(" + \
-            f"id={self.id}, " + \
-            f"project_id={self.project_id}, " + \
             f"external_id={self.external_id}, " + \
             f"title={self.title}, " + \
             f"status={self.status}, " + \
@@ -376,9 +376,8 @@ class InputBatch(Response):
 
 
 class Project(Response):
-    def __init__(self, id: int, created: datetime, title: str, description: str,
+    def __init__(self, created: datetime, title: str, description: str,
                  deadline: Optional[str], status: str, external_id: str):
-        self.id = id
         self.created = created
         self.title = title
         self.description = description
@@ -388,12 +387,11 @@ class Project(Response):
 
     @staticmethod
     def from_json(js: dict):
-        return Project(int(js["id"]), ts_to_dt(js["created"]), js["title"],
+        return Project(ts_to_dt(js["created"]), js["title"],
                        js["description"], js.get("deadline"), js["status"], js["externalId"])
 
     def __repr__(self):
         return f"<Project(" + \
-            f"id={self.id}, " + \
             f"created={self.created}, " + \
             f"title={self.title}, " + \
             f"description={self.description}, " + \
@@ -417,7 +415,8 @@ class Request(Response):
     @staticmethod
     def from_json(js: dict):
         return Request(int(js["id"]), ts_to_dt(js["created"]), int(js["projectId"]),
-                       js["title"], js["description"], int(js["inputListId"]), int(js["inputBatchId"]), js["externalId"])
+                       js["title"], js["description"], int(js["inputListId"]),
+                       int(js["inputBatchId"]), js["externalId"])
 
     def __repr__(self):
         return f"<Request(" + \
@@ -460,7 +459,7 @@ class InputJob(Response):
     @staticmethod
     def from_json(js: dict):
         return InputJob(int(js["id"]), js["jobId"], js["externalId"], js["filename"],
-                        bool(js["status"]), ts_to_dt(js["added"]), js.get("errorMessage"))
+                        str(js["status"]), ts_to_dt(js["added"]), js.get("errorMessage"))
 
     def __repr__(self):
         return f"<InputJob(" + \
@@ -497,7 +496,7 @@ class Data(Response):
     def from_json(js: dict):
         return Data(
             int(js["id"]),
-            js.get("externalId"),
+            str(js.get("externalId")),
             js.get("source"),
             ts_to_dt(js["created"])
         )
@@ -511,21 +510,31 @@ class Data(Response):
 
 
 class Input(Response):
-    def __init__(self, internal_id: Optional[str], external_id: Optional[str], input_type: str, invalidated: Optional[str], invalidated_reason: Optional[InvalidatedReasonInput]):
+    def __init__(
+        self,
+        internal_id: str,
+        external_id: str,
+        batch: str,
+        input_type: str,
+        status: InputStatus,
+        error_message: Optional[str],
+    ):
         self.internal_id = internal_id
         self.external_id = external_id
+        self.batch = batch
         self.input_type = input_type
-        self.invalidated = invalidated
-        self.invalidated_reason = invalidated_reason
+        self.status = status
+        self.error_message = error_message
 
     @staticmethod
     def from_json(js: dict):
         return Input(
-            js.get("internalId"),
-            js.get("externalId"),
+            js["internalId"],
+            js["externalId"],
+            js["batchId"],
             js["inputType"],
-            js.get("invalidated"),
-            js.get("invalidatedReason")
+            js.get("status"),
+            js.get("errorMessage")
         )
 
     def __repr__(self):
@@ -533,12 +542,13 @@ class Input(Response):
             f"internal_id={self.internal_id}, " + \
             f"external_id={self.external_id}, " + \
             f"input_type={self.input_type}, " + \
-            f"invalidated={self.invalidated}, " + \
-            f"invalidated_reason={self.invalidated_reason})>"
+            f"batch={self.batch}, " + \
+            f"status={self.status})>"
 
 
 class InvalidatedInputsResponse(Response):
-    def __init__(self, invalidated_input_ids: List[int], not_found_input_ids: List[int], already_invalidated_input_ids: List[int]):
+    def __init__(self, invalidated_input_ids: List[int], not_found_input_ids: List[int],
+                 already_invalidated_input_ids: List[int]):
         self.invalidated_input_ids = invalidated_input_ids
         self.not_found_input_ids = not_found_input_ids
         self.already_invalidated_input_ids = already_invalidated_input_ids
@@ -557,7 +567,8 @@ class InvalidatedInputsResponse(Response):
 
 
 class RemovedInputsResponse(Response):
-    def __init__(self, removed_input_ids: List[int], not_found_input_ids: List[int], already_removed_input_ids: List[int]):
+    def __init__(self, removed_input_ids: List[int], not_found_input_ids: List[int],
+                 already_removed_input_ids: List[int]):
         self.removed_input_ids = removed_input_ids
         self.not_found_input_ids = not_found_input_ids
         self.already_removed_input_ids = already_removed_input_ids

@@ -41,9 +41,11 @@ setup(
         'click>=7.1.1',
         'Pillow>=7.0.0',
         'requests>=2.23.0',
-        'tabulate>=0.8.7'
+        'tabulate>=0.8.7',
+        'python-dateutil',
+        "dataclasses;python_version<'3.7'"
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     include_package_data=True,
     package_data={
         '': ['*.md', 'LICENSE'],
