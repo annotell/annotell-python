@@ -13,6 +13,11 @@ https://annotell.github.io/annotell-python/docs/
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2021-01-29
+
+### Changed
+
+- Removed unused property `deadline` from project
 ## [0.4.0] - 2021-01-28
 
 ### Changed
