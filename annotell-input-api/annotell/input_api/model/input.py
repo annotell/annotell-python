@@ -1,22 +1,24 @@
 from dataclasses import dataclass
 from typing import Optional
-from annotell.input_api.model.enums import InvalidatedReasonInput
+from annotell.input_api.model.enums import InputStatus
 
 
 @dataclass
 class Input:
-    internal_id: Optional[str]
-    external_id: Optional[str]
+    internal_id: str
+    external_id: str
+    batch_id: str
     input_type: str
-    invalidated: Optional[str]
-    invalidated_reason: Optional[InvalidatedReasonInput]
+    status: InputStatus
+    error_message: Optional[str]
 
     @staticmethod
     def from_json(js: dict):
         return Input(
-            js.get("internalId"),
-            js.get("externalId"),
+            js["internalId"],
+            js["externalId"],
+            js["batchId"],
             js["inputType"],
-            js["invalidated"],
-            js["invalidatedReason"]
+            js["status"],
+            js.get("errorMessage")
         )
