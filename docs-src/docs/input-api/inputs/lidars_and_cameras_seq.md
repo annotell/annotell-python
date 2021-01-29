@@ -84,7 +84,7 @@ client = IAC.InputApiClient()
 
 # Get existing calibration
 calibration_external_id = "<calibration-identifier>"
-calibration = client.calibration.get_calibration_data(external_id=calibration_external_id)[-1]
+calibration = client.calibration.get_calibration(external_id=calibration_external_id)[-1]
 
 lidar_and_camera_seq = IAM.LidarsAndCamerasSequence(
     external_id="input1",

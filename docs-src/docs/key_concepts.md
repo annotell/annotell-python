@@ -1,4 +1,5 @@
 ---
+id: key_concepts
 title: Key Concepts
 description: Annotell Platform Concepts
 slug: /
@@ -11,11 +12,7 @@ slug: /
 Project is the top-most concept when interfacing with the Annotell Platform. It is possible to have multiple ongoing projects, and they act as a container for other Annotell resources.
 Project setup is performed by the Annotell Professional Services team during the Guideline Agreement Process (GAP) of a new client engagement.
 
-To use projects within the Annotell APIs, they can be identified using either a numeric annotell ID or by an external identifier which can be specified.
-
-:::caution Work in progress
-To harmonize the APIs, annotell project IDs will be phased out in favour of external identifiers.
-:::
+To use projects within the Annotell APIs, they can be identified using an external identifier.
 
 ## Batch
 
