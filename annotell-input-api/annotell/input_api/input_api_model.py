@@ -377,25 +377,23 @@ class InputBatch(Response):
 
 class Project(Response):
     def __init__(self, created: datetime, title: str, description: str,
-                 deadline: Optional[str], status: str, external_id: str):
+                 status: str, external_id: str):
         self.created = created
         self.title = title
         self.description = description
-        self.deadline = deadline
         self.status = status
         self.external_id = external_id
 
     @staticmethod
     def from_json(js: dict):
         return Project(ts_to_dt(js["created"]), js["title"],
-                       js["description"], js.get("deadline"), js["status"], js["externalId"])
+                       js["description"], js["status"], js["externalId"])
 
     def __repr__(self):
         return f"<Project(" + \
             f"created={self.created}, " + \
             f"title={self.title}, " + \
             f"description={self.description}, " + \
-            f"deadline={self.deadline}, " + \
             f"status={self.status}, " + \
             f"external_id={self.external_id})>"
 
