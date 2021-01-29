@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Dict
 from datetime import datetime
 from annotell.input_api.util import ts_to_dt
 
@@ -22,7 +22,8 @@ class InputJob:
 @dataclass
 class CreateInputJobResponse:
     internal_id: int
+    files: Dict[str, str]
 
     @staticmethod
     def from_json(js: dict):
-        return CreateInputJobResponse(js["internalId"])
+        return CreateInputJobResponse(js["internalId"], js["files"])

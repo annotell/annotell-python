@@ -9,6 +9,7 @@ from annotell.input_api.model import (CreateInputJobResponse, FilesToUpload,
 
 log = logging.getLogger(__name__)
 
+
 class CreateableInputAPIResource(FileResourceClient):
 
     def __init__(self, client: HttpClient, file_resource_client: FileResourceClient):
@@ -28,13 +29,19 @@ class CreateableInputAPIResource(FileResourceClient):
         """
         if input_list_id is not None:
             input_request['inputListId'] = input_list_id
-        
+
         log.debug("POST:ing to %s input %s", resource_path, input_request)
 
         request_url = self._resolve_request_url(resource_path, project, batch)
         json_resp = self.client.post(request_url, json=input_request, dryrun=dryrun)
         if not dryrun:
-            return CreateInputJobResponse.from_json(json_resp)
+            response = CreateInputJobResponse.from_json(json_resp)
+            
+            if (len(response.files) > 0):
+                self.file_resource_client.upload_files(response.files)
+                self.client.post(f"v1/inputs/input-jobs/{response.internal_id}/commit", json=False, discard_response=True)
+
+            return response
 
     @staticmethod
     def _resolve_request_url(resource_path: str,

@@ -17,5 +17,5 @@ class VideoFrame:
         return filter_none({
             "videoTimestamp": self.video_timestamp,
             "sensorName": self.sensor_name,
-            "resourceId": self.resource_id or Path(self.filename).name
+            "resourceId": self.resource_id or str(Path(self.filename).expanduser())
         })
