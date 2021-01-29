@@ -50,8 +50,9 @@ class InputApiClient:
         self.annotation = AnnotationResource(client)
         self.input = InputResource(client)
 
-        self.point_cloud = PointCloudResource(client, file_client)
-        self.point_cloud_with_images = PointCloudWithImagesResource(client, file_client)
-        self.images = ImageResource(client, file_client)
+        # Only expose v1 inputs
+        # self.point_cloud = PointCloudResource(client, file_client)
+        # self.point_cloud_with_images = PointCloudWithImagesResource(client, file_client)
+        # self.images = ImageResource(client, file_client)
 
         self.lidar_and_image_sequence = LidarAndImageSequenceResource(client, file_client)

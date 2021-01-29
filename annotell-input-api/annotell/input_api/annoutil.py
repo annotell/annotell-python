@@ -66,13 +66,13 @@ def projects(project, get_batches):
     elif project:
         list_of_projects = client.project.get_projects()
         target_project = [p for p in list_of_projects if p.external_id == project]
-        headers = ["created", "title", "description", "deadline", "status", "external_id"]
+        headers = ["created", "title", "description", "status", "external_id"]
         tab = _get_table(target_project, headers, "PROJECTS")
         print(tab)
     else:
         list_of_projects = client.project.get_projects()
-        headers = ["created", "title", "description", "deadline", "status", "external_id"]
-        tab = _get_table(target_project, headers, "PROJECTS")
+        headers = ["created", "title", "description", "status", "external_id"]
+        tab = _get_table(list_of_projects, headers, "PROJECTS")
         print(tab)
 
 
