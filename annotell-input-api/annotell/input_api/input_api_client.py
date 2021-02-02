@@ -625,7 +625,7 @@ class InputApiClient:
         :return List: A list of CalibrationNoContent if an id or external id was given, or a
         list of CalibrationWithContent otherwise.
         """
-        base_url = f"{self.host}/v1/calibrations"
+        base_url = f"{self.host}/v1/inputs/calibration-data"
         if id:
             url = base_url + f"?id={id}"
         elif external_id:
@@ -635,7 +635,7 @@ class InputApiClient:
 
         resp = self.session.get(url, headers=self.headers)
 
-        json_resp = self._unwrap_enveloped_json(self._raise_on_error(resp).json())
+        json_resp = self._raise_on_error(resp).json()
         if base_url == url:
             return [IAM.CalibrationNoContent.from_json(js) for js in json_resp]
         elif id is not None:
