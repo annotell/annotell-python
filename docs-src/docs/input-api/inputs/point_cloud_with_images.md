@@ -16,7 +16,8 @@ Currently there is only support for supplying a single point cloud
 :::
 
 ```python
-import annotell.input_api.model as IAM
+import annotell.input_api.input_api_model as IAM
+from pathlib import Path
 
 image1 = IAM.Image(filename="filename_image1.jpg", source="RFC01")
 pc = IAM.PointCloud(filename="filename_pc.pcd")

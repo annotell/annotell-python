@@ -105,7 +105,7 @@ calibration_spec = IAM.CalibrationSpec(external_id=calibration_external_id,
 # Create the calibration using the Input API client
 import annotell.input_api.input_api_client as IAC
 client = IAC.InputApiClient()
-created_calibration = client.calibration.create_calibration_data(calibration_spec=calibration_spec)
+created_calibration = client.calibration.create_calibration(calibration_spec=calibration_spec)
 ```
 
 ### Listing existing calibrations
@@ -113,9 +113,9 @@ created_calibration = client.calibration.create_calibration_data(calibration_spe
 As a final step we can fetch the calibration via the external id. This can either be done via the client, or via the CLI annoutil tool. 
 
 ```python
-client.calibration.get_calibration_data(external_id="Collection 2020-06-16")
+client.calibration.get_calibration(external_id="Collection 2020-06-16")
 ```
 
 ```bash
-$ annoutil calibration-externalid "Collection 2020-06-16"
+$ annoutil calibration --external-id "Collection 2020-06-16"
 ```

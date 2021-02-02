@@ -16,7 +16,7 @@ Note that the `Images` input is single frame, i.e. if you have a _sequence_ of c
 The first step is to produce an `Image` object. The parameters are the image name \(excluding the path to the image\) and the source of the image (i.e. camera name). In this case, we want to create a scene consisting of one image _image1_ and well go with the default source name of `"CAM"`. Next, we create a list of all our `Image` objects and create an `ImageFiles` object. Additionally, we need to include the path to where the image is located.
 
 ```python
-import annotell.input_api.model as IAM
+import annotell.input_api.input_api_model as IAM
 from pathlib import Path
 
 image1 = "filename1.jpg"
@@ -34,7 +34,7 @@ project = "<external_id>"
 import annotell.input_api.input_api_client as IAC
 client = IAC.InputApiClient()
 
-response = client.images.create(
+response = client.create_inputs_images(
     folder=folder,
     images_files=IAM.ImagesFiles(images),
     project=project)
@@ -74,7 +74,8 @@ source_spec = IAM.SourceSpecification(source_to_pretty_name={"CAM1": "FC", "CAM2
 images_metadata = IAM.SceneMetaData(external_id="2020-06-16",
                                     source_specification=source_spec)
 # Create Input
-response = client.images.create(folder=folder,
+response = client.create_inputs_images(
+                                folder=folder,
                                 images_files=images_files,
                                 metadata=images_metadata,
                                 project=project)
